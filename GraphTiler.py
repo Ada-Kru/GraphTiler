@@ -7,11 +7,10 @@ from quart import (
     url_for,
     abort,
 )
-from asyncio import Queue, CancelledError, get_event_loop
+from asyncio import get_event_loop
 from lib.controller import GraphTilerController
 from lib.validation import is_valid_year_month_day
-
-# import cfg
+import cfg
 
 
 app = Quart(__name__)
@@ -74,4 +73,4 @@ async def remove_category():
 
 @app.cli.command("run")
 def run():
-    app.run(port=6000)
+    app.run(port=cfg.SERVER_PORT)

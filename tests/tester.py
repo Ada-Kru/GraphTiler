@@ -6,16 +6,16 @@ from requests import post
 # resp = post(url="http://192.168.2.111:6000/timepoints/now", json=data)
 
 data = {
-    "user": "defaultUser",
+    # "user": "default",
     "readings": [
         {
-            "category": "bandwidth",
-            "time": "2019/10/22 09:15:30",
+            "category": "pcbandwidth",
+            "time": "2019/10/22 09:15",
             "reading": 50000,
         },
         {
-            "category": "bandwidth",
-            "time": "2019/10/22 09:16:33",
+            "category": "pcbandwidth",
+            "time": "2019/10/22 09:16",
             "reading": 60000,
         }
     ],
