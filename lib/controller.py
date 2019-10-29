@@ -10,7 +10,6 @@ class GraphTilerController:
         self._loop = loop
         self._db = DBInterface()
         self._categories = self._db.get_categories()
-        self._users = self._db.get_users()
 
     def add_now(self, data):
         """Add data for the current point in time."""

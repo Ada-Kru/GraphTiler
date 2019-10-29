@@ -1,5 +1,5 @@
-from datetime import datetime
 from pymongo import MongoClient
+from lib.validation import db_name_validator, new_category_validator
 import cfg
 
 
@@ -11,6 +11,8 @@ class DBInterface:
             f"mongodb://{cfg.MONGO_ADDRESS}:{cfg.MONGO_PORT}"
         )
         self._db = self._client.graphTiler
+        self._new_cat_validator = new_category_validator
+        self._db_name_validator = db_name_validator
 
     def add_points(self, data):
         """Add data points to the database."""
@@ -24,7 +26,7 @@ class DBInterface:
                 if cat_info:
                     categories[category] = cat_info
                 else:
-                    errors.append(f"Category \"{category}\" not found.")
+                    errors.append(f'Category "{category}" not found.')
                     continue
 
             # VALIDATE HERE
@@ -38,32 +40,46 @@ class DBInterface:
         """Remove datapoints from the database."""
         pass
 
-    def _get_category(self, name):
+    def get_category(self, catname):
         """Get information on the current categories."""
-        return self._db.categories.find_one(name)
+        return self._db.categories.find_one({"name": catname})
         # {
         #     "bandwidth": {
-        #         "units": "bytes",
-        #         "abrv_unit": "b",
-        #         "schema": {"type": "integer", "min": 0},
+        #         "displayName": "Bandwidth",
+        #         "units": "Bytes",
+        #         "abrvUnit": "b",
+        #         "decimalPlaces": 0,
         #     },
         #     "temperatureF": {
+        #         "displayName": "Temperature (F)",
         #         "units": "Degrees Farenheit",
-        #         "abrv_unit": "°F",
-        #         "schema": {"type": "number"},
+        #         "abrvUnit": "°F",
+        #         "decimalPlaces": 1,
         #     },
         #     "temperatureC": {
+        #         "displayName": "Temperature (C)",
         #         "units": "Degrees Celcius",
-        #         "abrv_unit": "°C",
-        #         "schema": {"type": "number"},
+        #         "abrvUnit": "°C",
+        #         "decimalPlaces": 1,
         #     },
         # }
 
     def add_category(self, data):
         """Add categories to the database."""
+        if not self._new_cat_validator.validate(data):
+            return {"errors": self._new_cat_validator.errors}
+
+        catname = data["name"]
+        if self.get_category(catname):
+            return {
+                "errors": {
+                    "name": f'A category named "{catname}" already exists.'
+                }
+            }
         self._db.categories.insert_one(data)
         return {"errors": None}
 
-    def remove_categories(self):
-        """Remove categories."""
-        pass
+    def remove_category(self, name):
+        """Remove category."""
+        self._client.drop_database(name)
+        return {"errors": None}
