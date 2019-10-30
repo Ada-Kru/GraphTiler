@@ -10,13 +10,12 @@ DB_NAME_SCHEMA = {
     }
 }
 NEW_CAT_SCHEMA = {
-    **DB_NAME_SCHEMA,
     "displayName": {"type": "string", "minlength": 1, "maxlength": 100},
     "units": {"type": "string", "minlength": 1, "maxlength": 100},
     "abrvUnit": {"type": "string", "minlength": 1, "maxlength": 100},
     "decimalPlaces": {"type": "integer", "min": 0, "max": 20},
-    "min": {"type": "number"},
-    "max": {"type": "number"},
+    "min": {"type": "number", "required": False},
+    "max": {"type": "number", "required": False},
 }
 
 db_name_validator = Validator(DB_NAME_SCHEMA, require_all=True)

@@ -14,7 +14,7 @@ import cfg
 
 
 app = Quart(__name__)
-# app.json_encoder = HSEncoder
+# app.json_encoder = GTJSONEncoder
 app.broadcast_clients = set()
 loop = get_event_loop()
 ctrl = GraphTilerController(app=app, loop=loop)
@@ -46,29 +46,27 @@ async def day_graph(year, month, day):
     return response
 
 
-@app.route("/timepoints/<action>", methods=["GET", "POST"])
-async def timepoints(action):
+@app.route("/category/<name>/<action>", methods=["GET", "POST"])
+async def timepoints(name, action):
     if action == "now" and request.method == "POST":
-        result = ctrl.add_now(await request.get_json())
+        result = ctrl.add_now(name, await request.get_json())
         return jsonify(result)
     elif action == "add" and request.method == "POST":
-        result = ctrl.add(await request.get_json())
+        result = ctrl.add(name, await request.get_json())
         return jsonify(result)
 
 
-@app.route("/category/", methods=["GET", "POST"])
-async def category(action):
+@app.route("/category/<name>", methods=["GET", "POST"])
+async def category(name):
     if request.method == "GET":
-        return jsonify(ctrl.get_categories())
+        return jsonify(ctrl.get_category(name))
     else:
-        result = ctrl.add_category(await request.get_json())
-        return jsonify(result)
+        return jsonify(ctrl.add_category(name, await request.get_json()))
 
 
-@app.route("/category/remove", methods=["POST"])
-async def remove_category():
-    result = ctrl.remove_category(await request.get_json())
-    return jsonify(result)
+@app.route("/remove_category/<name>", methods=["POST"])
+async def remove_category(name):
+    return jsonify(ctrl.remove_category(name))
 
 
 @app.cli.command("run")
