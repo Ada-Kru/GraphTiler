@@ -1,30 +1,9 @@
-from requests import post
+from requests import get, post
 
-# data = {"user": "defaultUser",
-#         "category": "bandwidth",
-#         "reading": 50000}
-# resp = post(url="http://192.168.2.111:6000/timepoints/now", json=data)
 
-# data = {
-#     # "user": "default",
-#     "readings": [
-#         {
-#             "category": "pcbandwidth",
-#             "time": "2019/10/22 09:15",
-#             "reading": 50000,
-#         },
-#         {
-#             "category": "pcbandwidth",
-#             "time": "2019/10/22 09:16",
-#             "reading": 60000,
-#         }
-#     ],
-# }
-# resp = post(url="http://192.168.2.111:6000/timepoints/add", json=data)
-
-resp = post(url="http://192.168.2.111:7123/remove_category/PCBandwidth")
-print(resp)
-
+# resp = post(url="http://192.168.2.111:7123/remove_category/PCBandwidth")
+# print(resp, resp.json())
+#
 data = {
     "displayName": "Bandwidth",
     "units": "Bytes",
@@ -35,4 +14,42 @@ data = {
 
 
 resp = post(url="http://192.168.2.111:7123/category/PCBandwidth", json=data)
-print(resp.json())
+print(resp, resp.json())
+#
+# data["min"] = 10
+# data["max"] = 20
+# # data.pop("min")
+# # data.pop("units")
+#
+# resp = post(
+#     url="http://192.168.2.111:7123/modify_category/PCBandwidth", json=data
+# )
+# print(resp, resp.json())
+#
+# resp = get(url="http://192.168.2.111:7123/category/PCBandwidth")
+# print(resp, resp.json())
+
+
+# data = {
+#     "readings": [
+#         {
+#             "time": "2019-10-22 09:15",
+#             "reading": 50000,
+#         },
+#         {
+#             "time": "2019-10-22 09:16",
+#             "reading": 60000,
+#         },
+#     ]
+# }
+# resp = post(
+#     url="http://192.168.2.111:7123/category/PCBandwidth/add", json=data
+# )
+# print(resp, resp.json())
+
+data = {"reading": 80}
+
+resp = post(
+    url="http://192.168.2.111:7123/category/PCBandwidth/now", json=data
+)
+print(resp, resp.json())

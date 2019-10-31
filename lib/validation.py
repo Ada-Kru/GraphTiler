@@ -1,5 +1,14 @@
 from cerberus import Validator
-from .validation_funcs import category_name_validator
+from .validation_funcs import category_name_validator, gt_date_format_validator
+
+ADD_SCHEMA = {
+    "readings": {"type": "list"}
+}
+
+ADD_READING_SCHEMA = {
+    "time": {"type": "string", "check_with": gt_date_format_validator},
+    "reading": {"type": "number"},
+}
 
 DB_NAME_SCHEMA = {
     "name": {
@@ -20,6 +29,8 @@ NEW_CAT_SCHEMA = {
 
 db_name_validator = Validator(DB_NAME_SCHEMA, require_all=True)
 new_category_validator = Validator(NEW_CAT_SCHEMA, require_all=True)
+add_validator = Validator(ADD_SCHEMA, require_all=True)
+reading_validator = Validator(ADD_READING_SCHEMA, require_all=True)
 
 
 def is_valid_year_month_day(year, month, day):

@@ -24,7 +24,7 @@ ctrl = GraphTilerController(app=app, loop=loop)
 async def index(filename):
     if filename not in (None, "index.html"):
         abort(404)
-        return ""
+        return "404: Not Found"
     response = await make_response(
         await render_template("index.html" if filename is None else filename)
     )
@@ -67,6 +67,11 @@ async def category(name):
 @app.route("/remove_category/<name>", methods=["POST"])
 async def remove_category(name):
     return jsonify(ctrl.remove_category(name))
+
+
+@app.route("/modify_category/<name>", methods=["POST"])
+async def modify_category(name):
+    return jsonify(ctrl.modify_category(name, await request.get_json()))
 
 
 @app.cli.command("run")
