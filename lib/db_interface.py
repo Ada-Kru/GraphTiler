@@ -1,8 +1,10 @@
-from pymongo import MongoClient
-from lib.validation import reading_validator, add_validator
+from pymongo import MongoClient, UpdateOne
+from lib.validation import (
+    reading_validator,
+    add_validator,
+    make_min_max_validator,
+)
 import cfg
-
-NO_ERRORS = {"errors": None}
 
 
 class DBInterface:
@@ -13,40 +15,44 @@ class DBInterface:
             f"mongodb://{cfg.MONGO_ADDRESS}:{cfg.MONGO_PORT}"
         )
         self._db = self._client.graphTiler
-        self._cat_data = self._db.catdata_default
         self._add_validator = add_validator
         self._reading_validator = reading_validator
 
     def add_points(self, catname, data):
         """Add data points to the database."""
         errors = []
+        updates = []
         cat_info = self.get_category(catname)
+
         if not cat_info:
             errors.append(
                 {"index": -1, "error": f'Category "{catname}" not found.'}
             )
             return {"errors": errors}
+        min_max_validator = make_min_max_validator(cat_info)
 
         if not self._add_validator.validate(data):
             errors.append({"index": -1, "error": self._add_validator.errors})
             return {"errors": errors}
 
         for i, reading in enumerate(data["readings"]):
-            if self._reading_validator.validate(reading):
-                reading["category"] = catname
-                self._cat_data.update_one(
-                    {"time": reading["time"]}, {"$set": reading}, upsert=True
-                )
-            else:
+            if not self._reading_validator.validate(reading):
                 errors.append(
                     {"index": i, "error": self._reading_validator.errors}
                 )
+            elif not min_max_validator.validate(reading):
+                errors.append({"index": i, "error": min_max_validator.errors})
+            else:
+                update = UpdateOne(
+                    {"time": reading["time"]}, {"$set": reading}, upsert=True
+                )
+                updates.append(update)
 
-        return NO_ERRORS if not errors else {"errors": errors}
+        if updates:
+            self._db[f"catdata_default_{catname}"].bulk_write(updates)
 
-    def remove_points(self, catname):
-        """Remove datapoints from the database."""
-        pass
+        return {"errors": None} if not errors else {"errors": errors}
+
 
     def get_category(self, catname):
         """Get information on the current categories."""
@@ -62,7 +68,7 @@ class DBInterface:
             }
         data["name"] = catname
         self._db.categories.insert_one(data)
-        return NO_ERRORS
+        return {"errors": None}
 
     def modify_category(self, catname, data):
         """
@@ -72,15 +78,39 @@ class DBInterface:
         """
         if not self.get_category(catname):
             return {
-                "errors": {"name": f'No category named "{catname}" exists.'}
+                "errors": {"name": f'Category "{catname}" does not exist.'}
             }
         self._db.categories.delete_one({"name": catname})
         data["name"] = catname
         self._db.categories.insert_one(data)
-        return NO_ERRORS
+        return {"errors": None}
 
     def remove_category(self, catname):
         """Remove a category."""
+        if self.get_category(catname) is None:
+            return {
+                "errors": {"name": f'Category "{catname}" does not exist.'}
+            }
         self._db.categories.delete_one({"name": catname})
-        self._cat_data.delete_many({"category": catname})
-        return NO_ERRORS
+        self._db[f"catdata_default_{catname}"].drop()
+        return {"errors": None}
+
+    def get_points(self, catname, data):
+        points = []
+
+    def remove_points(self, catname, times):
+        """Remove datapoints from the database."""
+        cat_data = f"catdata_default_{catname}"
+        res = self._db[cat_data].delete_many({"time": {"$in": times}})
+
+        if res.deleted_count == len(times):
+            return {"errors": None, "removed_count": res.deleted_count}
+        err = f"{len(times) - res.deleted_count} time points not found."
+        return {"errors": err, "removed_count": res.deleted_count}
+
+    def remove_all_points(self, catname):
+        """Remove datapoints from the database."""
+        cat_data = f"catdata_default_{catname}"
+        res = self._db[cat_data].delete_many({})
+
+        return {"errors": None, "removed_count": res.deleted_count}

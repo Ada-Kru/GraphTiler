@@ -1,5 +1,9 @@
 from .db_interface import DBInterface
-from lib.validation import db_name_validator, new_category_validator
+from lib.validation import (
+    db_name_validator,
+    new_category_validator,
+    points_data_validator,
+)
 from datetime import datetime
 import cfg
 
@@ -13,12 +17,12 @@ class GraphTilerController:
         self._db = DBInterface()
         self._new_cat_validator = new_category_validator
         self._db_name_validator = db_name_validator
+        self._points_data_validator = points_data_validator
 
     def add_now(self, catname, data):
         """Add data for the current point in time."""
         time_str = datetime.now().strftime(cfg.TIME_FORMAT)
         data["time"] = time_str
-        print({"readings": [data]})
         ret_data = self.add(catname, {"readings": [data]})
         if ret_data["errors"] is None:
             ret_data["added_at"] = time_str
@@ -31,7 +35,7 @@ class GraphTilerController:
     def add_category(self, catname, data):
         """Add a new category."""
         if not self._db_name_validator({"name": catname}):
-            return {"errors": f"\"{catname}\" is an invalid category name."}
+            return {"errors": f'"{catname}" is an invalid category name.'}
         if not self._new_cat_validator.validate(data):
             return {"errors": self._new_cat_validator.errors}
 
@@ -47,9 +51,24 @@ class GraphTilerController:
     def get_category(self, catname):
         """Get information about a category."""
         category = self._db.get_category(catname)
-        category.pop("_id", None)
+        if category is not None:
+            category.pop("_id", None)
         return category
 
     def remove_category(self, catname):
         """Remove a category."""
         return self._db.remove_category(catname)
+
+    def get_points(self, catname, data):
+        """Get data for the specified times."""
+        if not self._new_cat_validator.validate(data):
+            return {"errors": self._new_cat_validator.errors}
+        return self._db.get_points(catname, data)
+
+    def remove_points(self, catname, times):
+        """Remove timepoints from a category."""
+        return self._db.remove_points(catname, times)
+
+    def remove_all_points(self, catname):
+        """Remove timepoints from a category."""
+        return self._db.remove_all_points(catname)

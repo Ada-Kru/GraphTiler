@@ -46,22 +46,30 @@ async def day_graph(year, month, day):
     return response
 
 
-@app.route("/category/<name>/<action>", methods=["GET", "POST"])
-async def timepoints(name, action):
-    if action == "now" and request.method == "POST":
-        result = ctrl.add_now(name, await request.get_json())
-        return jsonify(result)
-    elif action == "add" and request.method == "POST":
-        result = ctrl.add(name, await request.get_json())
-        return jsonify(result)
-
-
 @app.route("/category/<name>", methods=["GET", "POST"])
 async def category(name):
     if request.method == "GET":
         return jsonify(ctrl.get_category(name))
     else:
         return jsonify(ctrl.add_category(name, await request.get_json()))
+
+
+@app.route("/category/<name>/<action>", methods=["GET", "POST"])
+async def timepoints(name, action):
+    result = {}
+    if request.method == "POST":
+        if action == "now":
+            result = ctrl.add_now(name, await request.get_json())
+        elif action == "add":
+            result = ctrl.add(name, await request.get_json())
+        elif action == "remove":
+            result = ctrl.remove_points(name, await request.get_json())
+        elif action == "remove_all":
+            result = ctrl.remove_all_points(name)
+    else:
+        if action == "get_points":
+            result = ctrl.get_points(name, await request.get_json())
+    return jsonify(result)
 
 
 @app.route("/remove_category/<name>", methods=["POST"])

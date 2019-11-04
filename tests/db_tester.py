@@ -16,6 +16,6 @@ print(db.categories)
 # category_data.insert_one({"2019-10-24 09:15": 12435434})
 # category_data.delete_many({})
 
-cursor = db.catdata_default.find()
+cursor = db.catdata_default_PCBandwidth.find()
 for item in cursor:
     print(item)
