@@ -1,41 +1,38 @@
 from cerberus import Validator
-from .validation_funcs import category_name_validator, gt_date_format_validator
+from .validation_funcs import cat_name_vali, date_vali
 
+
+STRING_MAX_100 = {"type": "string", "minlength": 1, "maxlength": 100}
+DATE_STR = {"type": "string", "check_with": date_vali}
 ADD_SCHEMA = {"readings": {"type": "list"}}
-
 ADD_READING_SCHEMA = {
-    "time": {"type": "string", "check_with": gt_date_format_validator},
+    "time": {"type": "string", "check_with": date_vali},
     "reading": {"type": "number"},
 }
-
-DB_NAME_SCHEMA = {
+CAT_NAME_SCHEMA = {
     "name": {
         "type": "string",
-        "check_with": category_name_validator,
+        "check_with": cat_name_vali,
         "minlength": 1,
         "maxlength": 63,
     }
 }
-
 NEW_CAT_SCHEMA = {
-    "displayName": {"type": "string", "minlength": 1, "maxlength": 100},
-    "units": {"type": "string", "minlength": 1, "maxlength": 100},
-    "abrvUnit": {"type": "string", "minlength": 1, "maxlength": 100},
+    "displayName": STRING_MAX_100,
+    "units": STRING_MAX_100,
+    "abrvUnit": STRING_MAX_100,
     "decimalPlaces": {"type": "integer", "min": 0, "max": 20},
     "min": {"type": "number", "required": False},
     "max": {"type": "number", "required": False},
 }
-
-POINT_DATA_SCHEMA = {"times": {"type": "list", "items": [{"type": "string"}]}}
-
-db_name_validator = Validator(DB_NAME_SCHEMA, require_all=True)
-new_category_validator = Validator(NEW_CAT_SCHEMA, require_all=True)
-add_validator = Validator(ADD_SCHEMA, require_all=True)
-reading_validator = Validator(ADD_READING_SCHEMA, require_all=True)
-points_data_validator = Validator(POINT_DATA_SCHEMA, require_all=True)
+POINT_DATA_SCHEMA = {"times": {"type": "list", "items": [DATE_STR]}}
+GET_REMOVE_POINTS_SCHEMA = {
+    "times": {"type": "list", "items": [DATE_STR]},
+    "range": {"type": "dict", "schema": {"start": DATE_STR, "end": DATE_STR}},
+}
 
 
-def make_min_max_validator(cat_info):
+def make_min_max_vali(cat_info):
     min_max = {}
     if "min" in cat_info:
         min_max["min"] = cat_info["min"]

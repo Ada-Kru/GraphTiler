@@ -54,21 +54,19 @@ async def category(name):
         return jsonify(ctrl.add_category(name, await request.get_json()))
 
 
-@app.route("/category/<name>/<action>", methods=["GET", "POST"])
+@app.route("/category/<name>/<action>", methods=["POST"])
 async def timepoints(name, action):
     result = {}
-    if request.method == "POST":
-        if action == "now":
-            result = ctrl.add_now(name, await request.get_json())
-        elif action == "add":
-            result = ctrl.add(name, await request.get_json())
-        elif action == "remove":
-            result = ctrl.remove_points(name, await request.get_json())
-        elif action == "remove_all":
-            result = ctrl.remove_all_points(name)
-    else:
-        if action == "get_points":
-            result = ctrl.get_points(name, await request.get_json())
+    if action == "get_points":
+        result = ctrl.get_points(name, await request.get_json())
+    elif action == "now":
+        result = ctrl.add_now(name, await request.get_json())
+    elif action == "add":
+        result = ctrl.add(name, await request.get_json())
+    elif action == "remove":
+        result = ctrl.remove_points(name, await request.get_json())
+    elif action == "remove_all":
+        result = ctrl.remove_all_points(name)
     return jsonify(result)
 
 

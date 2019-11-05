@@ -33,8 +33,8 @@ print(resp, resp.json())
 
 data = {
     "readings": [
-        {"time": "2019-10-22 09:15", "reading": 50000},
-        {"time": "2019-10-22 09:16", "reading": 60000},
+        {"time": "2019-10-22 09:15 -0600", "reading": 50000},
+        {"time": "2019-10-22 09:16 -0600", "reading": 60000},
     ]
 }
 resp = post(
@@ -49,7 +49,7 @@ print(resp, resp.json())
 # )
 # print(resp, resp.json())
 
-# data = ["2019-10-22 09:15", "2019-10-22 09:16"]
+# data = ["2019-10-22 09:15 -06:00", "2019-10-22 09:16 -0600"]
 #
 # resp = post(
 #     url="http://192.168.2.111:7123/category/PCBandwidth/remove", json=data

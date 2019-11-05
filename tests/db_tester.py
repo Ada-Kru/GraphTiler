@@ -13,7 +13,7 @@ print(db.categories)
 #     print(item)
 
 # category_data = db.catdata_default
-# category_data.insert_one({"2019-10-24 09:15": 12435434})
+# category_data.insert_one({"2019-10-24 09:15 -0600": 12435434})
 # category_data.delete_many({})
 
 cursor = db.catdata_default_PCBandwidth.find()
