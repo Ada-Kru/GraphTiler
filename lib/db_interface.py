@@ -3,7 +3,7 @@ from lib.funcs import no_errors
 from lib.validation import ADD_READING_SCHEMA, ADD_SCHEMA, make_min_max_vali
 from cerberus import Validator
 from datetime import datetime
-from cfg import MONGO_PORT, MONGO_ADDRESS, TIME_FORMAT
+from cfg import MONGO_PORT, MONGO_ADDRESS, TIME_FORMAT, TIME_FORMAT_NO_TZ
 
 
 class DBInterface:
@@ -107,8 +107,11 @@ class DBInterface:
         if "range" in data:
             start = datetime.strptime(data["range"]["start"], TIME_FORMAT)
             end = datetime.strptime(data["range"]["end"], TIME_FORMAT)
-            for item in cat_data.find({"time": {"$gte": start, "$lt": end}}):
-                points[item["time"].strftime(TIME_FORMAT)] = item["reading"]
+            for item in cat_data.find({"time": {"$gte": start, "$lte": end}}):
+                time = item["time"].strftime(TIME_FORMAT_NO_TZ)
+                points[time] = item["reading"]
+
+        return {"errors": None, "points": points}
 
     def remove_points(self, catname, data):
         """Remove datapoints from the database."""
@@ -129,7 +132,7 @@ class DBInterface:
         if "range" in data:
             start = datetime.strptime(data["range"]["start"], TIME_FORMAT)
             end = datetime.strptime(data["range"]["end"], TIME_FORMAT)
-            res = cat_data.delete_many({"time": {"$gte": start, "$lt": end}})
+            res = cat_data.delete_many({"time": {"$gte": start, "$lte": end}})
             output["removed_count"] += res.deleted_count
 
         output["errors"] = None

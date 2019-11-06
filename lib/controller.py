@@ -8,7 +8,7 @@ from lib.validation import (
 )
 from datetime import datetime
 from cerberus import Validator
-from cfg import TIME_FORMAT
+from cfg import TIME_FORMAT, TIME_FORMAT_NO_TZ
 
 
 class GraphTilerController:
@@ -25,9 +25,9 @@ class GraphTilerController:
 
     def add_now(self, catname, data):
         """Add data for the current point in time."""
-        time_str = datetime.utcnow().strftime(TIME_FORMAT)
+        time_str = datetime.utcnow().strftime(TIME_FORMAT_NO_TZ) + " +0000"
         data["time"] = time_str
-        ret_data = self.add(catname, {"readings": [data]})
+        ret_data = self._db.add_points(catname, {"readings": [data]})
         if ret_data["errors"] is None:
             ret_data["added_at"] = time_str
         return ret_data

@@ -27,7 +27,7 @@ NEW_CAT_SCHEMA = {
 }
 POINT_DATA_SCHEMA = {"times": {"type": "list", "items": [DATE_STR]}}
 GET_REMOVE_POINTS_SCHEMA = {
-    "times": {"type": "list", "items": [DATE_STR]},
+    "times": {"type": "list", "schema": DATE_STR},
     "range": {"type": "dict", "schema": {"start": DATE_STR, "end": DATE_STR}},
 }
 
@@ -41,7 +41,3 @@ def make_min_max_vali(cat_info):
     return Validator(
         {"reading": {"type": "number", **min_max}}, allow_unknown=True
     )
-
-
-def is_valid_year_month_day(year, month, day):
-    return True
