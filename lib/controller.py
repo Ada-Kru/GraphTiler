@@ -16,6 +16,7 @@ class GraphTilerController:
 
     def __init__(self, app, loop):
         self._app = app
+        self.updates_queue = self._app.data_updates
         self._loop = loop
         self._db = DBInterface()
         self._cat_vali = Validator(NEW_CAT_SCHEMA, require_all=True)

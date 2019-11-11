@@ -18,7 +18,8 @@ class DBInterface:
     def add_points(self, catname, data):
         """Add data points to the database."""
         errors = []
-        updates = []
+        db_updates = []
+        ws_updates = []
         cat_info = self.get_category(catname)
 
         if not cat_info:
@@ -42,12 +43,14 @@ class DBInterface:
                 update = UpdateOne(
                     {"time": point["time"]}, {"$set": point}, upsert=True
                 )
-                updates.append(update)
+                db_updates.append(update)
+                ws_updates.append(point)
 
-        if updates:
-            self._db[f"catdata_default_{catname}"].bulk_write(updates)
+        if db_updates:
+            self._db[f"catdata_default_{catname}"].bulk_write(db_updates)
 
-        return no_errors() if not errors else {"errors": errors}
+        errors = None if not errors else errors
+        return {"errors": errors, "ws_updates": ws_updates}
 
     def get_category(self, catname):
         """Get information on the current categories."""
