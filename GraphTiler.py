@@ -7,7 +7,14 @@ from quart import (
     url_for,
     abort,
 )
-from asyncio import get_event_loop, create_task, gather, Queue, CancelledError
+from asyncio import (
+    get_event_loop,
+    create_task,
+    gather,
+    Queue,
+    CancelledError,
+    websocket,
+)
 from collections import defaultdict
 from functools import wraps
 from lib.controller import GraphTilerController
@@ -104,7 +111,7 @@ async def ws_send():
         try:
             category, updates = await app.data_updates.get()
             for helper in app.ws_clients[category]:
-                await helper.send_updates_in_range(updates)
+                await helper.send_updates(category, updates)
         except CancelledError:
             pass
 
@@ -120,6 +127,10 @@ def assign_websocket(func):
         helper = ws_helper(request, websocket._get_current_object())
         for category in helper.categories:
             app.ws_clients[category].add(helper)
+            rg = {"range": {"start": helper.start_str, "end": helper.end_str}}
+            points = ctrl.get_points(category, rg)
+            if points:
+                helper.send_updates(category, points, validate_times=False)
         try:
             return await func(*args, **kwargs)
         finally:
