@@ -1,5 +1,4 @@
 from .db_interface import DBInterface
-# from lib.funcs import no_errors
 from lib.validation import (
     CAT_NAME_SCHEMA,
     NEW_CAT_SCHEMA,

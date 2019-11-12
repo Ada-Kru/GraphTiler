@@ -67,15 +67,15 @@ print(resp, resp.json())
 # resp = post(url="http://192.168.2.111:7123/category/PCBandwidth/remove-all")
 # print(resp, resp.json())
 
-data = {
-    "times": ["2019-10-22 09:15 -06:00"],
-    "range": {
-        "start": "2019-10-22 09:16 -06:00",
-        "end": "2019-10-22 09:17 -0600",
-    }
-}
-
-resp = post(
-    url="http://192.168.2.111:7123/category/PCBandwidth/get-points", json=data
-)
-print(resp, resp.json())
+# data = {
+#     "times": ["2019-10-22 09:15 -06:00"],
+#     "range": {
+#         "start": "2019-10-22 09:16 -06:00",
+#         "end": "2019-10-22 09:17 -0600",
+#     }
+# }
+#
+# resp = post(
+#     url="http://192.168.2.111:7123/category/PCBandwidth/get-points", json=data
+# )
+# print(resp, resp.json())

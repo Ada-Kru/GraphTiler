@@ -6,27 +6,21 @@ from quart import (
     request,
     url_for,
     abort,
-)
-from asyncio import (
-    get_event_loop,
-    create_task,
-    gather,
-    Queue,
-    CancelledError,
     websocket,
 )
+from asyncio import get_event_loop, create_task, gather, Queue, CancelledError
 from collections import defaultdict
 from functools import wraps
 from lib.controller import GraphTilerController
 from lib.validation_funcs import str_to_datetime
-from lib.ws_helper import ws_helper
+from lib.ws_connection import ws_connection
 import cfg
 
 
 app = Quart(__name__)
 # app.json_encoder = GTJSONEncoder
 app.ws_clients = defaultdict(set)
-app.data_updates = Queue()
+app.data_updates = None
 loop = get_event_loop()
 ctrl = GraphTilerController(app=app, loop=loop)
 
@@ -44,7 +38,7 @@ async def index(filename):
     return response
 
 
-# http://192.168.2.111:7123/graph?start=2019-11-06%2000%3A00%20-0600&end=2019-11-06%2023%3A59%20-0600&categories=PCBandwidth
+# http://192.168.2.111:7123/graph?start=2019-10-22%2000%3A00%20-0600&end=2019-10-22%2023%3A59%20-0600&categories=PCBandwidth
 @app.route("/graph", methods=["GET"])
 async def day_graph():
     start = str_to_datetime(request.args.get("start"))
@@ -62,7 +56,7 @@ async def day_graph():
         abort(400, "Start time is after end time.")
         return
     # categories = request.args.get("categories").split(',')
-    response = await make_response(await render_template("dayGraph.html"))
+    response = await make_response(await render_template("singleGraph.html"))
     response.push_promises.add(url_for("static", filename="images/idle.ico"))
     response.push_promises.add(url_for("static", filename="graphtiler.css"))
     response.push_promises.add(url_for("static", filename="singleGraph.js"))
@@ -91,7 +85,7 @@ async def timepoints(name, action):
     elif action == "remove-all":
         result = ctrl.remove_all_points(name)
 
-    if result["ws_updates"]:
+    if result["ws_updates"] and app.data_updates:
         await app.data_updates.put([name, result["ws_updates"]])
     return jsonify(result)
 
@@ -110,8 +104,9 @@ async def ws_send():
     while True:
         try:
             category, updates = await app.data_updates.get()
-            for helper in app.ws_clients[category]:
-                await helper.send_updates(category, updates)
+            if category in app.ws_clients:
+                for conn in app.ws_clients[category]:
+                    await conn.send_updates_in_range(category, updates)
         except CancelledError:
             pass
 
@@ -119,23 +114,24 @@ async def ws_send():
 async def ws_receive():
     while True:
         data = await websocket.receive()
+        print(data)
 
 
 def assign_websocket(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
-        helper = ws_helper(request, websocket._get_current_object())
-        for category in helper.categories:
-            app.ws_clients[category].add(helper)
-            rg = {"range": {"start": helper.start_str, "end": helper.end_str}}
-            points = ctrl.get_points(category, rg)
-            if points:
-                helper.send_updates(category, points, validate_times=False)
+        conn = ws_connection(websocket._get_current_object())
+        for category in conn.categories:
+            app.ws_clients[category].add(conn)
+            rnge = {"range": {"start": conn.start_str, "end": conn.end_str}}
+            points = ctrl.get_points(category, rnge)
+            if "points" in points:
+                await conn.send_points(category, points["points"])
         try:
             return await func(*args, **kwargs)
         finally:
-            for category in helper.categories:
-                app.ws_clients[category].remove(helper)
+            for category in conn.categories:
+                app.ws_clients[category].remove(conn)
                 if not app.ws_clients[category]:
                     app.ws_clients.pop(category, None)
 
@@ -145,6 +141,8 @@ def assign_websocket(func):
 @app.websocket("/ws")
 @assign_websocket
 async def ws():
+    if app.data_updates is None:
+        app.data_updates = Queue()
     try:
         producer = create_task(ws_send())
         consumer = create_task(ws_receive())
