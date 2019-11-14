@@ -9,17 +9,17 @@ from quart import (
     websocket,
 )
 from asyncio import get_event_loop, create_task, gather, Queue, CancelledError
-from collections import defaultdict
-from functools import wraps
+from json import loads
 from lib.controller import GraphTilerController
-from lib.validation_funcs import str_to_datetime
-from lib.ws_connection import ws_connection
+from lib.ws_connection_handler import WsConnectionHandler
 import cfg
+
+# from lib.validation_funcs import str_to_datetime
 
 
 app = Quart(__name__)
 # app.json_encoder = GTJSONEncoder
-app.ws_clients = defaultdict(set)
+app.ws_handler = WsConnectionHandler()
 app.data_updates = None
 loop = get_event_loop()
 ctrl = GraphTilerController(app=app, loop=loop)
@@ -35,31 +35,6 @@ async def index(filename):
     response.push_promises.add(url_for("static", filename="images/idle.ico"))
     response.push_promises.add(url_for("static", filename="graphtiler.css"))
     response.push_promises.add(url_for("static", filename="main.js"))
-    return response
-
-
-# http://192.168.2.111:7123/graph?start=2019-10-22%2000%3A00%20-0600&end=2019-10-22%2023%3A59%20-0600&categories=PCBandwidth
-@app.route("/graph", methods=["GET"])
-async def day_graph():
-    start = str_to_datetime(request.args.get("start"))
-    end = str_to_datetime(request.args.get("end"))
-    if not (start and end):
-        reason = (
-            "Invalid date time format.  Date time format must be "
-            "'YYYY-MM-DD HH:MM &#177HHMM' where '&#177HHMM' is the time zone "
-            "offset (ex. '2020-01-20 18:45 -0600'). All numbers must have "
-            "leading zeros and hours are in 24 hour format."
-        )
-        abort(400, reason)
-        return
-    if start > end:
-        abort(400, "Start time is after end time.")
-        return
-    # categories = request.args.get("categories").split(',')
-    response = await make_response(await render_template("singleGraph.html"))
-    response.push_promises.add(url_for("static", filename="images/idle.ico"))
-    response.push_promises.add(url_for("static", filename="graphtiler.css"))
-    response.push_promises.add(url_for("static", filename="singleGraph.js"))
     return response
 
 
@@ -85,8 +60,8 @@ async def timepoints(name, action):
     elif action == "remove-all":
         result = ctrl.remove_all_points(name)
 
-    if result["ws_updates"] and app.data_updates:
-        await app.data_updates.put([name, result["ws_updates"]])
+    if result["added_points"] and app.data_updates:
+        await app.data_updates.put([name, result["added_points"]])
     return jsonify(result)
 
 
@@ -100,55 +75,41 @@ async def modify_category(name):
     return jsonify(ctrl.modify_category(name, await request.get_json()))
 
 
-async def ws_send():
-    while True:
-        try:
-            category, updates = await app.data_updates.get()
-            if category in app.ws_clients:
-                for conn in app.ws_clients[category]:
-                    await conn.send_updates_in_range(category, updates)
-        except CancelledError:
-            pass
+async def ws_receive(ws):
+    handler = app.ws_handler
+    command_map = {
+        "add_connection": handler.add_connection,
+        "remove_connection": handler.remove_connection,
+        "add_categories": handler.add_categories,
+        "remove_categories": handler.remove_categories,
+    }
 
+    try:
+        while True:
+            msg = await websocket.receive()
+            if not msg:
+                continue
 
-async def ws_receive():
-    while True:
-        data = await websocket.receive()
-        print(data)
+            msg = loads(msg)
+            # validate here
+            for key, data in msg.items():
+                command_map[key](ws, data)
 
-
-def assign_websocket(func):
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        conn = ws_connection(websocket._get_current_object())
-        for category in conn.categories:
-            app.ws_clients[category].add(conn)
-            rnge = {"range": {"start": conn.start_str, "end": conn.end_str}}
-            points = ctrl.get_points(category, rnge)
-            if "points" in points:
-                await conn.send_points(category, points["points"])
-        try:
-            return await func(*args, **kwargs)
-        finally:
-            for category in conn.categories:
-                app.ws_clients[category].remove(conn)
-                if not app.ws_clients[category]:
-                    app.ws_clients.pop(category, None)
-
-    return wrapper
+    except CancelledError:
+        return
 
 
 @app.websocket("/ws")
-@assign_websocket
 async def ws():
     if app.data_updates is None:
         app.data_updates = Queue()
-    try:
-        producer = create_task(ws_send())
-        consumer = create_task(ws_receive())
-        await gather(producer, consumer)
-    except AssertionError:
-        return
+
+    ws = websocket._get_current_object()
+    app.ws_handler.add_connection(ws)
+    # producer = create_task(ws_send())
+    consumer = create_task(ws_receive(ws))
+    await gather(consumer)
+    app.ws_handler.add_connection(ws)
 
 
 @app.cli.command("run")
