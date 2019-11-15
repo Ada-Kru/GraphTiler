@@ -1,4 +1,4 @@
-# from lib.validation_funcs import str_to_datetime
+from lib.validation_funcs import str_to_datetime
 from cfg import TIME_FORMAT_NO_TZ
 from datetime import timezone
 from collections import defaultdict
@@ -26,6 +26,9 @@ class WsConnectionHandler:
         """Add categories to a websocket connection."""
         self.remove_categories(websocket, cat_data.keys())
         for category, monitor_ranges in cat_data.items():
+            for key in ("start", "end", "from"):
+                if key in monitor_ranges:
+                    monitor_ranges[key] = str_to_datetime(monitor_ranges[key])
             self._categories[category][websocket] = monitor_ranges
 
     def remove_categories(self, websocket, categories):
@@ -33,7 +36,7 @@ class WsConnectionHandler:
         for category in categories:
             self._categories[category].pop(websocket, None)
 
-    async def send_updates_in_range(self, category, updates, skip_vali=False):
+    async def send_updates(self, category, updates, skip_vali=False):
         """Send updates in the list that are within the time range."""
         if category not in self._categories:
             return

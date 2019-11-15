@@ -14,10 +14,17 @@ class App extends Component {
    }
 
     componentDidMount() {
-        console.log('HERE');
         ws.onopen = (evt) => {
             console.log('ws connected')
             this.setState({ ws: ws })
+            let cmd = {add_categories: {
+                PCBandwidth: {
+                    start: "2019-10-22 00:00 -0600",
+                    end: "2019-10-22 23:59 -0600"
+                    }
+                }
+            }
+            ws.send(JSON.stringify(cmd))
         }
 
         ws.onmessage = (evt) => {
