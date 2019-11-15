@@ -9,9 +9,11 @@ from quart import (
     websocket,
 )
 from asyncio import get_event_loop, create_task, gather, Queue, CancelledError
-from json import loads
+from json import loads, dumps, JSONDecodeError
+from cerberus import Validator
 from lib.controller import GraphTilerController
 from lib.ws_connection_handler import WsConnectionHandler
+from lib.validation import WS_MSG_SCHEMA
 import cfg
 
 # from lib.validation_funcs import str_to_datetime
@@ -77,21 +79,30 @@ async def modify_category(name):
 
 async def ws_receive(ws):
     handler = app.ws_handler
+    msg_vali = Validator(WS_MSG_SCHEMA)
     command_map = {
-        "add_connection": handler.add_connection,
-        "remove_connection": handler.remove_connection,
         "add_categories": handler.add_categories,
         "remove_categories": handler.remove_categories,
     }
 
     try:
         while True:
-            msg = await websocket.receive()
+            msg = await ws.receive()
             if not msg:
                 continue
 
-            msg = loads(msg)
-            # validate here
+            try:
+                msg = loads(msg)
+            except JSONDecodeError:
+                err = {"errors": {"reason": "Invalid JSON", "sent": msg}}
+                await ws.send(dumps(err))
+                continue
+
+            if not msg_vali.validate(msg):
+                err = {"errors": {"reason": msg_vali.errors, "sent": msg}}
+                await ws.send(dumps(err))
+                continue
+
             for key, data in msg.items():
                 command_map[key](ws, data)
 

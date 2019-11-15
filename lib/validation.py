@@ -31,6 +31,30 @@ GET_REMOVE_POINTS_SCHEMA = {
     "range": {"type": "dict", "schema": {"start": DATE_STR, "end": DATE_STR}},
 }
 
+WS_MSG_SCHEMA = {
+    "add_categories": {
+        "type": "dict",
+        "allow_unknown": True,
+        "valuesrules": {
+            "type": "dict",
+            "schema": {
+                "start": {
+                    "type": "string",
+                    "check_with": date_vali,
+                    "dependencies": "end",
+                },
+                "end": {
+                    "type": "string",
+                    "check_with": date_vali,
+                    "dependencies": "start",
+                },
+                "from": DATE_STR,
+            },
+        },
+    },
+    "remove_categories": {"type": "list", "schema": {"type": "string"}},
+}
+
 
 def make_min_max_vali(cat_info):
     min_max = {}
