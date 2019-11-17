@@ -46,8 +46,12 @@ class WsConnectionHandler:
             for update in updates:
                 tm = update["time"]
                 if not skip_vali:
-                    if not (tm >= ranges["start"] and tm <= ranges["end"]):
-                        continue
+                    if "start" in ranges:
+                        if not (tm >= ranges["start"] and tm <= ranges["end"]):
+                            continue
+                    elif "from" in ranges:
+                        if not (tm >= ranges["from"]):
+                            continue
                 time = tm.astimezone(timezone.utc).strftime(TIME_FORMAT_NO_TZ)
                 in_range[time] = update["reading"]
 

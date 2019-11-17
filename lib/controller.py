@@ -52,6 +52,13 @@ class GraphTilerController:
 
         return self._db.modify_category(catname, data)
 
+    def get_all_categories(self):
+        """Get information about a category."""
+        categories = self._db.get_all_categories()
+        for category in categories.values():
+            category.pop("_id", None)
+        return categories
+
     def get_category(self, catname):
         """Get information about a category."""
         category = self._db.get_category(catname)

@@ -29,6 +29,7 @@ POINT_DATA_SCHEMA = {"times": {"type": "list", "items": [DATE_STR]}}
 GET_REMOVE_POINTS_SCHEMA = {
     "times": {"type": "list", "schema": DATE_STR},
     "range": {"type": "dict", "schema": {"start": DATE_STR, "end": DATE_STR}},
+    "from": DATE_STR,
 }
 
 WS_MSG_SCHEMA = {

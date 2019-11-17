@@ -40,6 +40,11 @@ async def index(filename):
     return response
 
 
+@app.route("/category/", methods=["GET"])
+async def get_all_categories():
+    return jsonify(ctrl.get_all_categories())
+
+
 @app.route("/category/<name>", methods=["GET", "POST"])
 async def category(name):
     if request.method == "GET":
