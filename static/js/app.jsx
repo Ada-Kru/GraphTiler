@@ -1,7 +1,34 @@
 import React, {Component} from 'react';
 import GraphTile from './components/graphTile'
+import ConfigTab from './components/configTab'
+import DockLayout from 'rc-dock'
+
 
 const ws = new WebSocket('ws://192.168.2.111:7123/ws')
+
+const defaultLayout = {
+  dockbox: {
+    mode: 'horizontal',
+    children: [
+      {
+        mode: 'horizontal',
+        tabs: [
+          {id: 'graph1', title: 'Graph 1', content: <GraphTile />},
+          {id: 'cfg1', title: 'Config 1', content: <ConfigTab />}
+        ]
+    },
+    {
+      mode: 'horizontal',
+      tabs: [
+        {id: 'graph2', title: 'Graph 2', content: <GraphTile />},
+        {id: 'cfg2', title: 'Config 2', content: <ConfigTab />}
+      ]
+    }
+    ]
+  }
+};
+
+const docStyle = {position: 'absolute', left: 0, top: 0, right: 0, bottom: 0}
 
 class App extends Component {
     constructor(props) {
@@ -43,11 +70,7 @@ class App extends Component {
     }
 
     render() {
-        return (
-            <div className="app">
-                <GraphTile />
-            </div>
-        )
+        return <DockLayout defaultLayout={defaultLayout} style={docStyle}/>
     }
 }
 

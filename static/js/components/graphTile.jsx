@@ -5,16 +5,17 @@ const data = {
   labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
   datasets: [
     {
-      label: 'My First dataset',
-      fill: false,
+      label: 'Test Data',
+      fill: true,
       lineTension: 0,
-      backgroundColor: 'rgba(75,192,192,0.4)',
-      borderColor: 'rgba(75,192,192,1)',
+      backgroundColor: '#555',
+      borderColor: '#0C0',
       borderCapStyle: 'butt',
       borderDash: [],
       borderDashOffset: 0.0,
       borderJoinStyle: 'miter',
-      pointBorderColor: 'rgba(75,192,192,1)',
+      maintainAspectRatio: false,
+      pointBorderColor: '#0F0',
       pointBackgroundColor: '#FFFFFF',
       pointBorderWidth: 1,
       pointHoverRadius: 5,
@@ -28,13 +29,11 @@ const data = {
   ]
 };
 
+const options = {responsive: true, maintainAspectRatio: false}
+
 class GraphTile extends Component {
     render() {
-        return (
-            <div>
-                <Line data={data} />
-            </div>
-        );
+        return <Line data={data} options={options} />
     }
 }
 
