@@ -1,4 +1,4 @@
-import React, {Component} from 'react'
+import React, { Component } from "react"
 
 class ConfigTab extends Component {
     render() {
@@ -6,4 +6,4 @@ class ConfigTab extends Component {
     }
 }
 
-export default ConfigTab;
+export default ConfigTab

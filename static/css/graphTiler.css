@@ -1,0 +1,55 @@
+body {
+    background-color: #111;
+}
+
+.panel-ctrl {
+    cursor: pointer;
+    color: #aaa;
+    display: inline-block;
+    width: 18px;
+    height: 24px;
+    text-align: center;
+    opacity: 0.3;
+    transition: all 0.15s ease-in-out;
+    line-height: 30px;
+}
+
+.panel-ctrl:hover {
+    opacity: 1;
+}
+
+#root {
+    background: #222;
+}
+
+.side-controls {
+    height: 100%;
+    width: 20px;
+    position: absolute;
+    margin-left: -8px;
+    margin-top: -8px;
+    background: #181818;
+    user-select: none;
+}
+
+.ctrl-button {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 28px;
+    color: #00b974;
+    text-align: center;
+    padding-left: 2px;
+}
+
+.ctrl-button:hover {
+    color: #20d994;
+}
+
+.connection-indicator {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.not-connected {
+    color: #AA0000;
+}
