@@ -4,99 +4,59 @@ import GraphTile from "./components/GraphTile"
 import ConfigTab from "./components/ConfigTab"
 import DockLayout from "rc-dock"
 
-let openDocks = 1
+const hiddenTab = num => {
+    return {
+        id: `hiddenTab${num}`,
+        title: "Hidden",
+        group: "close-all",
+        closable: false,
+        content: <div />,
+    }
+}
 
 let groups = {
     "close-all": {
         floatable: false,
         closable: true,
-        tabLocked: true,
-        panelExtra: (panelData, context) => (
-            <div>
-                <span
-                    className="panel-ctrl"
-                    onClick={() =>
-                        context.dockMove(panelData, null, "maximize")
-                    }
-                >
-                    {panelData.parent.mode === "maximize" ? "🗕" : "🗖"}
-                </span>
-                <span
-                    className="panel-ctrl"
-                    onClick={() => context.dockMove(panelData, null, "remove")}
-                >
-                    🗙
-                </span>
-            </div>
-        ),
-    },
-    "close-all2": {
-        floatable: false,
-        closable: true,
-        tabLocked: true,
-        panelExtra: (panelData, context) => (
-            <div>
-                <span
-                    className="panel-ctrl"
-                    onClick={() =>
-                        context.dockMove(panelData, null, "maximize")
-                    }
-                >
-                    {panelData.parent.mode === "maximize" ? "🗕" : "🗖"}
-                </span>
-                <span
-                    className="panel-ctrl"
-                    onClick={() => {
-                        if (openDocks > 1) {
-                            openDocks--
-                            context.dockMove(panelData, null, "remove")
-                        }
-                    }}
-                >
-                    🗙
-                </span>
-            </div>
-        ),
+        // panelExtra: (panelData, context) => (
+        //     <div>
+        //         <span
+        //             className="panel-ctrl"
+        //             onClick={() =>
+        //                 context.dockMove(panelData, null, "maximize")
+        //             }
+        //         >
+        //             {panelData.parent.mode === "maximize" ? "🗕" : "🗖"}
+        //         </span>
+        //         <span
+        //             className="panel-ctrl"
+        //             onClick={() => context.dockMove(panelData, null, "remove")}
+        //         >
+        //             🗙
+        //         </span>
+        //     </div>
+        // ),
     },
 }
 
 const defaultLayout = {
     dockbox: {
+        id: "baseBox",
         mode: "horizontal",
+        size: 0,
         children: [
             {
-                mode: "horizontal",
+                id: "mainPanel",
                 tabs: [
                     {
-                        id: "graph1",
-                        title: "Graph 1",
-                        group: "close-all",
-                        content: <GraphTile />,
-                    },
-                    {
-                        id: "cfg1",
-                        title: "Config 1",
-                        group: "close-all",
-                        content: <ConfigTab />,
+                        id: "initialTab",
+                        title: "initial",
+                        closable: true,
+                        content: <div />,
                     },
                 ],
-            },
-            {
-                mode: "horizontal",
-                tabs: [
-                    {
-                        id: "graph2",
-                        title: "Graph 2",
-                        group: "close-all2",
-                        content: <GraphTile />,
-                    },
-                    {
-                        id: "cfg2",
-                        title: "Config 2",
-                        group: "close-all2",
-                        content: <ConfigTab />,
-                    },
-                ],
+                // panelLock: {},
+                // group: "close-all",
             },
         ],
     },
@@ -116,27 +76,37 @@ class App extends Component {
 
         this.state = {
             ws: null,
+            wsState: "disconnected",
             serverData: {},
         }
 
-        this.addGraphTile = this.addGraphTile.bind(this)
+        this.numGraphs = 0
+
+        // this.addGraphTile = this.addGraphTile.bind(this)
     }
 
-    setupWebsocket() {
+    getRef = ref => {
+        this.dockLayout = ref
+        this.mainPanel = this.dockLayout.find("mainPanel")
+    }
+
+    setupWebsocket = () => {
         this.state.ws = new WebSocket("ws://192.168.2.111:7123/ws")
+        this.setState({ wsState: "connecting" })
         let ws = this.state.ws
 
         ws.onopen = evt => {
             console.log("Websocket connected")
-            let cmd = {
-                add_categories: {
-                    PCBandwidth: {
-                        start: "2019-10-22 00:00 -0600",
-                        end: "2019-10-22 23:59 -0600",
-                    },
-                },
-            }
-            ws.send(JSON.stringify(cmd))
+            this.setState({ wsState: "connected" })
+            // let cmd = {
+            //     add_categories: {
+            //         PCBandwidth: {
+            //             start: "2019-10-22 00:00 -0600",
+            //             end: "2019-10-22 23:59 -0600",
+            //         },
+            //     },
+            // }
+            // ws.send(JSON.stringify(cmd))
         }
 
         ws.onmessage = evt => {
@@ -147,6 +117,7 @@ class App extends Component {
 
         ws.onclose = () => {
             console.log("Websocket connection closed.")
+            this.setState({ wsState: "disconnected" })
             setTimeout(() => this.setupWebsocket(), 1000)
         }
 
@@ -156,8 +127,23 @@ class App extends Component {
         }
     }
 
-    addGraphTile() {
-        console.log("Adding graph tile!")
+    addGraphTile = () => {
+        this.numGraphs++
+        let graphNum = this.numGraphs
+        let newPanel = {
+            id: `panel${graphNum}`,
+            mode: "horizontal",
+            tabs: [
+                {
+                    id: `graphTab${graphNum}`,
+                    title: `Graph ${graphNum}`,
+                    closable: true,
+                    content: <GraphTile />,
+                },
+            ],
+        }
+
+        this.dockLayout.dockMove(newPanel, "mainPanel", "middle")
     }
 
     componentDidMount() {
@@ -167,8 +153,12 @@ class App extends Component {
     render() {
         return (
             <div>
-                <SideControls addGraphTile={this.addGraphTile}/>
+                <SideControls
+                    addGraphTile={this.addGraphTile}
+                    wsState={this.state.wsState}
+                />
                 <DockLayout
+                    ref={this.getRef}
                     defaultLayout={defaultLayout}
                     dropMode="edge"
                     groups={groups}

@@ -50,6 +50,14 @@ body {
     font-size: 14px;
 }
 
-.not-connected {
+.disconnected {
     color: #AA0000;
+}
+
+.connecting {
+    color: #AAAA00;
+}
+
+.connected {
+    color: #00AA00;
 }
