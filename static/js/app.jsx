@@ -1,73 +1,28 @@
 import React, { Component } from "react"
 import SideControls from "./components/SideControls"
 import GraphTile from "./components/GraphTile"
-import ConfigTab from "./components/ConfigTab"
-import DockLayout from "rc-dock"
+import FlexLayout from "flexlayout-react"
 
-const hiddenTab = num => {
-    return {
-        id: `hiddenTab${num}`,
-        title: "Hidden",
-        group: "close-all",
-        closable: false,
-        content: <div />,
-    }
-}
-
-let groups = {
-    "close-all": {
-        floatable: false,
-        closable: true,
-        // panelExtra: (panelData, context) => (
-        //     <div>
-        //         <span
-        //             className="panel-ctrl"
-        //             onClick={() =>
-        //                 context.dockMove(panelData, null, "maximize")
-        //             }
-        //         >
-        //             {panelData.parent.mode === "maximize" ? "🗕" : "🗖"}
-        //         </span>
-        //         <span
-        //             className="panel-ctrl"
-        //             onClick={() => context.dockMove(panelData, null, "remove")}
-        //         >
-        //             🗙
-        //         </span>
-        //     </div>
-        // ),
-    },
-}
-
-const defaultLayout = {
-    dockbox: {
-        id: "baseBox",
-        mode: "horizontal",
-        size: 0,
+var layout = {
+    global: { splitterSize: 5, tabDragSpeed: 0.15 },
+    layout: {
+        type: "row",
+        weight: 100,
         children: [
             {
-                id: "mainPanel",
-                tabs: [
+                type: "tabset",
+                weight: 50,
+                selected: 0,
+                children: [
                     {
-                        id: "initialTab",
-                        title: "initial",
-                        closable: true,
-                        content: <div />,
+                        component: "graphTile",
+                        name: `TEST`,
+                        config: { configPanelOpen: true },
                     },
                 ],
-                // panelLock: {},
-                // group: "close-all",
             },
         ],
     },
-}
-
-const docStyle = {
-    position: "absolute",
-    left: 20,
-    top: 0,
-    right: 0,
-    bottom: 0,
 }
 
 class App extends Component {
@@ -75,19 +30,13 @@ class App extends Component {
         super(props)
 
         this.state = {
+            model: FlexLayout.Model.fromJson(layout),
             ws: null,
             wsState: "disconnected",
             serverData: {},
         }
 
         this.numGraphs = 0
-
-        // this.addGraphTile = this.addGraphTile.bind(this)
-    }
-
-    getRef = ref => {
-        this.dockLayout = ref
-        this.mainPanel = this.dockLayout.find("mainPanel")
     }
 
     setupWebsocket = () => {
@@ -127,23 +76,53 @@ class App extends Component {
         }
     }
 
-    addGraphTile = () => {
-        this.numGraphs++
-        let graphNum = this.numGraphs
-        let newPanel = {
-            id: `panel${graphNum}`,
-            mode: "horizontal",
-            tabs: [
-                {
-                    id: `graphTab${graphNum}`,
-                    title: `Graph ${graphNum}`,
-                    closable: true,
-                    content: <GraphTile />,
-                },
-            ],
+    factory = node => {
+        switch (node.getComponent()) {
+            case "graphTile":
+                return <GraphTile node={node} />
+                break
         }
+    }
 
-        this.dockLayout.dockMove(newPanel, "mainPanel", "middle")
+    addGraphTile = () => {
+        if (document.getElementsByClassName("flexlayout__drag_rect").length) {
+            return
+        }
+        this.numGraphs++
+        this.refs.layout.addTabWithDragAndDropIndirect(
+            "Add graph<br>(Drag to location)",
+            {
+                component: "graphTile",
+                name: `Graph ${this.numGraphs}`,
+                config: { configPanelOpen: false },
+            },
+            null
+        )
+    }
+
+    configButtonClicked = cfg => {
+        console.log("from click", cfg)
+    }
+
+    customizeTab = (node, data) => {
+        data.content = (
+            <span
+                className="flexlayout__tab_button_content"
+                title="Double click to change title"
+            >
+                {data.content}
+                <span
+                    className="graphConfigButton"
+                    title="Configure graph"
+                    onMouseDown={evt => {
+                        evt.preventDefault()
+                        node._fireEvent("configPanelOpen")
+                    }}
+                >
+                    ⛭
+                </span>
+            </span>
+        )
     }
 
     componentDidMount() {
@@ -157,13 +136,14 @@ class App extends Component {
                     addGraphTile={this.addGraphTile}
                     wsState={this.state.wsState}
                 />
-                <DockLayout
-                    ref={this.getRef}
-                    defaultLayout={defaultLayout}
-                    dropMode="edge"
-                    groups={groups}
-                    style={docStyle}
-                />
+                <div className="graphGrid">
+                    <FlexLayout.Layout
+                        model={this.state.model}
+                        factory={this.factory}
+                        ref="layout"
+                        onRenderTab={this.customizeTab}
+                    />
+                </div>
             </div>
         )
     }

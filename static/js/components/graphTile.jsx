@@ -1,8 +1,9 @@
 import React, { Component } from "react"
 import { Line } from "react-chartjs-2"
+import GraphConfigPanel from "./GraphConfigPanel"
 
 const data = {
-    labels: ["January", "February", "March", "April", "May", "June", "July"],
+    labels: ["1", "2", "3", "4", "5", "6", "7"],
     datasets: [
         {
             label: "Test Data",
@@ -24,6 +25,7 @@ const data = {
             pointHoverBorderWidth: 2,
             pointRadius: 1,
             pointHitRadius: 10,
+            responsive: true,
             data: [65, 59, 80, 81, 56, 55, 40],
         },
     ],
@@ -32,8 +34,44 @@ const data = {
 const options = { responsive: true, maintainAspectRatio: false }
 
 class GraphTile extends Component {
+    constructor(props) {
+        super(props)
+        let node = this.props.node
+
+        this.state = { configPanelOpen: false }
+
+        node.setEventListener("configPanelOpen", () => {
+            this.setState(prevState => {
+                return {
+                    configPanelOpen: !prevState.configPanelOpen,
+                }
+            })
+        })
+    }
+
+    showConfig = () => {
+        console.log("showConfig")
+    }
+
     render() {
-        return <Line data={data} options={options} />
+        if (!this.state.configPanelOpen) {
+            return (
+                <div className="graphTile">
+                    <div className="graphHolder">
+                        <Line data={data} options={options} />
+                    </div>
+                </div>
+            )
+        } else {
+            return (
+                <div className="graphTile">
+                    <div className="graphHolder configOpen">
+                        <Line data={data} options={options} />
+                    </div>
+                    <GraphConfigPanel />
+                </div>
+            )
+        }
     }
 }
 

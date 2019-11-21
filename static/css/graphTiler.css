@@ -22,6 +22,16 @@ body {
     background: #222;
 }
 
+.graphGrid {
+    left: 21px;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    position: absolute;
+    overflow: hidden;
+    background-color: black;
+}
+
 .side-controls {
     height: 100%;
     width: 20px;
@@ -47,17 +57,53 @@ body {
 
 .connection-indicator {
     font-weight: bold;
-    font-size: 14px;
+    font-size: 20px;
 }
 
 .disconnected {
-    color: #AA0000;
+    color: #aa0000;
 }
 
 .connecting {
-    color: #AAAA00;
+    color: #aaaa00;
 }
 
 .connected {
-    color: #00AA00;
+    color: #0f04;
+}
+
+.graphConfigButton {
+    color: #888;
+    cursor: pointer;
+    padding-left: 8px;
+    padding-right: 2px;
+}
+
+.graphConfigButton:hover {
+    color: #fff;
+}
+
+.graphTile {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    min-width: 0;
+}
+
+.graphHolder {
+    height: 100%;
+    width: 100%;
+}
+
+.graphHolder.configOpen {
+    width: 75%;
+    float: left;
+}
+
+.configPanel {
+    color: white;
+    width: 25%;
+    height: 100%;
+    float: right;
+    transition: width 0.2s;
 }

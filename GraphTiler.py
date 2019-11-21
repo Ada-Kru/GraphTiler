@@ -38,7 +38,9 @@ async def index(filename):
         url_for("static", filename="images/graphTiler.ico")
     )
     response.push_promises.add(url_for("static", filename="graphTiler.css"))
-    response.push_promises.add(url_for("static", filename="rc-dock.css"))
+    response.push_promises.add(
+        url_for("static", filename="flexLayout-dark.css")
+    )
     response.push_promises.add(url_for("static", filename="main.js"))
     return response
 
