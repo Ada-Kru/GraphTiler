@@ -38,22 +38,28 @@ WS_MSG_SCHEMA = {
         "allow_unknown": True,
         "valuesrules": {
             "type": "dict",
-            "schema": {
-                "start": {
-                    "type": "string",
-                    "check_with": date_vali,
-                    "dependencies": "end",
+            "valuesrules": {
+                "type": "dict",
+                "schema": {
+                    "start": {
+                        "type": "string",
+                        "check_with": date_vali,
+                        "dependencies": "end",
+                    },
+                    "end": {
+                        "type": "string",
+                        "check_with": date_vali,
+                        "dependencies": "start",
+                    },
+                    "from": DATE_STR,
                 },
-                "end": {
-                    "type": "string",
-                    "check_with": date_vali,
-                    "dependencies": "start",
-                },
-                "from": DATE_STR,
             },
         },
     },
-    "remove_categories": {"type": "list", "schema": {"type": "string"}},
+    "remove_categories": {
+        "type": "list",
+        "valuesrules": {"type": "dict", "schema": {"type": "string"}},
+    },
 }
 
 

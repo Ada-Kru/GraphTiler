@@ -79,7 +79,10 @@ async def timepoints(name, action):
 
 @app.route("/remove-category/<name>", methods=["POST"])
 async def remove_category(name):
-    return jsonify(ctrl.remove_category(name))
+    result = ctrl.remove_category(name)
+    if not result["errors"]:
+        app.ws_handler.remove_entire_category(name)
+    return jsonify(result)
 
 
 @app.route("/modify-category/<name>", methods=["POST"])
@@ -88,11 +91,11 @@ async def modify_category(name):
 
 
 async def ws_receive(ws):
-    handler = app.ws_handler
+    ws_handler = app.ws_handler
     msg_vali = Validator(WS_MSG_SCHEMA)
     command_map = {
-        "add_categories": handler.add_categories,
-        "remove_categories": handler.remove_categories,
+        "add_categories": ws_handler.add_cat_ranges,
+        "remove_categories": ws_handler.remove_cat_ranges,
     }
 
     try:

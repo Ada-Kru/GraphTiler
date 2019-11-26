@@ -47,15 +47,17 @@ class App extends Component {
         ws.onopen = evt => {
             console.log("Websocket connected")
             this.setState({ wsState: "connected" })
-            // let cmd = {
-            //     add_categories: {
-            //         PCBandwidth: {
-            //             start: "2019-10-22 00:00 -0600",
-            //             end: "2019-10-22 23:59 -0600",
-            //         },
-            //     },
-            // }
-            // ws.send(JSON.stringify(cmd))
+            let cmd = {
+                add_categories: {
+                    PCBandwidth: {
+                        UniqueKey: {
+                            start: "2019-10-22 00:00 -0600",
+                            end: "2019-10-22 23:59 -0600",
+                        },
+                    },
+                },
+            }
+            ws.send(JSON.stringify(cmd))
         }
 
         ws.onmessage = evt => {
