@@ -51,5 +51,9 @@
     "tabWidth": 4,
     "semi": false,
     "singleQuote": false
+  },
+  "dependencies": {
+    "@wojtekmaj/react-datetimerange-picker": "^2.3.0",
+    "react-datetime-picker": "^2.7.1"
   }
 }

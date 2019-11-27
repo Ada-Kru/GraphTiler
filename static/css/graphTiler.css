@@ -96,14 +96,69 @@ body {
 }
 
 .graphHolder.configOpen {
-    width: 75%;
+    width: 70%;
     float: left;
 }
 
 .configPanel {
+    display: flex;
+    flex-direction: column;
     color: white;
-    width: 25%;
+    background-color: #333;
+    width: 30%;
     height: 100%;
     float: right;
-    transition: width 0.2s;
+    /* transition: width 0.2s; */
+}
+
+.graphSettings {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    width: 90%;
+    height: 100%;
+    padding-top: 5%;
+    padding-left: 5%;
+}
+
+.configRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-top: 5%;
+}
+
+.configRow label {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    width: 100%;
+}
+
+label input,
+label select {
+    background-color: #333;
+    color: #fff;
+    border-top: 1px solid #555;
+    border-left: 1px solid #555;
+    border-bottom: 1px solid #aaa;
+    border-right: 1px solid #aaa;
+}
+
+label .react-datetime-picker,
+label .react-datetimerange-picker {
+    background-color: #333;
+    color: #fff;
+    max-height: 24px;
+}
+
+.react-calendar {
+    border-top: 1px solid #555;
+    border-left: 1px solid #555;
+    border-bottom: 1px solid #aaa;
+    border-right: 1px solid #aaa;
+	background-color: #444 !important;
+}
+
+.react-calendar__month-view__days__day {
+    color: white;
 }
