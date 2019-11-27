@@ -13,7 +13,19 @@ class GraphConfigPanel extends Component {
             rangeEnd: new Date(),
             pastAmount: 1,
             pastUnit: "hr",
+            numCategories: 0,
         }
+    }
+
+    addCategory = () => {
+        this.setState(prevState => {
+            numCategories: prevState.numCategories + 1
+        })
+        this.props.onModifySettings({addCategory: {
+            category: "PCBandwidth",
+            rangeId: "UNIQUE_ID_HERE",
+            rangeData: {}
+        }})
     }
 
     onMonitorTypeChange = evt => {
@@ -67,23 +79,6 @@ class GraphConfigPanel extends Component {
                     </span>
                 )
 
-            case "from":
-                return (
-                    <span className="configRow">
-                        <label>
-                            From
-                            <DateTimePicker
-                                onChange={this.onFromChange}
-                                value={this.state.from}
-                                calendarIcon={null}
-                                clearIcon={null}
-                                disableClock={true}
-                                format={DATETIME_FORMAT}
-                            />
-                        </label>
-                    </span>
-                )
-
             case "range":
                 return (
                     <div>
@@ -115,6 +110,23 @@ class GraphConfigPanel extends Component {
                         </span>
                     </div>
                 )
+
+            case "since":
+                return (
+                    <span className="configRow">
+                        <label>
+                            Since
+                            <DateTimePicker
+                                onChange={this.onFromChange}
+                                value={this.state.from}
+                                calendarIcon={null}
+                                clearIcon={null}
+                                disableClock={true}
+                                format={DATETIME_FORMAT}
+                            />
+                        </label>
+                    </span>
+                )
         }
     }
 
@@ -131,7 +143,7 @@ class GraphConfigPanel extends Component {
                             >
                                 <option value="past">Past X</option>
                                 <option value="range">Time range</option>
-                                <option value="from">From time</option>
+                                <option value="since">Since time</option>
                             </select>
                         </label>
                     </span>
@@ -150,7 +162,11 @@ class GraphConfigPanel extends Component {
                     </span>
                     <span className="configRow">
                         Categories
-                        <span className="ctrl-button" title="Add new category">
+                        <span
+                            className="ctrl-button"
+                            title="Add new category"
+                            onClick={this.addCategory}
+                        >
                             +
                         </span>
                     </span>

@@ -2,6 +2,11 @@ body {
     background-color: #111;
 }
 
+body,
+html {
+    scrollbar-color: #444 #222;
+}
+
 .panel-ctrl {
     cursor: pointer;
     color: #aaa;
@@ -77,6 +82,7 @@ body {
     cursor: pointer;
     padding-left: 8px;
     padding-right: 2px;
+    line-height: 14px;
 }
 
 .graphConfigButton:hover {
@@ -117,7 +123,6 @@ body {
     justify-content: start;
     width: 90%;
     height: 100%;
-    padding-top: 5%;
     padding-left: 5%;
 }
 
@@ -132,6 +137,16 @@ body {
     display: grid;
     grid-template-columns: 1fr 2fr;
     width: 100%;
+}
+
+select {
+    width: max-content;
+    height: 20px;
+}
+
+label input {
+    width: 40%;
+    min-width: 20%;
 }
 
 label input,
@@ -156,7 +171,7 @@ label .react-datetimerange-picker {
     border-left: 1px solid #555;
     border-bottom: 1px solid #aaa;
     border-right: 1px solid #aaa;
-	background-color: #444 !important;
+    background-color: #444 !important;
 }
 
 .react-calendar__month-view__days__day {

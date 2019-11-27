@@ -17,7 +17,7 @@ var layout = {
                     {
                         component: "graphTile",
                         name: `TEST`,
-                        config: { configPanelOpen: true },
+                        config: { graphId: "test", configPanelOpen: true },
                     },
                 ],
             },
@@ -37,6 +37,8 @@ class App extends Component {
         }
 
         this.numGraphs = 0
+        this.graphs = {}
+        this.monitoredCats = {}
     }
 
     setupWebsocket = () => {
@@ -78,10 +80,37 @@ class App extends Component {
         }
     }
 
+    onModifySettings = changed => {
+        console.log("onModifySettings", changed)
+        if (changed.hasOwnProperty("addCategory")) {
+            let data = changed.addCategory
+            if (!this.monitoredCats.hasOwnProperty(data.category)) {
+                this.monitoredCats[data.category] = {}
+            }
+            this.monitoredCats[data.category][data.rangeId] = data.rangeData
+        }
+        if (changed.hasOwnProperty("removeCategory")) {
+            let data = changed.removeCategory
+            delete this.monitoredCats[data.category][data.rangeId]
+            let cat = this.monitoredCats[data.category]
+            if (
+                Object.entries(cat).length === 0 &&
+                cat.constructor === Object
+            ) {
+                delete this.monitoredCats[data.category]
+            }
+        }
+    }
+
     factory = node => {
         switch (node.getComponent()) {
             case "graphTile":
-                return <GraphTile node={node} />
+                return (
+                    <GraphTile
+                        node={node}
+                        onModifySettings={this.onModifySettings}
+                    />
+                )
                 break
         }
     }
@@ -91,14 +120,22 @@ class App extends Component {
             return
         }
         this.numGraphs++
+        let id = `g${this.numGraphs}`
+        this.graphs[id] = { categories: {} }
         this.refs.layout.addTabWithDragAndDropIndirect(
-            "Add graph<br>(Drag to location)",
+            "Drag to location to add a graph<br>ESC to cancel",
             {
                 component: "graphTile",
                 name: `Graph ${this.numGraphs}`,
-                config: { configPanelOpen: false },
+                config: {
+                    graphId: id,
+                    configPanelOpen: true,
+                    modifyGraph,
+                },
             },
-            null
+            data => {
+                console.log(data)
+            }
         )
     }
 

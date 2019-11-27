@@ -37,8 +37,12 @@ class GraphTile extends Component {
     constructor(props) {
         super(props)
         let node = this.props.node
+        let cfg = node.getConfig()
 
-        this.state = { configPanelOpen: false }
+        this.state = {
+            graphId: cfg.graphId,
+            configPanelOpen: cfg.configPanelOpen,
+        }
 
         node.setEventListener("configPanelOpen", () => {
             this.setState(prevState => {
@@ -68,7 +72,10 @@ class GraphTile extends Component {
                     <div className="graphHolder configOpen">
                         <Line data={data} options={options} />
                     </div>
-                    <GraphConfigPanel />
+                    <GraphConfigPanel
+                        graphId={this.state.graphId}
+                        onModifySettings={this.props.onModifySettings}
+                    />
                 </div>
             )
         }
