@@ -1,7 +1,10 @@
 import React, { Component } from "react"
 import DateTimePicker from "react-datetime-picker"
+import CategoryTile from "./CategoryTile"
 
 const DATETIME_FORMAT = "MM-dd-y hh:mm a"
+
+var categories = [{ category: "PCBandwidth", lineColor: "#FFFFFF" }]
 
 class GraphConfigPanel extends Component {
     constructor(props) {
@@ -21,11 +24,13 @@ class GraphConfigPanel extends Component {
         this.setState(prevState => {
             numCategories: prevState.numCategories + 1
         })
-        this.props.onModifySettings({addCategory: {
-            category: "PCBandwidth",
-            rangeId: "UNIQUE_ID_HERE",
-            rangeData: {}
-        }})
+        this.props.onModifySettings({
+            addCategory: {
+                category: "PCBandwidth",
+                rangeId: "UNIQUE_ID_HERE",
+                rangeData: {},
+            },
+        })
     }
 
     onMonitorTypeChange = evt => {
@@ -56,7 +61,7 @@ class GraphConfigPanel extends Component {
         switch (type) {
             case "past":
                 return (
-                    <span className="configRow">
+                    <span className="config-row">
                         <label>
                             Past
                             <span>
@@ -82,7 +87,7 @@ class GraphConfigPanel extends Component {
             case "range":
                 return (
                     <div>
-                        <span className="configRow">
+                        <span className="config-row">
                             <label>
                                 Start
                                 <DateTimePicker
@@ -95,7 +100,7 @@ class GraphConfigPanel extends Component {
                                 />
                             </label>
                         </span>
-                        <span className="configRow">
+                        <span className="config-row">
                             <label>
                                 End
                                 <DateTimePicker
@@ -113,7 +118,7 @@ class GraphConfigPanel extends Component {
 
             case "since":
                 return (
-                    <span className="configRow">
+                    <span className="config-row">
                         <label>
                             Since
                             <DateTimePicker
@@ -134,7 +139,7 @@ class GraphConfigPanel extends Component {
         return (
             <div className="configPanel">
                 <div className="graphSettings">
-                    <span className="configRow">
+                    <span className="config-row">
                         <label>
                             Monitoring type
                             <select
@@ -148,7 +153,7 @@ class GraphConfigPanel extends Component {
                         </label>
                     </span>
                     {this.renderMonitorConfig(this.state.monitorType)}
-                    <span className="configRow">
+                    <span className="config-row">
                         <label>
                             Legend position
                             <select defaultValue="top">
@@ -160,7 +165,7 @@ class GraphConfigPanel extends Component {
                             </select>
                         </label>
                     </span>
-                    <span className="configRow">
+                    <span className="config-row">
                         Categories
                         <span
                             className="ctrl-button"
@@ -170,6 +175,14 @@ class GraphConfigPanel extends Component {
                             +
                         </span>
                     </span>
+                    {categories.map((item, idx) => {
+                        return (
+                            <CategoryTile
+                                key={item.category + this.props.graphId}
+                                item={item}
+                            />
+                        )
+                    })}
                 </div>
             </div>
         )

@@ -75,6 +75,7 @@ class GraphTile extends Component {
                     <GraphConfigPanel
                         graphId={this.state.graphId}
                         onModifySettings={this.props.onModifySettings}
+                        availableCats={this.props.availableCats}
                     />
                 </div>
             )

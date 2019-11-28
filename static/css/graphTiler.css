@@ -123,17 +123,17 @@ html {
     justify-content: start;
     width: 90%;
     height: 100%;
-    padding-left: 5%;
+    padding-left: 3%;
 }
 
-.configRow {
+.config-row {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding-top: 5%;
+    padding-top: 3%;
 }
 
-.configRow label {
+.config-row label {
     display: grid;
     grid-template-columns: 1fr 2fr;
     width: 100%;
@@ -151,29 +151,102 @@ label input {
 
 label input,
 label select {
-    background-color: #333;
+    background-color: #444;
     color: #fff;
     border-top: 1px solid #555;
     border-left: 1px solid #555;
-    border-bottom: 1px solid #aaa;
-    border-right: 1px solid #aaa;
+    border-bottom: 1px solid #888;
+    border-right: 1px solid #888;
 }
 
 label .react-datetime-picker,
 label .react-datetimerange-picker {
-    background-color: #333;
-    color: #fff;
     max-height: 24px;
 }
 
+.react-datetime-picker__wrapper {
+    color: #fff;
+    background-color: #444;
+    border-top: 1px solid #555 !important;
+    border-left: 1px solid #555 !important;
+    border-bottom: 1px solid #888 !important;
+    border-right: 1px solid #888 !important;
+}
+
 .react-calendar {
+    background-color: #333 !important;
     border-top: 1px solid #555;
     border-left: 1px solid #555;
     border-bottom: 1px solid #aaa;
     border-right: 1px solid #aaa;
-    background-color: #444 !important;
+}
+
+.react-calendar__navigation__label,
+.react-calendar__navigation__arrow, .react-calendar__tile {
+    color: white;
 }
 
 .react-calendar__month-view__days__day {
     color: white;
+}
+
+.react-calendar__navigation button:hover,
+.react-calendar__month-view__days button:hover,
+.react-calendar__year-view__months button:hover {
+    background-color: #555 !important;
+}
+
+.cat-tile {
+    border: 2px solid #4d4d4d;
+}
+
+.cat-tile-header {
+    display: flex;
+    justify-content: space-between;
+    padding-left: 1%;
+    padding-right: 1%;
+}
+
+.cat-tile-button {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    color: #aaa;
+}
+
+.cat-tile-button:hover {
+    color: #fff;
+}
+
+.cat-tile-button.red:hover {
+    color: #f55;
+}
+
+.cat-tile-options {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    width: 100%;
+    padding-left: 1%;
+}
+
+.cat-tile-footer {
+    display: flex;
+    justify-content: space-around;
+    padding-top: 5%;
+}
+
+.cat-tile-footer button {
+    width: 50%;
+    color: white;
+    cursor: pointer;
+    background-color: #555;
+    border-top: 2px solid #aaa;
+    border-left: 2px solid #aaa;
+    border-bottom: 2px solid #555;
+    border-right: 2px solid #555;
+}
+
+.cat-tile-footer button:hover {
+    color: #afa;
 }

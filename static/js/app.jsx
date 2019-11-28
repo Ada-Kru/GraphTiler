@@ -39,6 +39,15 @@ class App extends Component {
         this.numGraphs = 0
         this.graphs = {}
         this.monitoredCats = {}
+        this.availableCats = [
+            {
+                name: "PCBandwidth",
+                displayName: "Bandwidth",
+                units: "Bytes",
+                abrvUnit: "b",
+                decimalPlaces: 0,
+            },
+        ]
     }
 
     setupWebsocket = () => {
@@ -109,6 +118,7 @@ class App extends Component {
                     <GraphTile
                         node={node}
                         onModifySettings={this.onModifySettings}
+                        availableCats={this.state.availableCats}
                     />
                 )
                 break
@@ -171,6 +181,15 @@ class App extends Component {
     render() {
         return (
             <div>
+                <datalist id="AvailableCats">
+                    {this.availableCats.map((item, idx) => {
+                        return (
+                            <option key={item.name} value={item.name}>
+                                {item.name}
+                            </option>
+                        )
+                    })}
+                </datalist>
                 <SideControls
                     addGraphTile={this.addGraphTile}
                     wsState={this.state.wsState}
