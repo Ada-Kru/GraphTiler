@@ -44,12 +44,18 @@ class GraphTile extends Component {
             configPanelOpen: cfg.configPanelOpen,
         }
 
+        this.props.listener(cfg.graphId, {registerGraph: true})
+
         node.setEventListener("configPanelOpen", () => {
             this.setState(prevState => {
                 return {
                     configPanelOpen: !prevState.configPanelOpen,
                 }
             })
+        })
+
+        node.setEventListener("close", () => {
+            this.props.listener(cfg.graphId, {removeGraph: true})
         })
     }
 
@@ -74,7 +80,7 @@ class GraphTile extends Component {
                     </div>
                     <GraphConfigPanel
                         graphId={this.state.graphId}
-                        onModifySettings={this.props.onModifySettings}
+                        listener={this.props.listener}
                         availableCats={this.props.availableCats}
                     />
                 </div>

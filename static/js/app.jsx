@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import SideControls from "./components/SideControls"
 import GraphTile from "./components/GraphTile"
 import FlexLayout from "flexlayout-react"
+import uuid from "uuid/v4";
 
 var layout = {
     global: { splitterSize: 5, tabDragSpeed: 0.15 },
@@ -89,8 +90,14 @@ class App extends Component {
         }
     }
 
-    onModifySettings = changed => {
-        console.log("onModifySettings", changed)
+    listener = (graphId, changed) => {
+        console.log("listener", graphId, changed)
+        if (changed.hasOwnProperty("registerGraph")) {
+            this.graphs[graphId] = { categories: {} }
+        }
+        if (changed.hasOwnProperty("removeGraph")) {
+            delete this.graphs[graphId]
+        }
         if (changed.hasOwnProperty("addCategory")) {
             let data = changed.addCategory
             if (!this.monitoredCats.hasOwnProperty(data.category)) {
@@ -117,7 +124,7 @@ class App extends Component {
                 return (
                     <GraphTile
                         node={node}
-                        onModifySettings={this.onModifySettings}
+                        listener={this.listener}
                         availableCats={this.state.availableCats}
                     />
                 )
@@ -130,21 +137,18 @@ class App extends Component {
             return
         }
         this.numGraphs++
-        let id = `g${this.numGraphs}`
-        this.graphs[id] = { categories: {} }
         this.refs.layout.addTabWithDragAndDropIndirect(
             "Drag to location to add a graph<br>ESC to cancel",
             {
                 component: "graphTile",
                 name: `Graph ${this.numGraphs}`,
                 config: {
-                    graphId: id,
+                    graphId: uuid(),
                     configPanelOpen: true,
-                    modifyGraph,
                 },
             },
-            data => {
-                console.log(data)
+            () => {
+                console.log(this.graphs)
             }
         )
     }

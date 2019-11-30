@@ -24,10 +24,9 @@ class GraphConfigPanel extends Component {
         this.setState(prevState => {
             numCategories: prevState.numCategories + 1
         })
-        this.props.onModifySettings({
+        this.props.listener(this.props.graphId, {
             addCategory: {
                 category: "PCBandwidth",
-                rangeId: "UNIQUE_ID_HERE",
                 rangeData: {},
             },
         })
