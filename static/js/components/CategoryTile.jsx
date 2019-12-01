@@ -1,23 +1,51 @@
 import React, { Component } from "react"
 
 class CategoryTile extends Component {
+    static defaultProps = { editing: false }
     constructor(props) {
         super(props)
         this.state = {
-            editing: false,
-            category: props.item.category,
-            lineColor: "#FFF",
+            editing: this.props.editing,
+            category: props.category,
+            lineColor: props.data.lineColor,
+        }
+        this.savedState = {}
+        this.saveState()
+    }
+
+    save = () => {
+        let data = {
+            category: this.state.category,
+            lineColor: this.state.lineColor,
+        }
+        this.props.onCatSave(data)
+        this.setState({ editing: false })
+    }
+
+    cancel = () => {
+        this.setState({ editing: false, ...this.savedState })
+    }
+
+    saveState = () => {
+        this.savedState = {
+            category: this.state.category,
+            lineColor: this.state.lineColor,
         }
     }
 
     modifyCategory = () => {
         if (!this.state.editing) {
+            this.saveState()
             this.setState({ editing: true })
         }
     }
 
+    onChangeCat = evt => {
+        this.setState({ category: evt.target.value })
+    }
+
     onChangeLineColor = evt => {
-        this.setState({ lineColor: evt.data })
+        this.setState({ lineColor: evt.target.value })
     }
 
     render() {
@@ -46,7 +74,8 @@ class CategoryTile extends Component {
                                 Category
                                 <input
                                     list="AvailableCats"
-                                    value={this.state.category}
+                                    defaultValue={this.state.category}
+                                    onChange={this.onChangeCat}
                                 />
                             </label>
                         </span>
@@ -55,15 +84,15 @@ class CategoryTile extends Component {
                                 Line color
                                 <input
                                     type="color"
-                                    value={this.state.lineColor}
+                                    defaultValue={this.state.lineColor}
                                     onChange={this.onChangeLineColor}
                                 />
                             </label>
                         </span>
                     </div>
                     <span className="cat-tile-footer">
-                        <button>Save</button>
-                        <button>Cancel</button>
+                        <button onClick={this.save}>Save</button>
+                        <button onClick={this.cancel}>Cancel</button>
                     </span>
                 </div>
             )
@@ -90,7 +119,10 @@ class CategoryTile extends Component {
                         <span className="config-row">
                             <label>
                                 Category
-                                <label>{this.props.item.category}</label>
+                                <input
+                                    defaultValue={this.state.category}
+                                    disabled={true}
+                                />
                             </label>
                         </span>
                         <span className="config-row">
@@ -98,7 +130,7 @@ class CategoryTile extends Component {
                                 Line color
                                 <input
                                     type="color"
-                                    value={this.state.lineColor}
+                                    defaultValue={this.state.lineColor}
                                     onChange={this.onChangeLineColor}
                                     disabled={true}
                                 />

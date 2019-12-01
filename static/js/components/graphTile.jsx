@@ -44,7 +44,11 @@ class GraphTile extends Component {
             configPanelOpen: cfg.configPanelOpen,
         }
 
-        this.props.listener(cfg.graphId, {registerGraph: true})
+        this.categories = this.props.graphs[cfg.graphId]
+            ? this.props.graphs[cfg.graphId].categories
+            : {}
+
+        this.props.listener(cfg.graphId, { registerGraph: true })
 
         node.setEventListener("configPanelOpen", () => {
             this.setState(prevState => {
@@ -55,8 +59,10 @@ class GraphTile extends Component {
         })
 
         node.setEventListener("close", () => {
-            this.props.listener(cfg.graphId, {removeGraph: true})
+            this.props.listener(cfg.graphId, { removeGraph: true })
         })
+
+        this.categories = {}
     }
 
     showConfig = () => {
@@ -64,6 +70,8 @@ class GraphTile extends Component {
     }
 
     render() {
+        let state = this.state
+        let props = this.props
         if (!this.state.configPanelOpen) {
             return (
                 <div className="graphTile">
@@ -79,9 +87,10 @@ class GraphTile extends Component {
                         <Line data={data} options={options} />
                     </div>
                     <GraphConfigPanel
-                        graphId={this.state.graphId}
-                        listener={this.props.listener}
-                        availableCats={this.props.availableCats}
+                        graphId={state.graphId}
+                        listener={props.listener}
+                        availableCats={props.availableCats}
+                        categories={this.categories}
                     />
                 </div>
             )

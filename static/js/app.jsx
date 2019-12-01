@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import SideControls from "./components/SideControls"
 import GraphTile from "./components/GraphTile"
 import FlexLayout from "flexlayout-react"
-import uuid from "uuid/v4";
+import uuid from "uuid/v4"
 
 var layout = {
     global: { splitterSize: 5, tabDragSpeed: 0.15 },
@@ -34,12 +34,11 @@ class App extends Component {
             model: FlexLayout.Model.fromJson(layout),
             ws: null,
             wsState: "disconnected",
+            graphs: {},
             serverData: {},
         }
 
         this.numGraphs = 0
-        this.graphs = {}
-        this.monitoredCats = {}
         this.availableCats = [
             {
                 name: "PCBandwidth",
@@ -93,28 +92,28 @@ class App extends Component {
     listener = (graphId, changed) => {
         console.log("listener", graphId, changed)
         if (changed.hasOwnProperty("registerGraph")) {
-            this.graphs[graphId] = { categories: {} }
+            let newGraphs = { ...this.state.graphs }
+            newGraphs[graphId] = { categories: {} }
+            this.setState({ graphs: newGraphs })
         }
         if (changed.hasOwnProperty("removeGraph")) {
-            delete this.graphs[graphId]
+            let newGraphs = { ...this.state.graphs }
+            delete newGraphs[graphId]
+            this.setState({ graphs: newGraphs })
         }
         if (changed.hasOwnProperty("addCategory")) {
             let data = changed.addCategory
-            if (!this.monitoredCats.hasOwnProperty(data.category)) {
-                this.monitoredCats[data.category] = {}
+            let newGraphs = { ...this.state.graphs }
+            newGraphs[graphId].categories[data.category] = {
+                lineColor: data.lineColor,
             }
-            this.monitoredCats[data.category][data.rangeId] = data.rangeData
+            this.setState({ graphs: newGraphs })
         }
         if (changed.hasOwnProperty("removeCategory")) {
             let data = changed.removeCategory
-            delete this.monitoredCats[data.category][data.rangeId]
-            let cat = this.monitoredCats[data.category]
-            if (
-                Object.entries(cat).length === 0 &&
-                cat.constructor === Object
-            ) {
-                delete this.monitoredCats[data.category]
-            }
+            let newGraphs = { ...this.state.graphs }
+            delete newGraphs[graphId].categories[data.category]
+            this.setState({ graphs: newGraphs })
         }
     }
 
@@ -125,7 +124,8 @@ class App extends Component {
                     <GraphTile
                         node={node}
                         listener={this.listener}
-                        availableCats={this.state.availableCats}
+                        availableCats={this.availableCats}
+                        graphs={this.state.graphs}
                     />
                 )
                 break
@@ -148,7 +148,7 @@ class App extends Component {
                 },
             },
             () => {
-                console.log(this.graphs)
+                console.log("graphs: ", this.state.graphs)
             }
         )
     }

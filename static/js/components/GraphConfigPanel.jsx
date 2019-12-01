@@ -3,12 +3,13 @@ import DateTimePicker from "react-datetime-picker"
 import CategoryTile from "./CategoryTile"
 
 const DATETIME_FORMAT = "MM-dd-y hh:mm a"
-
-var categories = [{ category: "PCBandwidth", lineColor: "#FFFFFF" }]
+const NEW_CAT_DATA = { lineColor: "#FFFFFF" }
 
 class GraphConfigPanel extends Component {
     constructor(props) {
         super(props)
+
+        setInterval(() => console.log(this.props), 3000)
         this.state = {
             monitorType: "past",
             from: new Date(),
@@ -16,20 +17,16 @@ class GraphConfigPanel extends Component {
             rangeEnd: new Date(),
             pastAmount: 1,
             pastUnit: "hr",
-            numCategories: 0,
+            addingNewCat: false,
         }
     }
 
     addCategory = () => {
-        this.setState(prevState => {
-            numCategories: prevState.numCategories + 1
-        })
-        this.props.listener(this.props.graphId, {
-            addCategory: {
-                category: "PCBandwidth",
-                rangeData: {},
-            },
-        })
+        if (this.state.addingNewCat) {
+            return
+        }
+
+        this.setState({ addingNewCat: true })
     }
 
     onMonitorTypeChange = evt => {
@@ -54,6 +51,13 @@ class GraphConfigPanel extends Component {
 
     onPastUnitChange = evt => {
         this.setState({ pastUnit: evt.target.value })
+    }
+
+    onCatSave = data => {
+        this.setState({ addingNewCat: false })
+        this.props.listener(this.props.graphId, {
+            addCategory: data,
+        })
     }
 
     renderMonitorConfig = type => {
@@ -174,14 +178,27 @@ class GraphConfigPanel extends Component {
                             +
                         </span>
                     </span>
-                    {categories.map((item, idx) => {
-                        return (
-                            <CategoryTile
-                                key={item.category + this.props.graphId}
-                                item={item}
-                            />
-                        )
-                    })}
+                    {this.state.addingNewCat ? (
+                        <CategoryTile
+                            data={NEW_CAT_DATA}
+                            category=""
+                            onCatSave={this.onCatSave}
+                            editing={true}
+                        />
+                    ) : null}
+                    {this.props.categories !== undefined &&
+                        Object.keys(this.props.categories).length &&
+                        Object.keys(this.props.categories).map(key => {
+                            console.log("key", key)
+                            return (
+                                <CategoryTile
+                                    key={key}
+                                    data={this.props.categories[key]}
+                                    category={key}
+                                    onCatSave={this.onCatSave}
+                                />
+                            )
+                        })}
                 </div>
             </div>
         )
