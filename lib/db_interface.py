@@ -122,8 +122,8 @@ class DBInterface:
             end = datetime.strptime(data["range"]["end"], TIME_FORMAT)
             filter = {"time": {"$gte": start, "$lte": end}}
             self._get_and_format_points(points, collection, filter)
-        if "from" in data:
-            start = datetime.strptime(data["from"], TIME_FORMAT)
+        if "since" in data:
+            start = datetime.strptime(data["since"], TIME_FORMAT)
             filter = {"time": {"$gte": start}}
             self._get_and_format_points(points, collection, filter)
 
@@ -150,8 +150,8 @@ class DBInterface:
             end = datetime.strptime(data["range"]["end"], TIME_FORMAT)
             res = cat_data.delete_many({"time": {"$gte": start, "$lte": end}})
             output["removed_count"] += res.deleted_count
-        if "from" in data:
-            start = datetime.strptime(data["from"], TIME_FORMAT)
+        if "since" in data:
+            start = datetime.strptime(data["since"], TIME_FORMAT)
             res = cat_data.delete_many({"time": {"$gte": start}})
             output["removed_count"] += res.deleted_count
 

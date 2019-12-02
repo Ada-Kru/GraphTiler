@@ -9,22 +9,92 @@ class GraphConfigPanel extends Component {
     constructor(props) {
         super(props)
 
+        let monitorType = "past"
+        let pastAmount = 1
+        let pastUnit = "hr"
+        let since = new Date()
+        let rangeStart = new Date()
+        let rangeEnd = new Date()
+
+        if (props.graphs[props.graphId]) {
+            let data = props.graphs[props.graphId].range
+            console.log("found graph data", data)
+            if (data.hasOwnProperty("past")) {
+                pastAmount = data.past
+                pastUnit = "sec"
+            } else if (data.hasOwnProperty("since")) {
+                monitorType = "since"
+                since = new Date(data.since)
+            } else if (data.hasOwnProperty("start")) {
+                monitorType = "range"
+                rangeStart = new Date(data.start)
+                rangeEnd = new Date(data.end)
+            }
+        }
+
         this.state = {
-            monitorType: "past",
-            from: new Date(),
-            rangeStart: new Date(),
-            rangeEnd: new Date(),
-            pastAmount: 1,
-            pastUnit: "hr",
+            monitorType: monitorType,
+            since: since,
+            rangeStart: rangeStart,
+            rangeEnd: rangeEnd,
+            pastAmount: pastAmount,
+            pastUnit: pastUnit,
             addingNewCat: false,
+            editingRange: false,
             categories: this.props.categories || {},
         }
+
+        this.snapshot = {}
     }
 
     componentDidUpdate = prevProps => {
         if (prevProps.categories != this.props.categories) {
             this.setState({ categories: this.props.categories })
         }
+    }
+
+    saveSnapshot = () => {
+        this.snapshot = {
+            monitorType: this.state.monitorType,
+            since: this.state.since,
+            rangeStart: this.state.rangeStart,
+            rangeEnd: this.state.rangeEnd,
+            pastAmount: this.state.pastAmount,
+            pastUnit: this.state.pastUnit,
+        }
+    }
+
+    onEditRange = () => {
+        this.saveSnapshot()
+        this.setState({ editingRange: true })
+    }
+
+    onEditRangeSave = () => {
+        let data = {}
+        let mtype = this.state.monitorType
+        switch (mtype) {
+            case "since":
+                data.since = this.state.since
+                break
+            case "range":
+                data.start = this.state.rangeStart
+                data.end = this.state.rangeEnd
+                break
+            case "past":
+                data.past = this.state.pastAmount
+                if (this.state.pastUnit == "hr") {
+                    data.past *= 3600
+                } else if (this.state.pastUnit == "min") {
+                    data.past *= 60
+                }
+        }
+
+        this.props.listener(this.props.graphId, { modifyGraphRange: data })
+        this.setState({ editingRange: false })
+    }
+
+    onEditRangeCancel = () => {
+        this.setState({ editingRange: false, ...this.snapshot })
     }
 
     addCategory = () => {
@@ -39,8 +109,8 @@ class GraphConfigPanel extends Component {
         this.setState({ monitorType: evt.target.value })
     }
 
-    onFromChange = newFrom => {
-        this.setState({ from: newFrom })
+    onSinceChange = newSince => {
+        this.setState({ since: newSince })
     }
 
     onRangeStartChange = newStart => {
@@ -76,10 +146,34 @@ class GraphConfigPanel extends Component {
         })
     }
 
-    renderMonitorConfig = type => {
-        switch (type) {
+    makeHeader = () => {
+        return this.state.editingRange ? null : (
+            <div className="cat-tile-header">
+                <span
+                    className="cat-tile-button"
+                    title="Modify monitor range"
+                    onClick={this.onEditRange}
+                >
+                    ⛭
+                </span>
+            </div>
+        )
+    }
+
+    makeFooter = () => {
+        return this.state.editingRange ? (
+            <span className="cat-tile-footer">
+                <button onClick={this.onEditRangeSave}>Save</button>
+                <button onClick={this.onEditRangeCancel}>Cancel</button>
+            </span>
+        ) : null
+    }
+
+    makeMonitorConfig = () => {
+        let rangeInputs = null
+        switch (this.state.monitorType) {
             case "past":
-                return (
+                rangeInputs = (
                     <span className="config-row">
                         <label>
                             Past
@@ -102,9 +196,9 @@ class GraphConfigPanel extends Component {
                         </label>
                     </span>
                 )
-
+                break
             case "range":
-                return (
+                rangeInputs = (
                     <div>
                         <span className="config-row">
                             <label>
@@ -134,15 +228,15 @@ class GraphConfigPanel extends Component {
                         </span>
                     </div>
                 )
-
+                break
             case "since":
-                return (
+                rangeInputs = (
                     <span className="config-row">
                         <label>
                             Since
                             <DateTimePicker
-                                onChange={this.onFromChange}
-                                value={this.state.from}
+                                onChange={this.onSinceChange}
+                                value={this.state.since}
                                 calendarIcon={null}
                                 clearIcon={null}
                                 disableClock={true}
@@ -151,18 +245,18 @@ class GraphConfigPanel extends Component {
                         </label>
                     </span>
                 )
+                break
         }
-    }
 
-    render() {
         return (
-            <div className="configPanel">
-                <div className="graphSettings">
+            <form>
+                {this.makeHeader()}
+                <fieldset disabled={!this.state.editingRange}>
                     <span className="config-row">
                         <label>
                             Monitoring type
                             <select
-                                defaultValue="past"
+                                value={this.state.monitorType}
                                 onChange={this.onMonitorTypeChange}
                             >
                                 <option value="past">Past X</option>
@@ -171,7 +265,18 @@ class GraphConfigPanel extends Component {
                             </select>
                         </label>
                     </span>
-                    {this.renderMonitorConfig(this.state.monitorType)}
+                    {rangeInputs}
+                    {this.makeFooter()}
+                </fieldset>
+            </form>
+        )
+    }
+
+    render() {
+        return (
+            <div className="configPanel">
+                <div className="graphSettings">
+                    {this.makeMonitorConfig()}
                     <span className="config-row">
                         <label>
                             Legend position

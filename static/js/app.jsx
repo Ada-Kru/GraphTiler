@@ -89,22 +89,22 @@ class App extends Component {
         }
     }
 
-    listener = (graphId, changed) => {
-        // console.log("listener", graphId, changed)
-        if (changed.hasOwnProperty("registerGraph")) {
+    listener = (graphId, msg) => {
+        // console.log("listener", graphId, msg)
+        if (msg.hasOwnProperty("registerGraph")) {
             let newGraphs = { ...this.state.graphs }
-            newGraphs[graphId] = { categories: {} }
+            newGraphs[graphId] = { categories: {}, range: { past: 3600 } }
             this.setState({ graphs: newGraphs })
         }
 
-        if (changed.hasOwnProperty("removeGraph")) {
+        if (msg.hasOwnProperty("removeGraph")) {
             let newGraphs = { ...this.state.graphs }
             delete newGraphs[graphId]
             this.setState({ graphs: newGraphs })
         }
 
-        if (changed.hasOwnProperty("addCategory")) {
-            let data = changed.addCategory
+        if (msg.hasOwnProperty("addCategory")) {
+            let data = msg.addCategory
             let newGraphs = { ...this.state.graphs }
             if (newGraphs[graphId].categories[data.category]) {
                 delete newGraphs[graphId].categories[data.category]
@@ -115,10 +115,16 @@ class App extends Component {
             this.setState({ graphs: newGraphs })
         }
 
-        if (changed.hasOwnProperty("removeCategory")) {
-            let data = changed.removeCategory
+        if (msg.hasOwnProperty("removeCategory")) {
+            let data = msg.removeCategory
             let newGraphs = { ...this.state.graphs }
             delete newGraphs[graphId].categories[data.category]
+            this.setState({ graphs: newGraphs })
+        }
+
+        if (msg.hasOwnProperty("modifyGraphRange")) {
+            let newGraphs = { ...this.state.graphs }
+            newGraphs[graphId].range = msg.modifyGraphRange
             this.setState({ graphs: newGraphs })
         }
     }

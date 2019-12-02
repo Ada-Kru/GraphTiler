@@ -35,7 +35,7 @@ class WsConnectionHandler:
             if websocket not in self._categories[category]:
                 self._categories[category][websocket] = {}
             for range_id, ranges in monitor_ranges.items():
-                for key in ("start", "end", "from"):
+                for key in ("start", "end", "since"):
                     if key in ranges:
                         ranges[key] = str_to_datetime(ranges[key])
                 self._categories[category][websocket][range_id] = ranges
@@ -70,8 +70,8 @@ class WsConnectionHandler:
                         if "start" in rng:
                             if not (tm >= rng["start"] and tm <= rng["end"]):
                                 continue
-                        elif "from" in rng:
-                            if not (tm >= rng["from"]):
+                        elif "since" in rng:
+                            if not (tm >= rng["since"]):
                                 continue
                 time = tm.astimezone(timezone.utc).strftime(TIME_FORMAT_NO_TZ)
                 in_range[time] = update["reading"]

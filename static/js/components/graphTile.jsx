@@ -95,6 +95,7 @@ class GraphTile extends Component {
                     </div>
                     <GraphConfigPanel
                         graphId={state.graphId}
+                        graphs={props.graphs}
                         listener={props.listener}
                         availableCats={props.availableCats}
                         categories={state.categories}

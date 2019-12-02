@@ -13,7 +13,7 @@ class CategoryTile extends Component {
         this.currentCategory = props.category
 
         this.savedState = {}
-        this.saveState()
+        this.saveSnapshot()
     }
 
     componentDidUpdate = prevProps => {
@@ -22,7 +22,7 @@ class CategoryTile extends Component {
         }
     }
 
-    saveState = () => {
+    saveSnapshot = () => {
         this.savedState = {
             category: this.state.category,
             lineColor: this.state.lineColor,
@@ -51,7 +51,7 @@ class CategoryTile extends Component {
 
     modifyCategory = () => {
         if (!this.state.editing) {
-            this.saveState()
+            this.saveSnapshot()
             this.setState({ editing: true })
         }
     }

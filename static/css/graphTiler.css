@@ -144,6 +144,10 @@ html {
     width: 100%;
 }
 
+fieldset {
+    border: 2px solid #222;
+}
+
 select {
     width: max-content;
     height: 20px;
@@ -186,6 +190,7 @@ label .react-datetimerange-picker {
 .react-datetime-picker__wrapper {
     color: #fff;
     background-color: #444;
+    font-size: small;
     border-top: 1px solid #555 !important;
     border-left: 1px solid #555 !important;
     border-bottom: 1px solid #888 !important;
