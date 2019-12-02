@@ -9,7 +9,6 @@ class GraphConfigPanel extends Component {
     constructor(props) {
         super(props)
 
-        setInterval(() => console.log(this.props), 3000)
         this.state = {
             monitorType: "past",
             from: new Date(),
@@ -18,6 +17,13 @@ class GraphConfigPanel extends Component {
             pastAmount: 1,
             pastUnit: "hr",
             addingNewCat: false,
+            categories: this.props.categories || {},
+        }
+    }
+
+    componentDidUpdate = prevProps => {
+        if (prevProps.categories != this.props.categories) {
+            this.setState({ categories: this.props.categories })
         }
     }
 
@@ -57,6 +63,16 @@ class GraphConfigPanel extends Component {
         this.setState({ addingNewCat: false })
         this.props.listener(this.props.graphId, {
             addCategory: data,
+        })
+    }
+
+    onCatCancel = () => {
+        this.setState({ addingNewCat: false })
+    }
+
+    onCatRemove = data => {
+        this.props.listener(this.props.graphId, {
+            removeCategory: data,
         })
     }
 
@@ -178,27 +194,30 @@ class GraphConfigPanel extends Component {
                             +
                         </span>
                     </span>
-                    {this.state.addingNewCat ? (
-                        <CategoryTile
-                            data={NEW_CAT_DATA}
-                            category=""
-                            onCatSave={this.onCatSave}
-                            editing={true}
-                        />
-                    ) : null}
-                    {this.props.categories !== undefined &&
-                        Object.keys(this.props.categories).length &&
-                        Object.keys(this.props.categories).map(key => {
-                            console.log("key", key)
+                    <div className="y-scroll cat-tile-container">
+                        {this.state.addingNewCat ? (
+                            <CategoryTile
+                                data={NEW_CAT_DATA}
+                                category=""
+                                onRemove={this.onCatRemove}
+                                onSave={this.onCatSave}
+                                onCancel={this.onCatCancel}
+                                editing={true}
+                            />
+                        ) : null}
+                        {Object.keys(this.state.categories).map(key => {
                             return (
                                 <CategoryTile
                                     key={key}
                                     data={this.props.categories[key]}
                                     category={key}
-                                    onCatSave={this.onCatSave}
+                                    onRemove={this.onCatRemove}
+                                    onSave={this.onCatSave}
+                                    onCancel={this.onCatCancel}
                                 />
                             )
                         })}
+                    </div>
                 </div>
             </div>
         )

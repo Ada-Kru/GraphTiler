@@ -90,25 +90,31 @@ class App extends Component {
     }
 
     listener = (graphId, changed) => {
-        console.log("listener", graphId, changed)
+        // console.log("listener", graphId, changed)
         if (changed.hasOwnProperty("registerGraph")) {
             let newGraphs = { ...this.state.graphs }
             newGraphs[graphId] = { categories: {} }
             this.setState({ graphs: newGraphs })
         }
+
         if (changed.hasOwnProperty("removeGraph")) {
             let newGraphs = { ...this.state.graphs }
             delete newGraphs[graphId]
             this.setState({ graphs: newGraphs })
         }
+
         if (changed.hasOwnProperty("addCategory")) {
             let data = changed.addCategory
             let newGraphs = { ...this.state.graphs }
+            if (newGraphs[graphId].categories[data.category]) {
+                delete newGraphs[graphId].categories[data.category]
+            }
             newGraphs[graphId].categories[data.category] = {
                 lineColor: data.lineColor,
             }
             this.setState({ graphs: newGraphs })
         }
+
         if (changed.hasOwnProperty("removeCategory")) {
             let data = changed.removeCategory
             let newGraphs = { ...this.state.graphs }

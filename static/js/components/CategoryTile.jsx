@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 
 class CategoryTile extends Component {
-    static defaultProps = { editing: false }
+    static defaultProps = { editing: false, onCancel: null }
     constructor(props) {
         super(props)
         this.state = {
@@ -9,21 +9,17 @@ class CategoryTile extends Component {
             category: props.category,
             lineColor: props.data.lineColor,
         }
+
+        this.currentCategory = props.category
+
         this.savedState = {}
         this.saveState()
     }
 
-    save = () => {
-        let data = {
-            category: this.state.category,
-            lineColor: this.state.lineColor,
+    componentDidUpdate = prevProps => {
+        if (prevProps.data != this.props.data) {
+            this.setState({ lineColor: this.props.data.lineColor })
         }
-        this.props.onCatSave(data)
-        this.setState({ editing: false })
-    }
-
-    cancel = () => {
-        this.setState({ editing: false, ...this.savedState })
     }
 
     saveState = () => {
@@ -31,6 +27,26 @@ class CategoryTile extends Component {
             category: this.state.category,
             lineColor: this.state.lineColor,
         }
+    }
+
+    save = () => {
+        this.props.onRemove({ category: this.currentCategory })
+        let data = {
+            category: this.state.category,
+            lineColor: this.state.lineColor,
+        }
+        this.props.onSave(data)
+        this.currentCategory = this.state.category
+        this.setState({ editing: false })
+    }
+
+    cancel = () => {
+        this.props.onCancel()
+        this.setState({ editing: false, ...this.savedState })
+    }
+
+    remove = () => {
+        this.props.onRemove({ category: this.state.category })
     }
 
     modifyCategory = () => {
@@ -48,26 +64,31 @@ class CategoryTile extends Component {
         this.setState({ lineColor: evt.target.value })
     }
 
+    makeHeader = () => {
+        return this.state.editing ? null :
+        <div className="cat-tile-header">
+            <span
+                className="cat-tile-button"
+                title="Modify category"
+                onClick={this.modifyCategory}
+            >
+                ⛭
+            </span>
+            <span
+                className="cat-tile-button red"
+                title="Remove category"
+                onClick={this.remove}
+            >
+                ✖
+            </span>
+        </div>
+    }
+
     render() {
         if (this.state.editing) {
             return (
                 <div className="cat-tile editing">
-                    <div className="cat-tile-header">
-                        <span
-                            className="cat-tile-button"
-                            title="Modify category"
-                            onClick={this.modifyCategory}
-                        >
-                            ⛭
-                        </span>
-                        <span
-                            className="cat-tile-button red"
-                            title="Remove category"
-                            onClick={this.props.removeCategory}
-                        >
-                            ✖
-                        </span>
-                    </div>
+                    {this.makeHeader()}
                     <div className="cat-tile-options">
                         <span className="config-row">
                             <label>
@@ -76,6 +97,7 @@ class CategoryTile extends Component {
                                     list="AvailableCats"
                                     defaultValue={this.state.category}
                                     onChange={this.onChangeCat}
+                                    autoFocus
                                 />
                             </label>
                         </span>
@@ -84,7 +106,7 @@ class CategoryTile extends Component {
                                 Line color
                                 <input
                                     type="color"
-                                    defaultValue={this.state.lineColor}
+                                    value={this.state.lineColor}
                                     onChange={this.onChangeLineColor}
                                 />
                             </label>
@@ -99,22 +121,7 @@ class CategoryTile extends Component {
         } else {
             return (
                 <div className="cat-tile">
-                    <div className="cat-tile-header">
-                        <span
-                            className="cat-tile-button"
-                            title="Modify category"
-                            onClick={this.modifyCategory}
-                        >
-                            ⛭
-                        </span>
-                        <span
-                            className="cat-tile-button red"
-                            title="Remove category"
-                            onClick={this.props.removeCategory}
-                        >
-                            ✖
-                        </span>
-                    </div>
+                    {this.makeHeader()}
                     <div className="cat-tile-options">
                         <span className="config-row">
                             <label>
@@ -130,7 +137,7 @@ class CategoryTile extends Component {
                                 Line color
                                 <input
                                     type="color"
-                                    defaultValue={this.state.lineColor}
+                                    value={this.state.lineColor}
                                     onChange={this.onChangeLineColor}
                                     disabled={true}
                                 />

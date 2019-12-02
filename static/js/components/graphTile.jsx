@@ -36,19 +36,20 @@ const options = { responsive: true, maintainAspectRatio: false }
 class GraphTile extends Component {
     constructor(props) {
         super(props)
-        let node = this.props.node
+        let node = props.node
         let cfg = node.getConfig()
+        let id = cfg.graphId
+        let cats = props.graphs[id] ? props.graphs[id].categories : {}
 
         this.state = {
-            graphId: cfg.graphId,
+            graphId: id,
             configPanelOpen: cfg.configPanelOpen,
+            categories: cats,
         }
 
-        this.categories = this.props.graphs[cfg.graphId]
-            ? this.props.graphs[cfg.graphId].categories
-            : {}
-
-        this.props.listener(cfg.graphId, { registerGraph: true })
+        this.props.listener(cfg.graphId, {
+            registerGraph: true,
+        })
 
         node.setEventListener("configPanelOpen", () => {
             this.setState(prevState => {
@@ -61,12 +62,18 @@ class GraphTile extends Component {
         node.setEventListener("close", () => {
             this.props.listener(cfg.graphId, { removeGraph: true })
         })
-
-        this.categories = {}
     }
 
     showConfig = () => {
         console.log("showConfig")
+    }
+
+    componentDidUpdate = (prevProps) => {
+        let id = this.state.graphId
+        let cats = prevProps.graphs[id] ? prevProps.graphs[id].categories : {}
+        if (cats != this.state.categories) {
+            this.setState({categories: cats})
+        }
     }
 
     render() {
@@ -90,7 +97,7 @@ class GraphTile extends Component {
                         graphId={state.graphId}
                         listener={props.listener}
                         availableCats={props.availableCats}
-                        categories={this.categories}
+                        categories={state.categories}
                     />
                 </div>
             )

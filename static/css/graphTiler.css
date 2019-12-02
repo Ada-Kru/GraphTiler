@@ -7,6 +7,11 @@ html {
     scrollbar-color: #444 #222;
 }
 
+.y-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
 .panel-ctrl {
     cursor: pointer;
     color: #aaa;
@@ -159,6 +164,20 @@ label select {
     border-right: 1px solid #888;
 }
 
+label input:disabled,
+label select:disabled {
+    background-color: #222;
+    color: #aaa;
+    border: none;
+}
+
+label input[type="color"] {
+    width: 40px;
+    background-color: inherit;
+    border: none;
+    min-width: 20px;
+}
+
 label .react-datetime-picker,
 label .react-datetimerange-picker {
     max-height: 24px;
@@ -196,8 +215,13 @@ label .react-datetimerange-picker {
     background-color: #555 !important;
 }
 
+.cat-tile-container {
+    justify-content: center;
+}
+
 .cat-tile {
-    border: 2px solid #4d4d4d;
+    border: 1px solid #4d4d4d;
+    /* width: 75%; */
 }
 
 .cat-tile-header {
