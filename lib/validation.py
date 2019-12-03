@@ -52,6 +52,7 @@ WS_MSG_SCHEMA = {
                         "dependencies": "start",
                     },
                     "since": DATE_STR,
+                    "past": {"type": "integer", "min": 0},
                 },
             },
         },

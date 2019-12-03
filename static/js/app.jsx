@@ -32,12 +32,12 @@ class App extends Component {
 
         this.state = {
             model: FlexLayout.Model.fromJson(layout),
-            ws: null,
             wsState: "disconnected",
             graphs: {},
             serverData: {},
         }
 
+        this.ws = null
         this.numGraphs = 0
         this.availableCats = [
             {
@@ -51,11 +51,10 @@ class App extends Component {
     }
 
     setupWebsocket = () => {
-        this.state.ws = new WebSocket("ws://192.168.2.111:7123/ws")
+        this.ws = new WebSocket("ws://192.168.2.111:7123/ws")
         this.setState({ wsState: "connecting" })
-        let ws = this.state.ws
 
-        ws.onopen = evt => {
+        this.ws.onopen = evt => {
             console.log("Websocket connected")
             this.setState({ wsState: "connected" })
             let cmd = {
@@ -68,16 +67,16 @@ class App extends Component {
                     },
                 },
             }
-            ws.send(JSON.stringify(cmd))
+            this.ws.send(JSON.stringify(cmd))
         }
 
-        ws.onmessage = evt => {
+        this.ws.onmessage = evt => {
             let data = JSON.parse(evt.data)
             this.setState({ serverData: data })
             console.log(data)
         }
 
-        ws.onclose = () => {
+        this.ws.onclose = () => {
             console.log("Websocket connection closed.")
             this.setState({ wsState: "disconnected" })
             setTimeout(() => this.setupWebsocket(), 1000)
@@ -85,7 +84,7 @@ class App extends Component {
 
         this.state.ws.error = evt => {
             console.log("Websocket error: ", evt)
-            ws.close()
+            this.ws.close()
         }
     }
 

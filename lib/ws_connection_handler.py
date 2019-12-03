@@ -1,6 +1,6 @@
 from lib.validation_funcs import str_to_datetime
 from cfg import TIME_FORMAT_NO_TZ
-from datetime import timezone
+from datetime import timezone, timedelta, datetime
 from collections import defaultdict
 from json import dumps
 
@@ -35,7 +35,7 @@ class WsConnectionHandler:
             if websocket not in self._categories[category]:
                 self._categories[category][websocket] = {}
             for range_id, ranges in monitor_ranges.items():
-                for key in ("start", "end", "since"):
+                for key in ("start", "end", "since", "past"):
                     if key in ranges:
                         ranges[key] = str_to_datetime(ranges[key])
                 self._categories[category][websocket][range_id] = ranges
@@ -63,6 +63,7 @@ class WsConnectionHandler:
 
         for ws, ranges in self._categories[category].items():
             in_range = {}
+            now = datetime.now()
             for update in updates:
                 tm = update["time"]
                 if not skip_vali:
@@ -72,6 +73,10 @@ class WsConnectionHandler:
                                 continue
                         elif "since" in rng:
                             if not (tm >= rng["since"]):
+                                continue
+                        elif "past" in rng:
+                            delta = timedelta(seconds=rng["past"])
+                            if not (tm >= (now - delta)):
                                 continue
                 time = tm.astimezone(timezone.utc).strftime(TIME_FORMAT_NO_TZ)
                 in_range[time] = update["reading"]
