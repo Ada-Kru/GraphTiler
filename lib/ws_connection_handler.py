@@ -9,7 +9,7 @@ class WsConnectionHandler:
     """Helper for websocket connections."""
 
     def __init__(self):
-        self._categories = defaultdict(dict)
+        self._categories = defaultdict(lambda: defaultdict(dict))
         self._connections = set()
 
     def add_connection(self, websocket):
@@ -29,32 +29,30 @@ class WsConnectionHandler:
     def add_cat_ranges(self, websocket, cat_data):
         """Add categories to a websocket connection."""
         self.remove_cat_ranges(websocket, cat_data)
-        for category, monitor_ranges in cat_data.items():
-            if category not in self._categories:
-                self._categories[category] = {}
-            if websocket not in self._categories[category]:
-                self._categories[category][websocket] = {}
-            for range_id, ranges in monitor_ranges.items():
-                for key in ("start", "end", "since", "past"):
-                    if key in ranges:
-                        ranges[key] = str_to_datetime(ranges[key])
-                self._categories[category][websocket][range_id] = ranges
 
-    def remove_cat_ranges(self, websocket, categories):
+        unique_id = cat_data["unique_id"]
+        range_data = cat_data["range"]
+        for key in ("start", "end", "since"):
+            if key in range_data:
+                range_data[key] = str_to_datetime(range_data[key])
+
+        for category in cat_data["categories"]:
+            self._categories[category][websocket][unique_id] = range_data
+
+    def remove_cat_ranges(self, websocket, cat_data):
         """Add categories to a websocket connection."""
-        for cat_name, ranges in categories.items():
-            if cat_name not in self._categories:
+        for category in cat_data["categories"]:
+            if category not in self._categories:
                 continue
 
-            stored_cat = self._categories[cat_name]
+            stored_cat = self._categories[category]
             if websocket in stored_cat:
-                for key in ranges:
-                    stored_cat[websocket].pop(key, None)
+                stored_cat[websocket].pop(cat_data["unique_id"], None)
                 if not stored_cat[websocket]:
                     del stored_cat[websocket]
 
             if not stored_cat:
-                del self._categories[cat_name]
+                del self._categories[category]
 
     async def send_updates(self, category, updates, skip_vali=False):
         """Send updates in the list that are within the time range."""

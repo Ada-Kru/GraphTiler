@@ -57,17 +57,6 @@ class App extends Component {
         this.ws.onopen = evt => {
             console.log("Websocket connected")
             this.setState({ wsState: "connected" })
-            let cmd = {
-                add_categories: {
-                    PCBandwidth: {
-                        UniqueKey: {
-                            start: "2019-10-22 00:00 -0600",
-                            end: "2019-10-22 23:59 -0600",
-                        },
-                    },
-                },
-            }
-            this.ws.send(JSON.stringify(cmd))
         }
 
         this.ws.onmessage = evt => {
@@ -98,8 +87,17 @@ class App extends Component {
 
         if (msg.hasOwnProperty("removeGraph")) {
             let newGraphs = { ...this.state.graphs }
+            let catData = newGraphs[graphId].categories
             delete newGraphs[graphId]
             this.setState({ graphs: newGraphs })
+
+            let cmd = {
+                remove_categories: {
+                    unique_id: graphId,
+                    categories: Object.keys(catData).map(x => x.category),
+                },
+            }
+            this.ws.send(JSON.stringify(cmd))
         }
 
         if (msg.hasOwnProperty("addCategory")) {
@@ -112,6 +110,15 @@ class App extends Component {
                 lineColor: data.lineColor,
             }
             this.setState({ graphs: newGraphs })
+
+            let cmd = {
+                add_categories: {
+                    unique_id: graphId,
+                    range: newGraphs[graphId].range,
+                    categories: [data.category],
+                },
+            }
+            this.ws.send(JSON.stringify(cmd))
         }
 
         if (msg.hasOwnProperty("removeCategory")) {
@@ -119,12 +126,31 @@ class App extends Component {
             let newGraphs = { ...this.state.graphs }
             delete newGraphs[graphId].categories[data.category]
             this.setState({ graphs: newGraphs })
+
+            let cmd = {
+                remove_categories: {
+                    unique_id: graphId,
+                    categories: [data.category],
+                },
+            }
+            this.ws.send(JSON.stringify(cmd))
         }
 
         if (msg.hasOwnProperty("modifyGraphRange")) {
             let newGraphs = { ...this.state.graphs }
-            newGraphs[graphId].range = msg.modifyGraphRange
+            let rangeData = msg.modifyGraphRange
+            newGraphs[graphId].range = rangeData
             this.setState({ graphs: newGraphs })
+
+            let catData = newGraphs[graphId].categories
+            let cmd = {
+                add_categories: {
+                    unique_id: graphId,
+                    range: rangeData,
+                    categories: Object.keys(catData).map(x => x.category),
+                },
+            }
+            this.ws.send(JSON.stringify(cmd))
         }
     }
 

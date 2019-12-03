@@ -3,6 +3,7 @@ from .validation_funcs import cat_name_vali, date_vali
 
 
 STRING_MAX_100 = {"type": "string", "minlength": 1, "maxlength": 100}
+STRING_LIST = {"type": "list", "items": [STRING_MAX_100]}
 DATE_STR = {"type": "string", "check_with": date_vali}
 ADD_SCHEMA = {"readings": {"type": "list"}}
 ADD_READING_SCHEMA = {
@@ -35,31 +36,34 @@ GET_REMOVE_POINTS_SCHEMA = {
 WS_MSG_SCHEMA = {
     "add_categories": {
         "type": "dict",
-        "allow_unknown": True,
-        "valuesrules": {
-            "type": "dict",
-            "valuesrules": {
+        "schema": {
+            "unique_id": STRING_MAX_100,
+            "categories": STRING_LIST,
+            "range": {
                 "type": "dict",
-                "schema": {
-                    "start": {
-                        "type": "string",
-                        "check_with": date_vali,
-                        "dependencies": "end",
+                "valuesrules": {
+                    "type": "dict",
+                    "schema": {
+                        "start": {
+                            "type": "string",
+                            "check_with": date_vali,
+                            "dependencies": "end",
+                        },
+                        "end": {
+                            "type": "string",
+                            "check_with": date_vali,
+                            "dependencies": "start",
+                        },
+                        "since": DATE_STR,
+                        "past": {"type": "integer", "min": 1},
                     },
-                    "end": {
-                        "type": "string",
-                        "check_with": date_vali,
-                        "dependencies": "start",
-                    },
-                    "since": DATE_STR,
-                    "past": {"type": "integer", "min": 0},
                 },
             },
         },
     },
     "remove_categories": {
-        "type": "list",
-        "valuesrules": {"type": "dict", "schema": {"type": "string"}},
+        "type": "dict",
+        "schema": {"unique_id": STRING_MAX_100, "categories": STRING_LIST},
     },
 }
 
