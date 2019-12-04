@@ -3,6 +3,9 @@ import SideControls from "./components/SideControls"
 import GraphTile from "./components/GraphTile"
 import FlexLayout from "flexlayout-react"
 import uuid from "uuid/v4"
+import moment from "moment"
+
+const BACKEND_DATE_FORMAT = "YYYY-MM-DD HH:mm ZZ"
 
 var layout = {
     global: { splitterSize: 5, tabDragSpeed: 0.15 },
@@ -17,13 +20,28 @@ var layout = {
                 children: [
                     {
                         component: "graphTile",
-                        name: `TEST`,
+                        name: "TEST",
                         config: { graphId: "test", configPanelOpen: true },
                     },
                 ],
             },
         ],
     },
+}
+
+function formatWsRangeData(rangeData) {
+    let output = { range_type: rangeData.rangeType }
+    if (rangeData.hasOwnProperty("pastUnit")) {
+        output.past_unit = rangeData.pastUnit
+        output.past_amount = rangeData.pastAmount
+    } else if (rangeData.hasOwnProperty("since")) {
+        output.since = moment(rangeData.since).format(BACKEND_DATE_FORMAT)
+    } else if (rangeData.hasOwnProperty("start")) {
+        output.start = moment(rangeData.start).format(BACKEND_DATE_FORMAT)
+        output.end = moment(rangeData.end).format(BACKEND_DATE_FORMAT)
+    }
+
+    return output
 }
 
 class App extends Component {
@@ -71,7 +89,7 @@ class App extends Component {
             setTimeout(() => this.setupWebsocket(), 1000)
         }
 
-        this.state.ws.error = evt => {
+        this.ws.error = evt => {
             console.log("Websocket error: ", evt)
             this.ws.close()
         }
@@ -81,7 +99,10 @@ class App extends Component {
         // console.log("listener", graphId, msg)
         if (msg.hasOwnProperty("registerGraph")) {
             let newGraphs = { ...this.state.graphs }
-            newGraphs[graphId] = { categories: {}, range: { past: 3600 } }
+            newGraphs[graphId] = {
+                categories: {},
+                range: { rangeType: "past", pastAmount: 1, pastUnit: "hr" },
+            }
             this.setState({ graphs: newGraphs })
         }
 
@@ -94,7 +115,7 @@ class App extends Component {
             let cmd = {
                 remove_categories: {
                     unique_id: graphId,
-                    categories: Object.keys(catData).map(x => x.category),
+                    categories: Object.keys(catData),
                 },
             }
             this.ws.send(JSON.stringify(cmd))
@@ -114,7 +135,7 @@ class App extends Component {
             let cmd = {
                 add_categories: {
                     unique_id: graphId,
-                    range: newGraphs[graphId].range,
+                    range: formatWsRangeData(newGraphs[graphId].range),
                     categories: [data.category],
                 },
             }
@@ -139,15 +160,15 @@ class App extends Component {
         if (msg.hasOwnProperty("modifyGraphRange")) {
             let newGraphs = { ...this.state.graphs }
             let rangeData = msg.modifyGraphRange
-            newGraphs[graphId].range = rangeData
+            newGraphs[graphId] = { ...newGraphs[graphId], ...rangeData }
             this.setState({ graphs: newGraphs })
 
             let catData = newGraphs[graphId].categories
             let cmd = {
                 add_categories: {
                     unique_id: graphId,
-                    range: rangeData,
-                    categories: Object.keys(catData).map(x => x.category),
+                    range: formatWsRangeData(rangeData.range),
+                    categories: Object.keys(catData),
                 },
             }
             this.ws.send(JSON.stringify(cmd))

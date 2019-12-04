@@ -120,6 +120,7 @@ async def ws_receive(ws):
                 command_map[key](ws, data)
 
     except CancelledError:
+        ws_handler.remove_connection(ws)
         return
 
 
@@ -133,7 +134,6 @@ async def ws():
     # producer = create_task(ws_send())
     consumer = create_task(ws_receive(ws))
     await gather(consumer)
-    app.ws_handler.add_connection(ws)
 
 
 @app.cli.command("run")

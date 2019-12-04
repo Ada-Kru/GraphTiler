@@ -9,7 +9,7 @@ class GraphConfigPanel extends Component {
     constructor(props) {
         super(props)
 
-        let monitorType = "past"
+        let rangeType = "past"
         let pastAmount = 1
         let pastUnit = "hr"
         let since = new Date()
@@ -19,21 +19,20 @@ class GraphConfigPanel extends Component {
         if (props.graphs[props.graphId]) {
             let data = props.graphs[props.graphId].range
             console.log("found graph data", data)
-            if (data.hasOwnProperty("past")) {
-                pastAmount = data.past
-                pastUnit = "sec"
-            } else if (data.hasOwnProperty("since")) {
-                monitorType = "since"
-                since = new Date(data.since)
-            } else if (data.hasOwnProperty("start")) {
-                monitorType = "range"
-                rangeStart = new Date(data.start)
-                rangeEnd = new Date(data.end)
+            rangeType = data.rangeType
+            if (rangeType === "past") {
+                pastAmount = data.range.pastAmount
+                pastUnit = data.range.pastUnit
+            } else if (rangeType === "since") {
+                since = new Date(data.range.since)
+            } else if (rangeType === "timerange") {
+                rangeStart = new Date(data.range.start)
+                rangeEnd = new Date(data.range.end)
             }
         }
 
         this.state = {
-            monitorType: monitorType,
+            rangeType: rangeType,
             since: since,
             rangeStart: rangeStart,
             rangeEnd: rangeEnd,
@@ -55,7 +54,7 @@ class GraphConfigPanel extends Component {
 
     saveSnapshot = () => {
         this.snapshot = {
-            monitorType: this.state.monitorType,
+            rangeType: this.state.rangeType,
             since: this.state.since,
             rangeStart: this.state.rangeStart,
             rangeEnd: this.state.rangeEnd,
@@ -70,23 +69,18 @@ class GraphConfigPanel extends Component {
     }
 
     onEditRangeSave = () => {
-        let data = {}
-        let mtype = this.state.monitorType
-        switch (mtype) {
+        let data = { range: { rangeType: this.state.rangeType } }
+        switch (this.state.rangeType) {
             case "since":
-                data.since = this.state.since
+                data.range.since = this.state.since
                 break
-            case "range":
-                data.start = this.state.rangeStart
-                data.end = this.state.rangeEnd
+            case "timerange":
+                data.range.start = this.state.rangeStart
+                data.range.end = this.state.rangeEnd
                 break
             case "past":
-                data.past = this.state.pastAmount
-                if (this.state.pastUnit == "hr") {
-                    data.past *= 3600
-                } else if (this.state.pastUnit == "min") {
-                    data.past *= 60
-                }
+                data.range.pastAmount = parseInt(this.state.pastAmount)
+                data.range.pastUnit = this.state.pastUnit
         }
 
         this.props.listener(this.props.graphId, { modifyGraphRange: data })
@@ -105,8 +99,8 @@ class GraphConfigPanel extends Component {
         this.setState({ addingNewCat: true })
     }
 
-    onMonitorTypeChange = evt => {
-        this.setState({ monitorType: evt.target.value })
+    onrangeTypeChange = evt => {
+        this.setState({ rangeType: evt.target.value })
     }
 
     onSinceChange = newSince => {
@@ -141,9 +135,11 @@ class GraphConfigPanel extends Component {
     }
 
     onCatRemove = data => {
-        this.props.listener(this.props.graphId, {
-            removeCategory: data,
-        })
+        if (data.category.length) {
+            this.props.listener(this.props.graphId, {
+                removeCategory: data,
+            })
+        }
     }
 
     makeHeader = () => {
@@ -171,7 +167,7 @@ class GraphConfigPanel extends Component {
 
     makeMonitorConfig = () => {
         let rangeInputs = null
-        switch (this.state.monitorType) {
+        switch (this.state.rangeType) {
             case "past":
                 rangeInputs = (
                     <span className="config-row">
@@ -197,7 +193,7 @@ class GraphConfigPanel extends Component {
                     </span>
                 )
                 break
-            case "range":
+            case "timerange":
                 rangeInputs = (
                     <div>
                         <span className="config-row">
@@ -256,11 +252,11 @@ class GraphConfigPanel extends Component {
                         <label>
                             Monitoring type
                             <select
-                                value={this.state.monitorType}
-                                onChange={this.onMonitorTypeChange}
+                                value={this.state.rangeType}
+                                onChange={this.onrangeTypeChange}
                             >
                                 <option value="past">Past X</option>
-                                <option value="range">Time range</option>
+                                <option value="timerange">Time range</option>
                                 <option value="since">Since time</option>
                             </select>
                         </label>

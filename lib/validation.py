@@ -3,7 +3,7 @@ from .validation_funcs import cat_name_vali, date_vali
 
 
 STRING_MAX_100 = {"type": "string", "minlength": 1, "maxlength": 100}
-STRING_LIST = {"type": "list", "items": [STRING_MAX_100]}
+STRING_LIST = {"type": "list", "empty": True, "schema": STRING_MAX_100}
 DATE_STR = {"type": "string", "check_with": date_vali}
 ADD_SCHEMA = {"readings": {"type": "list"}}
 ADD_READING_SCHEMA = {
@@ -33,31 +33,43 @@ GET_REMOVE_POINTS_SCHEMA = {
     "since": DATE_STR,
 }
 
+PAST_RANGE_SCHEMA = {
+    "range_type": {"type": "string", "required": True, "allowed": ["past"]},
+    "past_amount": {"type": "integer", "required": True, "min": 1},
+    "past_unit": {
+        "type": "string",
+        "required": True,
+        "allowed": ["hr", "min", "sec"],
+    },
+}
+SINCE_RANGE_SCHEMA = {
+    "range_type": {"type": "string", "required": True, "allowed": ["since"]},
+    "since": {"required": True, **DATE_STR},
+}
+TIMERANGE_RANGE_SCHEMA = {
+    "range_type": {
+        "type": "string",
+        "required": True,
+        "allowed": ["timerange"],
+    },
+    "start": {"type": "string", "check_with": date_vali, "required": True},
+    "end": {"type": "string", "check_with": date_vali, "required": True},
+}
+
 WS_MSG_SCHEMA = {
     "add_categories": {
         "type": "dict",
         "schema": {
-            "unique_id": STRING_MAX_100,
-            "categories": STRING_LIST,
+            "unique_id": {"required": True, **STRING_MAX_100},
+            "categories": {"required": True, **STRING_LIST},
             "range": {
                 "type": "dict",
-                "valuesrules": {
-                    "type": "dict",
-                    "schema": {
-                        "start": {
-                            "type": "string",
-                            "check_with": date_vali,
-                            "dependencies": "end",
-                        },
-                        "end": {
-                            "type": "string",
-                            "check_with": date_vali,
-                            "dependencies": "start",
-                        },
-                        "since": DATE_STR,
-                        "past": {"type": "integer", "min": 1},
-                    },
-                },
+                "required": True,
+                "anyof_schema": [
+                    PAST_RANGE_SCHEMA,
+                    SINCE_RANGE_SCHEMA,
+                    TIMERANGE_RANGE_SCHEMA,
+                ],
             },
         },
     },
