@@ -80,8 +80,6 @@ async def timepoints(name, action):
 @app.route("/remove-category/<name>", methods=["POST"])
 async def remove_category(name):
     result = ctrl.remove_category(name)
-    if not result["errors"]:
-        app.ws_handler.remove_entire_category(name)
     return jsonify(result)
 
 

@@ -35,10 +35,10 @@ function formatWsRangeData(rangeData) {
         output.past_unit = rangeData.pastUnit
         output.past_amount = rangeData.pastAmount
     } else if (rangeData.hasOwnProperty("since")) {
-        output.since = moment(rangeData.since).format(BACKEND_DATE_FORMAT)
+        output.since = moment.utc(rangeData.since).format(BACKEND_DATE_FORMAT)
     } else if (rangeData.hasOwnProperty("start")) {
-        output.start = moment(rangeData.start).format(BACKEND_DATE_FORMAT)
-        output.end = moment(rangeData.end).format(BACKEND_DATE_FORMAT)
+        output.start = moment.utc(rangeData.start).format(BACKEND_DATE_FORMAT)
+        output.end = moment.utc(rangeData.end).format(BACKEND_DATE_FORMAT)
     }
 
     return output
@@ -113,10 +113,9 @@ class App extends Component {
             this.setState({ graphs: newGraphs })
 
             let cmd = {
-                remove_categories: {
-                    unique_id: graphId,
-                    categories: Object.keys(catData),
-                },
+                remove_categories: [
+                    { unique_id: graphId, categories: Object.keys(catData) },
+                ],
             }
             this.ws.send(JSON.stringify(cmd))
         }
@@ -133,11 +132,13 @@ class App extends Component {
             this.setState({ graphs: newGraphs })
 
             let cmd = {
-                add_categories: {
-                    unique_id: graphId,
-                    range: formatWsRangeData(newGraphs[graphId].range),
-                    categories: [data.category],
-                },
+                add_categories: [
+                    {
+                        unique_id: graphId,
+                        range: formatWsRangeData(newGraphs[graphId].range),
+                        categories: [data.category],
+                    },
+                ],
             }
             this.ws.send(JSON.stringify(cmd))
         }
@@ -149,10 +150,9 @@ class App extends Component {
             this.setState({ graphs: newGraphs })
 
             let cmd = {
-                remove_categories: {
-                    unique_id: graphId,
-                    categories: [data.category],
-                },
+                remove_categories: [
+                    { unique_id: graphId, categories: [data.category] },
+                ],
             }
             this.ws.send(JSON.stringify(cmd))
         }
@@ -165,11 +165,13 @@ class App extends Component {
 
             let catData = newGraphs[graphId].categories
             let cmd = {
-                add_categories: {
-                    unique_id: graphId,
-                    range: formatWsRangeData(rangeData.range),
-                    categories: Object.keys(catData),
-                },
+                add_categories: [
+                    {
+                        unique_id: graphId,
+                        range: formatWsRangeData(rangeData.range),
+                        categories: Object.keys(catData),
+                    },
+                ],
             }
             this.ws.send(JSON.stringify(cmd))
         }

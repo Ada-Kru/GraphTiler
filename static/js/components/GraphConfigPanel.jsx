@@ -21,13 +21,13 @@ class GraphConfigPanel extends Component {
             console.log("found graph data", data)
             rangeType = data.rangeType
             if (rangeType === "past") {
-                pastAmount = data.range.pastAmount
-                pastUnit = data.range.pastUnit
+                pastAmount = data.pastAmount
+                pastUnit = data.pastUnit
             } else if (rangeType === "since") {
-                since = new Date(data.range.since)
+                since = new Date(data.since)
             } else if (rangeType === "timerange") {
-                rangeStart = new Date(data.range.start)
-                rangeEnd = new Date(data.range.end)
+                rangeStart = new Date(data.start)
+                rangeEnd = new Date(data.end)
             }
         }
 
@@ -44,6 +44,8 @@ class GraphConfigPanel extends Component {
         }
 
         this.snapshot = {}
+        this.rangeForm = React.createRef()
+        this.saveButton = React.createRef()
     }
 
     componentDidUpdate = prevProps => {
@@ -68,7 +70,23 @@ class GraphConfigPanel extends Component {
         this.setState({ editingRange: true })
     }
 
+    onSaveButtonBlur = () => {
+        this.saveButton.current.setCustomValidity("")
+    }
+
     onEditRangeSave = () => {
+        if (!this.rangeForm.current.reportValidity()) {
+            return
+        }
+        if (
+            this.state.rangeType === "timerange" &&
+            this.state.rangeStart >= this.state.rangeEnd
+        ) {
+            this.saveButton.current.setCustomValidity(
+                "End of time range must be later than start!"
+            )
+            return
+        }
         let data = { range: { rangeType: this.state.rangeType } }
         switch (this.state.rangeType) {
             case "since":
@@ -116,7 +134,8 @@ class GraphConfigPanel extends Component {
     }
 
     onPastAmountChange = evt => {
-        this.setState({ pastAmount: evt.target.value })
+        let value = evt.target.value
+        this.setState({ pastAmount: value })
     }
 
     onPastUnitChange = evt => {
@@ -142,31 +161,32 @@ class GraphConfigPanel extends Component {
         }
     }
 
-    makeHeader = () => {
-        return this.state.editingRange ? null : (
-            <div className="cat-tile-header">
-                <span
-                    className="cat-tile-button"
-                    title="Modify monitor range"
-                    onClick={this.onEditRange}
-                >
-                    ⛭
-                </span>
-            </div>
-        )
-    }
-
     makeFooter = () => {
         return this.state.editingRange ? (
             <span className="cat-tile-footer">
-                <button onClick={this.onEditRangeSave}>Save</button>
+                <button
+                    ref={this.saveButton}
+                    onClick={this.onEditRangeSave}
+                    onBlur={this.onSaveButtonBlur}
+                >
+                    Save
+                </button>
                 <button onClick={this.onEditRangeCancel}>Cancel</button>
             </span>
         ) : null
     }
 
-    makeMonitorConfig = () => {
+    makeConfigForm = () => {
         let rangeInputs = null
+        let cfgButton = this.state.editingRange ? null : (
+            <span
+                className="cat-tile-button"
+                title="Edit monitoring range"
+                onClick={this.onEditRange}
+            >
+                ⛭
+            </span>
+        )
         switch (this.state.rangeType) {
             case "past":
                 rangeInputs = (
@@ -245,12 +265,17 @@ class GraphConfigPanel extends Component {
         }
 
         return (
-            <form>
-                {this.makeHeader()}
-                <fieldset disabled={!this.state.editingRange}>
+            <form ref={this.rangeForm} onSubmit={evt => evt.preventDefault()}>
+                <label className="fieldset-legend">
+                    Monitoring Range {cfgButton}
+                </label>
+                <fieldset
+                    className="range-cfg-fieldset"
+                    disabled={!this.state.editingRange}
+                >
                     <span className="config-row">
                         <label>
-                            Monitoring type
+                            Range type
                             <select
                                 value={this.state.rangeType}
                                 onChange={this.onrangeTypeChange}
@@ -272,19 +297,26 @@ class GraphConfigPanel extends Component {
         return (
             <div className="configPanel">
                 <div className="graphSettings">
-                    {this.makeMonitorConfig()}
-                    <span className="config-row">
-                        <label>
-                            Legend position
-                            <select defaultValue="top">
-                                <option value="top">Top</option>
-                                <option value="left">Left</option>
-                                <option value="bottom">Bottom</option>
-                                <option value="right">Right</option>
-                                <option value="disabled">Disabled</option>
-                            </select>
-                        </label>
-                    </span>
+                    {this.makeConfigForm()}
+                    <form>
+                        <fieldset>
+                            <legend>Graph Options</legend>
+                            <span className="config-row">
+                                <label>
+                                    Legend position
+                                    <select defaultValue="top">
+                                        <option value="top">Top</option>
+                                        <option value="left">Left</option>
+                                        <option value="bottom">Bottom</option>
+                                        <option value="right">Right</option>
+                                        <option value="disabled">
+                                            Disabled
+                                        </option>
+                                    </select>
+                                </label>
+                            </span>
+                        </fieldset>
+                    </form>
                     <span className="config-row">
                         Categories
                         <span

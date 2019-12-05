@@ -58,24 +58,30 @@ TIMERANGE_RANGE_SCHEMA = {
 
 WS_MSG_SCHEMA = {
     "add_categories": {
-        "type": "dict",
+        "type": "list",
         "schema": {
-            "unique_id": {"required": True, **STRING_MAX_100},
-            "categories": {"required": True, **STRING_LIST},
-            "range": {
-                "type": "dict",
-                "required": True,
-                "anyof_schema": [
-                    PAST_RANGE_SCHEMA,
-                    SINCE_RANGE_SCHEMA,
-                    TIMERANGE_RANGE_SCHEMA,
-                ],
+            "type": "dict",
+            "schema": {
+                "unique_id": {"required": True, **STRING_MAX_100},
+                "categories": {"required": True, **STRING_LIST},
+                "range": {
+                    "type": "dict",
+                    "required": True,
+                    "anyof_schema": [
+                        PAST_RANGE_SCHEMA,
+                        SINCE_RANGE_SCHEMA,
+                        TIMERANGE_RANGE_SCHEMA,
+                    ],
+                },
             },
         },
     },
     "remove_categories": {
-        "type": "dict",
-        "schema": {"unique_id": STRING_MAX_100, "categories": STRING_LIST},
+        "type": "list",
+        "schema": {
+            "type": "dict",
+            "schema": {"unique_id": STRING_MAX_100, "categories": STRING_LIST},
+        },
     },
 }
 

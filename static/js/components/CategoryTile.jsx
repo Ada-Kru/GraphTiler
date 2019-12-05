@@ -14,6 +14,7 @@ class CategoryTile extends Component {
 
         this.savedState = {}
         this.saveSnapshot()
+        this.catForm = React.createRef()
     }
 
     componentDidUpdate = prevProps => {
@@ -30,6 +31,9 @@ class CategoryTile extends Component {
     }
 
     save = () => {
+        if (!this.catForm.current.reportValidity()) {
+            return
+        }
         this.props.onRemove({ category: this.currentCategory })
         let data = {
             category: this.state.category,
@@ -64,9 +68,8 @@ class CategoryTile extends Component {
         this.setState({ lineColor: evt.target.value })
     }
 
-    makeHeader = () => {
-        return this.state.editing ? null :
-        <div className="cat-tile-header">
+    makeCfgBtn = () => {
+        return (
             <span
                 className="cat-tile-button"
                 title="Modify category"
@@ -74,44 +77,56 @@ class CategoryTile extends Component {
             >
                 ⛭
             </span>
+        )
+    }
+
+    makeCloseBtn = (alignRight = false) => {
+        let classname = "cat-tile-button red"
+        if (alignRight) {
+            classname += " right"
+        }
+        return (
             <span
-                className="cat-tile-button red"
+                className={classname}
                 title="Remove category"
                 onClick={this.remove}
             >
                 ✖
             </span>
-        </div>
+        )
     }
 
     render() {
         if (this.state.editing) {
             return (
                 <div className="cat-tile editing">
-                    {this.makeHeader()}
-                    <div className="cat-tile-options">
-                        <span className="config-row">
-                            <label>
-                                Category
-                                <input
-                                    list="AvailableCats"
-                                    defaultValue={this.state.category}
-                                    onChange={this.onChangeCat}
-                                    autoFocus
-                                />
-                            </label>
-                        </span>
-                        <span className="config-row">
-                            <label>
-                                Line color
-                                <input
-                                    type="color"
-                                    value={this.state.lineColor}
-                                    onChange={this.onChangeLineColor}
-                                />
-                            </label>
-                        </span>
-                    </div>
+                    <form ref={this.catForm}>
+                        <div className="cat-tile-options">
+                            <span className="config-row">
+                                <label>
+                                    Category
+                                    <input
+                                        list="AvailableCats"
+                                        defaultValue={this.state.category}
+                                        onChange={this.onChangeCat}
+                                        autoFocus
+                                        maxLength="100"
+                                        required
+                                    />
+                                </label>
+                            </span>
+                            <span className="config-row">
+                                <label>
+                                    Line color
+                                    <input
+                                        type="color"
+                                        value={this.state.lineColor}
+                                        onChange={this.onChangeLineColor}
+                                    />
+                                </label>
+                            </span>
+                        </div>
+                    </form>
                     <span className="cat-tile-footer">
                         <button onClick={this.save}>Save</button>
                         <button onClick={this.cancel}>Cancel</button>
@@ -120,18 +135,12 @@ class CategoryTile extends Component {
             )
         } else {
             return (
-                <div className="cat-tile">
-                    {this.makeHeader()}
+                <fieldset className="cat-tile">
+                    <legend>
+                        {this.state.category + " "}
+                        {this.makeCfgBtn()} {this.makeCloseBtn(true)}
+                    </legend>
                     <div className="cat-tile-options">
-                        <span className="config-row">
-                            <label>
-                                Category
-                                <input
-                                    defaultValue={this.state.category}
-                                    disabled={true}
-                                />
-                            </label>
-                        </span>
                         <span className="config-row">
                             <label>
                                 Line color
@@ -144,7 +153,7 @@ class CategoryTile extends Component {
                             </label>
                         </span>
                     </div>
-                </div>
+                </fieldset>
             )
         }
     }
