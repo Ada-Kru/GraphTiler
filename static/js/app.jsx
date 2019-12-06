@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import SideControls from "./components/SideControls"
 import GraphTile from "./components/GraphTile"
 import FlexLayout from "flexlayout-react"
+import removeKeys from "./components/funcs"
 import uuid from "uuid/v4"
 import moment from "moment"
 
@@ -73,7 +74,6 @@ class App extends Component {
         this.setState({ wsState: "connecting" })
 
         this.ws.onopen = evt => {
-            console.log("Websocket connected")
             this.setState({ wsState: "connected" })
         }
 
@@ -84,7 +84,6 @@ class App extends Component {
         }
 
         this.ws.onclose = () => {
-            console.log("Websocket connection closed.")
             this.setState({ wsState: "disconnected" })
             setTimeout(() => this.setupWebsocket(), 1000)
         }
@@ -123,12 +122,8 @@ class App extends Component {
         if (msg.hasOwnProperty("addCategory")) {
             let data = msg.addCategory
             let newGraphs = { ...this.state.graphs }
-            if (newGraphs[graphId].categories[data.category]) {
-                delete newGraphs[graphId].categories[data.category]
-            }
-            newGraphs[graphId].categories[data.category] = {
-                lineColor: data.lineColor,
-            }
+            newGraphs[graphId].categories[data.category] = {...data}
+            delete newGraphs[graphId].categories[data.category].category
             this.setState({ graphs: newGraphs })
 
             let cmd = {
@@ -207,9 +202,10 @@ class App extends Component {
                     configPanelOpen: true,
                 },
             },
-            () => {
-                console.log("graphs: ", this.state.graphs)
-            }
+            null
+            // () => {
+            //     console.log("graphs: ", this.state.graphs)
+            // }
         )
     }
 

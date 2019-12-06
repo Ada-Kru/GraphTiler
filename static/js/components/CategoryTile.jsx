@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import removeKeys from "./funcs"
 
 class CategoryTile extends Component {
     static defaultProps = { editing: false, onCancel: null }
@@ -7,8 +8,9 @@ class CategoryTile extends Component {
         this.state = {
             editing: this.props.editing,
             category: props.category,
-            lineColor: props.data.lineColor,
+            ...props.data
         }
+        this.noSaveKeys = new Set(["editing"])
 
         this.currentCategory = props.category
 
@@ -19,15 +21,12 @@ class CategoryTile extends Component {
 
     componentDidUpdate = prevProps => {
         if (prevProps.data != this.props.data) {
-            this.setState({ lineColor: this.props.data.lineColor })
+            this.setState({ ...this.props.data })
         }
     }
 
     saveSnapshot = () => {
-        this.savedState = {
-            category: this.state.category,
-            lineColor: this.state.lineColor,
-        }
+        this.savedState = removeKeys({ ...this.state }, this.noSaveKeys)
     }
 
     save = () => {
@@ -35,10 +34,7 @@ class CategoryTile extends Component {
             return
         }
         this.props.onRemove({ category: this.currentCategory })
-        let data = {
-            category: this.state.category,
-            lineColor: this.state.lineColor,
-        }
+        let data = removeKeys({ ...this.state }, this.noSaveKeys)
         this.props.onSave(data)
         this.currentCategory = this.state.category
         this.setState({ editing: false })
@@ -60,12 +56,29 @@ class CategoryTile extends Component {
         }
     }
 
-    onChangeCat = evt => {
+    onCatChange = evt => {
         this.setState({ category: evt.target.value })
     }
 
-    onChangeLineColor = evt => {
-        this.setState({ lineColor: evt.target.value })
+    onLineColorChange = evt => {
+        this.setState({ borderColor: evt.target.value })
+    }
+
+    onLineTensionChange = evt => {
+        this.setState({ lineTension: evt.target.value })
+    }
+
+    onPointColorChange = evt => {
+        this.setState({ pointBackgroundColor: evt.target.value })
+    }
+
+    onPointStyleChange = evt => {
+        this.setState({ pointStyle: evt.target.value })
+    }
+
+    onFillChange = evt => {
+        console.log(evt.target.value, evt.target.value === "true")
+        this.setState({ fill: evt.target.value === "true" })
     }
 
     makeCfgBtn = () => {
@@ -108,7 +121,7 @@ class CategoryTile extends Component {
                                     <input
                                         list="AvailableCats"
                                         defaultValue={this.state.category}
-                                        onChange={this.onChangeCat}
+                                        onChange={this.onCatChange}
                                         autoFocus
                                         maxLength="100"
                                         required
@@ -120,9 +133,64 @@ class CategoryTile extends Component {
                                     Line color
                                     <input
                                         type="color"
-                                        value={this.state.lineColor}
-                                        onChange={this.onChangeLineColor}
+                                        value={this.state.borderColor}
+                                        onChange={this.onLineColorChange}
                                     />
+                                </label>
+                            </span>
+                            <span className="config-row">
+                                <label>
+                                    Line tension
+                                    <input
+                                        value={this.state.lineTension}
+                                        onChange={this.onLineTensionChange}
+                                        min="0"
+                                        max="1"
+                                        step="0.01"
+                                        type="number"
+                                    />
+                                </label>
+                            </span>
+                            <span className="config-row">
+                                <label>
+                                    Point color
+                                    <input
+                                        type="color"
+                                        value={this.state.pointBackgroundColor}
+                                        onChange={this.onPointColorChange}
+                                    />
+                                </label>
+                            </span>
+                            <span className="config-row">
+                                <label>
+                                    Point style
+                                    <select
+                                        value={this.state.pointStyle}
+                                        onChange={this.onPointStyleChange}
+                                    >
+                                        <option value="circle">Circle</option>
+                                        <option value="cross">Cross</option>
+                                        <option value="crossRot">Rotated Cross</option>
+                                        <option value="dash">Dash</option>
+                                        <option value="line">Line</option>
+                                        <option value="rect">Rectangle</option>
+                                        <option value="rectRounded">Rounded Rectangle</option>
+                                        <option value="rectRot">Rotated Rectangle</option>
+                                        <option value="star">Star</option>
+                                        <option value="triangle">Triangel</option>
+                                    </select>
+                                </label>
+                            </span>
+                            <span className="config-row">
+                                <label>
+                                    Fill
+                                    <select
+                                        value={this.state.fill.toString()}
+                                        onChange={this.onFillChange}
+                                    >
+                                        <option value="true">True</option>
+                                        <option value="false">False</option>
+                                    </select>
                                 </label>
                             </span>
                         </div>
@@ -146,8 +214,8 @@ class CategoryTile extends Component {
                                 Line color
                                 <input
                                     type="color"
-                                    value={this.state.lineColor}
-                                    onChange={this.onChangeLineColor}
+                                    value={this.state.borderColor}
+                                    onChange={this.onLineColorChange}
                                     disabled={true}
                                 />
                             </label>

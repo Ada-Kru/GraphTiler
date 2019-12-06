@@ -3,7 +3,16 @@ import DateTimePicker from "react-datetime-picker"
 import CategoryTile from "./CategoryTile"
 
 const DATETIME_FORMAT = "MM-dd-y hh:mm a"
-const NEW_CAT_DATA = { lineColor: "#FFFFFF" }
+const NEW_CAT_DATA = {
+    borderColor: "#FFFFFF",
+    fill: true,
+    lineTension: 0,
+    backgroundColor: "#444",
+    pointStyle: "circle",
+    pointBackgroundColor: "#FFFFFF",
+    pointHoverBackgroundColor: "#888",
+    pointHoverBorderColor: "#999",
+}
 
 class GraphConfigPanel extends Component {
     constructor(props) {
@@ -134,8 +143,7 @@ class GraphConfigPanel extends Component {
     }
 
     onPastAmountChange = evt => {
-        let value = evt.target.value
-        this.setState({ pastAmount: value })
+        this.setState({ pastAmount: evt.target.value })
     }
 
     onPastUnitChange = evt => {

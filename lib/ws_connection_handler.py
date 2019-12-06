@@ -3,6 +3,7 @@ from cfg import TIME_FORMAT_NO_TZ
 from datetime import timezone, timedelta, datetime
 from collections import defaultdict
 from json import dumps
+
 # from pprint import pprint
 
 
@@ -12,6 +13,7 @@ class WsConnectionHandler:
     def __init__(self):
         self._categories = defaultdict(lambda: defaultdict(dict))
         self._connections = set()
+        self.mults = {"sec": 1, "min": 60, "hr": 3600}
 
     def add_connection(self, websocket):
         """Add a new websocket connection."""
@@ -38,8 +40,7 @@ class WsConnectionHandler:
         self.remove_cat_ranges(websocket, data)
 
         for cat_data in data:
-            unique_id = cat_data["unique_id"]
-            range_data = cat_data["range"]
+            unique_id, range_data = cat_data["unique_id"], cat_data["range"]
             for key in ("start", "end", "since"):
                 if key in range_data:
                     range_data[key] = str_to_datetime(range_data[key])
@@ -69,28 +70,23 @@ class WsConnectionHandler:
             return
 
         for ws, ranges in self._categories[category].items():
-            in_range = {}
-            now = datetime.now(timezone.utc)
+            in_range, now = {}, datetime.now(timezone.utc)
             for update in updates:
                 tm = update["time"]
                 if not skip_vali:
                     for rng in ranges.values():
                         rtype = rng["range_type"]
                         if rtype == "past":
-                            amount = rng["past_amount"]
-                            if rng["past_unit"] == "min":
-                                amount *= 60
-                            elif rng["past_unit"] == "hr":
-                                amount *= 3600
-                            delta = timedelta(seconds=amount)
+                            amnt, unit = rng["past_amount"], rng["past_unit"]
+                            delta = timedelta(seconds=amnt * self.mults[unit])
                             if not (tm >= (now - delta)):
                                 continue
-                        elif rtype == "since":
-                            if not (tm >= rng["since"]):
-                                continue
-                        elif rtype == "timerange":
-                            if not (tm >= rng["start"] and tm <= rng["end"]):
-                                continue
+                        elif rtype == "since" and not (tm >= rng["since"]):
+                            continue
+                        elif rtype == "timerange" and not (
+                            tm >= rng["start"] and tm <= rng["end"]
+                        ):
+                            continue
                 time = tm.astimezone(timezone.utc).strftime(TIME_FORMAT_NO_TZ)
                 in_range[time] = update["reading"]
 

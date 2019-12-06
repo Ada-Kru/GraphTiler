@@ -6,24 +6,16 @@ import moment from "moment"
 const data = {
     datasets: [
         {
+            fill: true,
             label: "Test Data",
-            // fill: true,
             lineTension: 0,
             backgroundColor: "#444",
-            borderColor: "#0C0",
-            borderCapStyle: "butt",
-            borderDash: [],
-            borderDashOffset: 0.0,
-            borderJoinStyle: "miter",
-            pointBorderColor: "#0F0",
-            pointBackgroundColor: "#FFFFFF",
-            pointBorderWidth: 1,
-            pointHoverRadius: 5,
-            pointHoverBackgroundColor: "rgba(75,192,192,1)",
-            pointHoverBorderColor: "rgba(220,220,220,1)",
+            borderColor: "#0F0",
+            pointStyle: "rectRounded",
+            pointBackgroundColor: "#0F0",
+            pointHoverBackgroundColor: "#888",
+            pointHoverBorderColor: "#999",
             pointHoverBorderWidth: 2,
-            pointRadius: 1,
-            pointHitRadius: 10,
             data: [
                 { x: "2019-12-05 10:15", y: 65 },
                 { x: "2019-12-05 10:30", y: 59 },
@@ -105,10 +97,6 @@ class GraphTile extends Component {
         node.setEventListener("close", () => {
             this.props.listener(cfg.graphId, { removeGraph: true })
         })
-    }
-
-    showConfig = () => {
-        console.log("showConfig")
     }
 
     componentDidUpdate = prevProps => {
