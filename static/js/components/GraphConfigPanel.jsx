@@ -18,7 +18,7 @@ class GraphConfigPanel extends Component {
 
         if (props.graphs[props.graphId]) {
             let data = props.graphs[props.graphId].range
-            console.log("found graph data", data)
+            console.log("cfg panel found graph data", data)
             rangeType = data.rangeType
             if (rangeType === "past") {
                 pastAmount = data.pastAmount

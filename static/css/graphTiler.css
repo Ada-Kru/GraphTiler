@@ -145,6 +145,7 @@ html {
 }
 
 fieldset {
+    position: relative;
     border: 2px solid #222;
 }
 
@@ -155,6 +156,7 @@ fieldset {
 .fieldset-legend {
     position: absolute;
     background-color: #333;
+    z-index: 1000;
 }
 
 select {
@@ -234,11 +236,6 @@ label .react-datetimerange-picker {
     justify-content: center;
 }
 
-.cat-tile {
-    border: 1px solid #4d4d4d;
-    /* width: 75%; */
-}
-
 .cat-tile-header {
     display: flex;
     justify-content: space-between;
@@ -263,7 +260,7 @@ label .react-datetimerange-picker {
 
 .cat-tile-button.right {
     position: absolute;
-    right: 2%;
+	left: 97.5%;
 }
 
 .cat-tile-options {

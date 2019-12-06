@@ -1,21 +1,20 @@
 import React, { Component } from "react"
-import { Line } from "react-chartjs-2"
+import { Line, Bar, Radar, Polar } from "react-chartjs-2"
 import GraphConfigPanel from "./GraphConfigPanel"
+import moment from "moment"
 
 const data = {
-    labels: ["1", "2", "3", "4", "5", "6", "7"],
     datasets: [
         {
             label: "Test Data",
-            fill: true,
+            // fill: true,
             lineTension: 0,
-            backgroundColor: "#555",
+            backgroundColor: "#444",
             borderColor: "#0C0",
             borderCapStyle: "butt",
             borderDash: [],
             borderDashOffset: 0.0,
             borderJoinStyle: "miter",
-            maintainAspectRatio: false,
             pointBorderColor: "#0F0",
             pointBackgroundColor: "#FFFFFF",
             pointBorderWidth: 1,
@@ -25,13 +24,57 @@ const data = {
             pointHoverBorderWidth: 2,
             pointRadius: 1,
             pointHitRadius: 10,
-            responsive: true,
-            data: [65, 59, 80, 81, 56, 55, 40],
+            data: [
+                { x: "2019-12-05 10:15", y: 65 },
+                { x: "2019-12-05 10:30", y: 59 },
+                { x: "2019-12-05 10:45", y: 80 },
+                { x: "2019-12-05 11:00", y: 81 },
+                { x: "2019-12-05 11:15", y: 56 },
+                { x: "2019-12-05 11:30", y: 55 },
+                { x: "2019-12-05 11:45", y: 40 },
+                { x: "2019-12-05 12:00", y: 56 },
+            ],
         },
     ],
 }
 
-const options = { responsive: true, maintainAspectRatio: false }
+const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    legend: {
+        display: false,
+    },
+    scales: {
+        xAxes: [
+            {
+                type: "time",
+                distribution: "linear",
+                bounds: "ticks",
+                time: {
+                    displayFormats: {
+                        hour: "hA MMM D",
+                        minute: "HH:mm"
+                    },
+                    labelString: "Date",
+                    parser: "YYYY-MM-DD HH:mm",
+                },
+                ticks: {
+                    source: "data",
+                },
+            },
+        ],
+        yAxes: [
+            {
+                ticks: {
+                    beginAtZero: true,
+                },
+                scaleLabel: {
+                    labelString: "Test data",
+                },
+            },
+        ],
+    },
+}
 
 class GraphTile extends Component {
     constructor(props) {
@@ -68,11 +111,11 @@ class GraphTile extends Component {
         console.log("showConfig")
     }
 
-    componentDidUpdate = (prevProps) => {
+    componentDidUpdate = prevProps => {
         let id = this.state.graphId
         let cats = prevProps.graphs[id] ? prevProps.graphs[id].categories : {}
         if (cats != this.state.categories) {
-            this.setState({categories: cats})
+            this.setState({ categories: cats })
         }
     }
 
