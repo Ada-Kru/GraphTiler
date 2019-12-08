@@ -48,7 +48,7 @@ const options = {
                         minute: "HH:mm"
                     },
                     labelString: "Date",
-                    parser: "YYYY-MM-DD HH:mm",
+                    parser: "YYYY-MM-DD HH:mm:ss",
                 },
                 ticks: {
                     source: "data",

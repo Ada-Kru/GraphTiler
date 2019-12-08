@@ -7,7 +7,7 @@ import insertPoints from "./components/insertPoints"
 import uuid from "uuid/v4"
 import moment from "moment"
 
-const RECV_DATE_FORMAT = "YYYY-MM-DD HH:mm"
+const RECV_DATE_FORMAT = "YYYY-MM-DD HH:mm:ss"
 const SEND_DATE_FORMAT = RECV_DATE_FORMAT + " ZZ"
 
 var layout = {
@@ -70,6 +70,17 @@ class App extends Component {
                 decimalPlaces: 0,
             },
         ]
+
+        this._wsMsgMap = {
+            point_update: this.onMsgPointUpdate
+        }
+        this._listenerMap = {
+            registerGraph: this.onRegisterGraph,
+            removeGraph: this.onRemoveGraph,
+            addCategory: this.onAddCategory,
+            removeCategory: this.onRemoveCategory,
+            modifyGraphRange: this.onModifyGraphRange,
+        }
     }
 
     setupWebsocket = () => {
@@ -83,22 +94,8 @@ class App extends Component {
         this.ws.onmessage = evt => {
             let msg = JSON.parse(evt.data)
             console.log("websocket data:", msg)
-
-            if (msg.hasOwnProperty("point_update")) {
-                let categories = msg.point_update
-                let newGraphData = { ...this.state.graphData }
-                for (let [category, readings] of Object.entries(categories)) {
-                    let points = []
-                    for (let [timeStr, reading] of Object.entries(readings)) {
-                        points.push({
-                            x: moment.utc(timeStr, RECV_DATE_FORMAT),
-                            y: reading,
-                        })
-                    }
-                    this.updateGraphPoints(newGraphData, category, points)
-                }
-                console.log("graphdata", newGraphData)
-                this.setState({ graphData: newGraphData })
+            for (let [type, data] of Object.entries(msg)) {
+                this._wsMsgMap[type](data)
             }
         }
 
@@ -114,92 +111,107 @@ class App extends Component {
     }
 
     listener = (graphId, msg) => {
-        // console.log("listener", graphId, msg)
-        if (msg.hasOwnProperty("registerGraph")) {
-            let newGraphs = { ...this.state.graphs }
-            let newGraphData = { ...this.state.graphData }
-            newGraphs[graphId] = {
-                categories: {},
-                range: { rangeType: "past", pastAmount: 1, pastUnit: "hr" },
-            }
-            newGraphData[graphId] = { categories: {} }
-            this.setState({ graphs: newGraphs, graphData: newGraphData })
+        for (let [key, data] of Object.entries(msg)) {
+            this._listenerMap[key](graphId, data)
         }
+    }
 
-        if (msg.hasOwnProperty("removeGraph")) {
-            let newGraphs = { ...this.state.graphs }
-            let newGraphData = { ...this.state.graphData }
-            let catData = newGraphs[graphId].categories
-            delete newGraphs[graphId]
-            delete newGraphData[graphId]
-            this.setState({ graphs: newGraphs, graphData: newGraphData })
+    _cloneGraphs = () => {
+        return [{ ...this.state.graphs }, { ...this.state.graphData }]
+    }
 
-            let cmd = {
-                remove_categories: [
-                    { unique_id: graphId, categories: Object.keys(catData) },
-                ],
-            }
-            this.ws.send(JSON.stringify(cmd))
+    onRegisterGraph = (graphId, data) => {
+        let [newGraphs, newGraphData] = this._cloneGraphs()
+        newGraphs[graphId] = {
+            categories: {},
+            range: { rangeType: "past", pastAmount: 1, pastUnit: "hr" },
         }
+        newGraphData[graphId] = { categories: {} }
+        this.setState({ graphs: newGraphs, graphData: newGraphData })
+    }
 
-        if (msg.hasOwnProperty("addCategory")) {
-            let catCfg = msg.addCategory
-            let newGraphs = { ...this.state.graphs }
-            let newGraphData = { ...this.state.graphData }
-            newGraphs[graphId].categories[catCfg.category] = catCfg
-            newGraphData[graphId].categories[catCfg.category] = []
-            this.setState({ graphs: newGraphs, graphData: newGraphData })
+    onRemoveGraph = (graphId, data) => {
+        let [newGraphs, newGraphData] = this._cloneGraphs()
+        let catData = newGraphs[graphId].categories
+        delete newGraphs[graphId]
+        delete newGraphData[graphId]
+        this.setState({ graphs: newGraphs, graphData: newGraphData })
 
-            let cmd = {
-                add_categories: [
-                    {
-                        unique_id: graphId,
-                        range: formatWsRangeData(newGraphs[graphId].range),
-                        categories: [catCfg.category],
-                    },
-                ],
-            }
-            this.ws.send(JSON.stringify(cmd))
+        let cmd = {
+            remove_categories: [
+                { unique_id: graphId, categories: Object.keys(catData) },
+            ],
         }
+        this.ws.send(JSON.stringify(cmd))
+    }
 
-        if (msg.hasOwnProperty("removeCategory")) {
-            let data = msg.removeCategory
-            let newGraphs = { ...this.state.graphs }
-            let newGraphData = { ...this.state.graphData }
-            delete newGraphs[graphId].categories[data.category]
-            delete newGraphData[graphId].categories[data.category]
-            this.setState({ graphs: newGraphs, graphData: newGraphData })
+    onAddCategory = (graphId, catCfg) => {
+        let [newGraphs, newGraphData] = this._cloneGraphs()
+        newGraphs[graphId].categories[catCfg.category] = catCfg
+        newGraphData[graphId].categories[catCfg.category] = []
+        this.setState({ graphs: newGraphs, graphData: newGraphData })
 
-            let cmd = {
-                remove_categories: [
-                    { unique_id: graphId, categories: [data.category] },
-                ],
-            }
-            this.ws.send(JSON.stringify(cmd))
+        let cmd = {
+            add_categories: [
+                {
+                    unique_id: graphId,
+                    range: formatWsRangeData(newGraphs[graphId].range),
+                    categories: [catCfg.category],
+                },
+            ],
         }
+        this.ws.send(JSON.stringify(cmd))
+    }
 
-        if (msg.hasOwnProperty("modifyGraphRange")) {
-            let newGraphs = { ...this.state.graphs }
-            let newGraphData = { ...this.state.graphData }
-            let rangeData = msg.modifyGraphRange
-            newGraphs[graphId] = { ...newGraphs[graphId], ...rangeData }
-            let categories = Object.keys(newGraphData[graphId].categories)
-            for (let category of categories) {
-                newGraphData[graphId].categories[category].length = 0
-            }
-            this.setState({ graphs: newGraphs })
+    onRemoveCategory = (graphId, data) => {
+        let [newGraphs, newGraphData] = this._cloneGraphs()
+        delete newGraphs[graphId].categories[data.category]
+        delete newGraphData[graphId].categories[data.category]
+        this.setState({ graphs: newGraphs, graphData: newGraphData })
 
-            let cmd = {
-                add_categories: [
-                    {
-                        unique_id: graphId,
-                        range: formatWsRangeData(rangeData.range),
-                        categories: categories,
-                    },
-                ],
-            }
-            this.ws.send(JSON.stringify(cmd))
+        let cmd = {
+            remove_categories: [
+                { unique_id: graphId, categories: [data.category] },
+            ],
         }
+        this.ws.send(JSON.stringify(cmd))
+    }
+
+    onModifyGraphRange = (graphId, rangeData) => {
+        let [newGraphs, newGraphData] = this._cloneGraphs()
+        newGraphs[graphId] = { ...newGraphs[graphId], ...rangeData }
+        let categories = Object.keys(newGraphData[graphId].categories)
+        for (let category of categories) {
+            newGraphData[graphId].categories[category].length = 0
+        }
+        this.setState({ graphs: newGraphs })
+
+        let cmd = {
+            add_categories: [
+                {
+                    unique_id: graphId,
+                    range: formatWsRangeData(rangeData.range),
+                    categories: categories,
+                },
+            ],
+        }
+        this.ws.send(JSON.stringify(cmd))
+    }
+
+    onMsgPointUpdate = (categories) => {
+        let newGraphData = { ...this.state.graphData }
+        for (let [category, readings] of Object.entries(categories)) {
+            let points = []
+            for (let [timeStr, reading] of Object.entries(readings)) {
+                points.push({
+                    x: moment.utc(timeStr, RECV_DATE_FORMAT),
+                    y: reading,
+                })
+            }
+            this.updateGraphPoints(newGraphData, category, points)
+        }
+        console.log("graphdata", newGraphData)
+        this.setState({ graphData: newGraphData })
     }
 
     updateGraphPoints = (graphData, category, points) => {
