@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import removeKeys from "./funcs"
+import removeKeys from "./removeKeys"
 
 class CategoryTile extends Component {
     static defaultProps = { editing: false, onCancel: null }
@@ -77,7 +77,6 @@ class CategoryTile extends Component {
     }
 
     onFillChange = evt => {
-        console.log(evt.target.value, evt.target.value === "true")
         this.setState({ fill: evt.target.value === "true" })
     }
 
