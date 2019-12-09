@@ -1,16 +1,18 @@
 import React, { Component } from "react"
+import { connect } from "react-redux"
 import SideControls from "./components/SideControls"
 import GraphTile from "./components/GraphTile"
 import FlexLayout from "flexlayout-react"
 import removeKeys from "./components/removeKeys"
 import insertPoints from "./components/insertPoints"
+import { addGraph, removeGraph } from "./redux"
 import uuid from "uuid/v4"
 import moment from "moment"
 
 const RECV_DATE_FORMAT = "YYYY-MM-DD HH:mm:ss"
 const SEND_DATE_FORMAT = RECV_DATE_FORMAT + " ZZ"
 
-var layout = {
+let layout = {
     global: { splitterSize: 5, tabDragSpeed: 0.15 },
     layout: {
         type: "row",
@@ -56,7 +58,6 @@ class App extends Component {
             wsState: "disconnected",
             graphs: {},
             graphData: {},
-            serverData: {},
         }
 
         this.ws = null
@@ -72,7 +73,7 @@ class App extends Component {
         ]
 
         this._wsMsgMap = {
-            point_update: this.onMsgPointUpdate
+            point_update: this.onMsgPointUpdate,
         }
         this._listenerMap = {
             registerGraph: this.onRegisterGraph,
@@ -121,6 +122,7 @@ class App extends Component {
     }
 
     onRegisterGraph = (graphId, data) => {
+        this.props.addGraph(graphId)
         let [newGraphs, newGraphData] = this._cloneGraphs()
         newGraphs[graphId] = {
             categories: {},
@@ -131,6 +133,7 @@ class App extends Component {
     }
 
     onRemoveGraph = (graphId, data) => {
+        this.props.removeGraph(graphId)
         let [newGraphs, newGraphData] = this._cloneGraphs()
         let catData = newGraphs[graphId].categories
         delete newGraphs[graphId]
@@ -198,7 +201,7 @@ class App extends Component {
         this.ws.send(JSON.stringify(cmd))
     }
 
-    onMsgPointUpdate = (categories) => {
+    onMsgPointUpdate = categories => {
         let newGraphData = { ...this.state.graphData }
         for (let [category, readings] of Object.entries(categories)) {
             let points = []
@@ -319,4 +322,22 @@ class App extends Component {
     }
 }
 
-export default App
+const mapStateToProps = state => {
+    return {
+        graphs: state.graphs,
+        ranges: state.ranges,
+        categories: state.categories,
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        addGraph: graphId => dispatch(addGraph(graphId)),
+        removeGraph: graphId => dispatch(removeGraph(graphId)),
+    }
+}
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(App)
