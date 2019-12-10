@@ -1,1 +1,6 @@
-export { addGraph, removeGraph } from "./App/appActions"
+export {
+    addGraph,
+    removeGraph,
+    addCategory,
+    removeCategory,
+} from "./App/appActions"

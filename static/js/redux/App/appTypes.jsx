@@ -1,2 +1,4 @@
 export const ADD_GRAPH = "ADD_GRAPH"
 export const REMOVE_GRAPH = "REMOVE_GRAPH"
+export const ADD_CATEGORY = "ADD_CATEGORY"
+export const REMOVE_CATEGORY = "REMOVE_CATEGORY"

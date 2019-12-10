@@ -5,7 +5,7 @@ import GraphTile from "./components/GraphTile"
 import FlexLayout from "flexlayout-react"
 import removeKeys from "./components/removeKeys"
 import insertPoints from "./components/insertPoints"
-import { addGraph, removeGraph } from "./redux"
+import { addGraph, removeGraph, addCategory, removeCategory } from "./redux"
 import uuid from "uuid/v4"
 import moment from "moment"
 
@@ -149,6 +149,7 @@ class App extends Component {
     }
 
     onAddCategory = (graphId, catCfg) => {
+        this.props.addCategory(graphId, catCfg)
         let [newGraphs, newGraphData] = this._cloneGraphs()
         newGraphs[graphId].categories[catCfg.category] = catCfg
         newGraphData[graphId].categories[catCfg.category] = []
@@ -167,6 +168,7 @@ class App extends Component {
     }
 
     onRemoveCategory = (graphId, data) => {
+        this.props.removeCategory(graphId, data.category)
         let [newGraphs, newGraphData] = this._cloneGraphs()
         delete newGraphs[graphId].categories[data.category]
         delete newGraphData[graphId].categories[data.category]
