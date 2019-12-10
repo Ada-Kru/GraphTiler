@@ -3,4 +3,5 @@ export {
     removeGraph,
     addCategory,
     removeCategory,
+    modifyRange
 } from "./App/appActions"

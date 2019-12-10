@@ -3,6 +3,7 @@ import {
     REMOVE_GRAPH,
     ADD_CATEGORY,
     REMOVE_CATEGORY,
+    MODIFY_RANGE,
 } from "./appTypes"
 import removeKeys from "../../components/removeKeys"
 
@@ -22,20 +23,26 @@ const initialState = {
 }
 
 const appReducer = (state = initialState, action) => {
-    console.log("reducer called: ", action, state)
+    console.log("reducer called: ", action)
+    console.log("state:", state)
+    let type = action.type
+    if (!action.hasOwnProperty("payload")) {
+        return state
+    }
     if (
-        action.type === ADD_GRAPH ||
-        action.type === REMOVE_GRAPH ||
-        action.type === ADD_CATEGORY ||
-        action.type === REMOVE_CATEGORY
+        type === REMOVE_GRAPH ||
+        type === ADD_CATEGORY ||
+        type === REMOVE_CATEGORY ||
+        type === MODIFY_RANGE
     ) {
         if (!state.graphs.byId.hasOwnProperty(action.payload.graphId)) {
             return state
         }
     }
+
     let graphId = action.payload.graphId
     let graph = state.graphs.byId[graphId]
-    let catById = state.categories.byId
+    let catsById = state.categories.byId
     let catsAllIds = state.categories.allIds
     let graphById = state.graphs.byId
     let graphAllIds = state.graphs.allIds
@@ -72,7 +79,7 @@ const appReducer = (state = initialState, action) => {
         }
         case REMOVE_GRAPH: {
             let catIds = new Set(graph.categories)
-            let newCatsById = removeKeys({ ...catById }, catIds)
+            let newCatsById = removeKeys({ ...catsById }, catIds)
             let newCatsAllIds = catsAllIds.filter(x => !catIds.has(x))
             let newGraphById = removeKeys({ ...graphById }, new Set([graphId]))
             let newGraphAllIds = graphAllIds.filter(x => x !== graphId)
@@ -87,7 +94,7 @@ const appReducer = (state = initialState, action) => {
                 ...state,
                 categories: {
                     ...state.categories,
-                    byId: { ...catById, ...newCatsById },
+                    byId: { ...catsById, ...newCatsById },
                     allIds: { ...catsAllIds, ...newCatsAllIds },
                 },
                 graphs: {
@@ -104,11 +111,13 @@ const appReducer = (state = initialState, action) => {
         }
         case ADD_CATEGORY: {
             let category = action.payload.catData.category
+            let graphCats = graph.categories
             let ids = state.categories.allIds
             let catId = ids.length ? ids[ids.length - 1] + 1 : 0
-            let newCatsById = { ...catById, catId: catData }
+
+            let newCatsById = { ...catsById, [catId]: action.payload.catData }
             let newCatsAllIds = [...catsAllIds, catId]
-            let newGraphCategories = [...graph.categories, catId]
+            let newGraphCats = [...graphCats, catId]
 
             return {
                 ...state,
@@ -121,7 +130,7 @@ const appReducer = (state = initialState, action) => {
                     ...state.graphs,
                     byId: {
                         ...state.graphs.byId,
-                        graphId: { ...graph, categories: newGraphCategories },
+                        [graphId]: { ...graph, categories: newGraphCats },
                     },
                 },
             }
@@ -129,32 +138,44 @@ const appReducer = (state = initialState, action) => {
         case REMOVE_CATEGORY: {
             let remId = -1
 
-            for (let [key, value] of Object.entries(catById)) {
+            for (let [key, value] of Object.entries(catsById)) {
                 if (value.category === action.payload.category) {
                     remId = key
                     break
                 }
             }
             if (remId === -1) {
-                return
+                return state
             }
 
-            let newCatsById = removeKeys({ ...catById }, new Set([remId]))
-            let newCatsAllIds = catsAllIds.filter(x => x !== remId)
-            let newGraphCategories = graph.categories.filter(x => x !== remId)
+            let remIdInt = parseInt(remId)
+            let newCatsById = removeKeys({ ...catsById }, new Set([remId]))
+            let newCatsAllIds = catsAllIds.filter(x => x !== remIdInt)
+            let newGraphCats = graph.categories.filter(x => x !== remIdInt)
             return {
                 ...state,
                 graphs: {
                     ...state.graphs,
                     byId: {
                         ...graphById,
-                        [graphId]: { ...graph, categories: newGraphCategories },
+                        [graphId]: { ...graph, categories: newGraphCats },
                     },
                 },
                 categories: {
                     ...state.categories,
                     byId: newCatsById,
                     allIds: newCatsAllIds,
+                },
+            }
+        }
+        case MODIFY_RANGE: {
+            let rangeId = graph.range
+            let newRangesById = { ...rangesById, [rangeId]: action.payload.rangeData.range }
+            return {
+                ...state,
+                ranges: {
+                    ...state.ranges,
+                    byId: newRangesById,
                 },
             }
         }

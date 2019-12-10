@@ -5,7 +5,13 @@ import GraphTile from "./components/GraphTile"
 import FlexLayout from "flexlayout-react"
 import removeKeys from "./components/removeKeys"
 import insertPoints from "./components/insertPoints"
-import { addGraph, removeGraph, addCategory, removeCategory } from "./redux"
+import {
+    addGraph,
+    removeGraph,
+    addCategory,
+    removeCategory,
+    modifyRange,
+} from "./redux"
 import uuid from "uuid/v4"
 import moment from "moment"
 
@@ -183,6 +189,7 @@ class App extends Component {
     }
 
     onModifyGraphRange = (graphId, rangeData) => {
+        this.props.modifyRange(graphId, rangeData)
         let [newGraphs, newGraphData] = this._cloneGraphs()
         newGraphs[graphId] = { ...newGraphs[graphId], ...rangeData }
         let categories = Object.keys(newGraphData[graphId].categories)
@@ -336,6 +343,12 @@ const mapDispatchToProps = dispatch => {
     return {
         addGraph: graphId => dispatch(addGraph(graphId)),
         removeGraph: graphId => dispatch(removeGraph(graphId)),
+        addCategory: (graphId, catData) =>
+            dispatch(addCategory(graphId, catData)),
+        removeCategory: (graphId, category) =>
+            dispatch(removeCategory(graphId, category)),
+        modifyRange: (graphId, rangeData) =>
+            dispatch(modifyRange(graphId, rangeData)),
     }
 }
 
