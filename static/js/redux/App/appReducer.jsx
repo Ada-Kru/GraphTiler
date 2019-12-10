@@ -7,177 +7,96 @@ import {
 } from "./appTypes"
 import removeKeys from "../../components/removeKeys"
 
-const initialState = {
-    graphs: {
-        byId: {},
-        allIds: [],
-    },
-    ranges: {
-        byId: {},
-        allIds: [],
-    },
-    categories: {
-        byId: {},
-        allIds: [],
-    },
-}
+const INITIAL_STATE = { graphs: {}, ranges: {}, categories: {} },
+    DEFAULT_RANGE = { rangeType: "past", pastAmount: 1, pastUnit: "hr" },
+    GRAPH_TYPES = new Set([
+        REMOVE_GRAPH,
+        ADD_CATEGORY,
+        REMOVE_CATEGORY,
+        MODIFY_RANGE,
+    ])
 
-const appReducer = (state = initialState, action) => {
-    console.log("reducer called: ", action)
-    console.log("state:", state)
-    let type = action.type
-    if (!action.hasOwnProperty("payload")) {
-        return state
-    }
-    if (
-        type === REMOVE_GRAPH ||
-        type === ADD_CATEGORY ||
-        type === REMOVE_CATEGORY ||
-        type === MODIFY_RANGE
-    ) {
-        if (!state.graphs.byId.hasOwnProperty(action.payload.graphId)) {
-            return state
+const findGraphCatId = (cat, allCats, graphCats) => {
+    for (let [key, val] of Object.entries(allCats)) {
+        if (val.category === cat && graphCats.includes(key)) {
+            return key
         }
     }
+    return ""
+}
 
-    let graphId = action.payload.graphId
-    let graph = state.graphs.byId[graphId]
-    let catsById = state.categories.byId
-    let catsAllIds = state.categories.allIds
-    let graphById = state.graphs.byId
-    let graphAllIds = state.graphs.allIds
-    let rangesById = state.ranges.byId
-    let rangesAllIds = state.ranges.allIds
+let nextRangeId = 0,
+    nextCatId = 0
+
+const appReducer = (state = INITIAL_STATE, action) => {
+    let type = action.type,
+        isGraphType = GRAPH_TYPES.has(type)
+    if (
+        !action.hasOwnProperty("payload") ||
+        (isGraphType && !state.graphs.hasOwnProperty(action.payload.graphId))
+    ) {
+        return state
+    }
+
+    let graphId = action.payload.graphId,
+        graphs = state.graphs,
+        graph = graphs[graphId],
+        ranges = state.ranges,
+        cats = state.categories
+    // let graphIds = Object.keys(graphs)
+    // let rangesIds = Object.keys(ranges)
+    // let catIds = Object.keys(cats)
 
     switch (action.type) {
         case ADD_GRAPH: {
-            let ids = state.ranges.allIds
-            let rangeId = ids.length ? ids[ids.length - 1] + 1 : 0
+            let rangeId = (nextRangeId++).toString(),
+                graphData = { range: rangeId, categories: [] }
             return {
                 ...state,
-                graphs: {
-                    ...state.graphs,
-                    byId: {
-                        ...state.graphs.byId,
-                        [graphId]: { range: rangeId, categories: [] },
-                    },
-                    allIds: [...state.graphs.allIds, graphId],
-                },
-                ranges: {
-                    ...state.ranges,
-                    byId: {
-                        ...state.ranges.byId,
-                        [rangeId]: {
-                            rangeType: "past",
-                            pastAmount: 1,
-                            pastUnit: "hr",
-                        },
-                    },
-                    allIds: [...state.ranges.allIds, rangeId],
-                },
+                graphs: { ...graphs, [graphId]: graphData },
+                ranges: { ...ranges, [rangeId]: DEFAULT_RANGE },
             }
         }
         case REMOVE_GRAPH: {
-            let catIds = new Set(graph.categories)
-            let newCatsById = removeKeys({ ...catsById }, catIds)
-            let newCatsAllIds = catsAllIds.filter(x => !catIds.has(x))
-            let newGraphById = removeKeys({ ...graphById }, new Set([graphId]))
-            let newGraphAllIds = graphAllIds.filter(x => x !== graphId)
-            let rangeId = graph.range
-            let newRangesById = removeKeys(
-                { ...rangesById },
-                new Set([rangeId])
-            )
-            let newRangesAllIds = rangesAllIds.filter(x => x !== rangeId)
-
+            let curCatIds = new Set(graph.categories)
             return {
                 ...state,
-                categories: {
-                    ...state.categories,
-                    byId: { ...catsById, ...newCatsById },
-                    allIds: { ...catsAllIds, ...newCatsAllIds },
-                },
-                graphs: {
-                    ...state.graphs,
-                    byId: newGraphById,
-                    allIds: newGraphAllIds,
-                },
-                ranges: {
-                    ...state.ranges,
-                    byId: newRangesById,
-                    allIds: newRangesAllIds,
-                },
+                graphs: removeKeys({ ...graphs }, new Set([graphId])),
+                ranges: removeKeys({ ...ranges }, new Set([graph.range])),
+                categories: removeKeys({ ...cats }, curCatIds),
             }
         }
         case ADD_CATEGORY: {
-            let category = action.payload.catData.category
-            let graphCats = graph.categories
-            let ids = state.categories.allIds
-            let catId = ids.length ? ids[ids.length - 1] + 1 : 0
-
-            let newCatsById = { ...catsById, [catId]: action.payload.catData }
-            let newCatsAllIds = [...catsAllIds, catId]
-            let newGraphCats = [...graphCats, catId]
+            let category = action.payload.catData.category,
+                catId = (nextCatId++).toString(),
+                newGraphCats = [...graph.categories, catId],
+                newGraph = { ...graph, categories: newGraphCats }
 
             return {
                 ...state,
-                categories: {
-                    ...state.categories,
-                    byId: newCatsById,
-                    allIds: newCatsAllIds,
-                },
-                graphs: {
-                    ...state.graphs,
-                    byId: {
-                        ...state.graphs.byId,
-                        [graphId]: { ...graph, categories: newGraphCats },
-                    },
-                },
+                categories: { ...cats, [catId]: action.payload.catData },
+                graphs: { ...state.graphs, [graphId]: newGraph },
             }
         }
         case REMOVE_CATEGORY: {
-            let remId = -1
-
-            for (let [key, value] of Object.entries(catsById)) {
-                if (value.category === action.payload.category) {
-                    remId = key
-                    break
-                }
-            }
-            if (remId === -1) {
+            let searchCat = action.payload.category,
+                remId = findGraphCatId(searchCat, cats, graph.categories)
+            if (!remId) {
                 return state
             }
 
-            let remIdInt = parseInt(remId)
-            let newCatsById = removeKeys({ ...catsById }, new Set([remId]))
-            let newCatsAllIds = catsAllIds.filter(x => x !== remIdInt)
-            let newGraphCats = graph.categories.filter(x => x !== remIdInt)
+            let newGraphCats = graph.categories.filter(x => x !== remId),
+                newGraph = { ...graph, categories: newGraphCats }
             return {
                 ...state,
-                graphs: {
-                    ...state.graphs,
-                    byId: {
-                        ...graphById,
-                        [graphId]: { ...graph, categories: newGraphCats },
-                    },
-                },
-                categories: {
-                    ...state.categories,
-                    byId: newCatsById,
-                    allIds: newCatsAllIds,
-                },
+                graphs: { ...graphs, [graphId]: newGraph },
+                categories: removeKeys({ ...cats }, new Set([remId])),
             }
         }
         case MODIFY_RANGE: {
-            let rangeId = graph.range
-            let newRangesById = { ...rangesById, [rangeId]: action.payload.rangeData.range }
-            return {
-                ...state,
-                ranges: {
-                    ...state.ranges,
-                    byId: newRangesById,
-                },
-            }
+            let rangeId = graph.range,
+                rangeData = action.payload.rangeData.range
+            return { ...state, ranges: { ...ranges, [rangeId]: rangeData } }
         }
         default: {
             return state

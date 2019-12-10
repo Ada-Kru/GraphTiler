@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import { connect } from "react-redux"
 import { Line, Bar, Radar, Polar } from "react-chartjs-2"
 import GraphConfigPanel from "./GraphConfigPanel"
 import moment from "moment"
@@ -45,7 +46,7 @@ const options = {
                 time: {
                     displayFormats: {
                         hour: "hA MMM D",
-                        minute: "HH:mm"
+                        minute: "HH:mm",
                     },
                     labelString: "Date",
                     parser: "YYYY-MM-DD HH:mm:ss",
@@ -74,7 +75,7 @@ class GraphTile extends Component {
         let node = props.node
         let cfg = node.getConfig()
         let id = cfg.graphId
-        let cats = props.graphs[id] ? props.graphs[id].categories : {}
+        let cats = props.graphs[id] ? props.graphs[id].categories : []
 
         this.state = {
             graphId: id,
@@ -101,7 +102,8 @@ class GraphTile extends Component {
 
     componentDidUpdate = prevProps => {
         let id = this.state.graphId
-        let cats = prevProps.graphs[id] ? prevProps.graphs[id].categories : {}
+        let props = this.props
+        let cats = props.graphs[id] ? props.graphs[id].categories : []
         if (cats != this.state.categories) {
             this.setState({ categories: cats })
         }
@@ -137,4 +139,12 @@ class GraphTile extends Component {
     }
 }
 
-export default GraphTile
+const mapStateToProps = state => {
+    return {
+        graphs: state.graphs,
+        ranges: state.ranges,
+        categories: state.categories,
+    }
+}
+
+export default connect(mapStateToProps)(GraphTile)

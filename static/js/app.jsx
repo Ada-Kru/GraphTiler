@@ -244,7 +244,6 @@ class App extends Component {
                         node={node}
                         listener={this.listener}
                         availableCats={this.availableCats}
-                        graphs={this.state.graphs}
                     />
                 )
                 break
