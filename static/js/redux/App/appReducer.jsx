@@ -4,10 +4,17 @@ import {
     ADD_CATEGORY,
     REMOVE_CATEGORY,
     MODIFY_RANGE,
+    NEW_DATA_POINTS,
 } from "./appTypes"
 import removeKeys from "../../components/removeKeys"
 
-const INITIAL_STATE = { graphs: {}, ranges: {}, categories: {} },
+const INITIAL_STATE = {
+        graphs: {},
+        ranges: {},
+        categories: {},
+        pointUpdate: {},
+        pointUpdateId: 0,
+    },
     DEFAULT_RANGE = { rangeType: "past", pastAmount: 1, pastUnit: "hr" },
     GRAPH_TYPES = new Set([
         REMOVE_GRAPH,
@@ -26,7 +33,8 @@ const findGraphCatId = (cat, allCats, graphCats) => {
 }
 
 let nextRangeId = 0,
-    nextCatId = 0
+    nextCatId = 0,
+    pointUpdateId = 0
 
 const appReducer = (state = INITIAL_STATE, action) => {
     let type = action.type,
@@ -48,6 +56,13 @@ const appReducer = (state = INITIAL_STATE, action) => {
     // let catIds = Object.keys(cats)
 
     switch (action.type) {
+        case NEW_DATA_POINTS: {
+            return {
+                ...state,
+                pointUpdate: action.payload,
+                pointUpdateId: ++pointUpdateId,
+            }
+        }
         case ADD_GRAPH: {
             let rangeId = (nextRangeId++).toString(),
                 graphData = { range: rangeId, categories: [] }

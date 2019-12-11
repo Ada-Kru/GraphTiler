@@ -3,5 +3,6 @@ export {
     removeGraph,
     addCategory,
     removeCategory,
-    modifyRange
+    modifyRange,
+    newDataPoints
 } from "./App/appActions"

@@ -11,6 +11,7 @@ import {
     addCategory,
     removeCategory,
     modifyRange,
+    newDataPoints,
 } from "./redux"
 import uuid from "uuid/v4"
 import moment from "moment"
@@ -62,8 +63,6 @@ class App extends Component {
         this.state = {
             model: FlexLayout.Model.fromJson(layout),
             wsState: "disconnected",
-            graphs: {},
-            graphData: {},
         }
 
         this.ws = null
@@ -117,101 +116,85 @@ class App extends Component {
         }
     }
 
+    _send = data => {
+        this.ws.send(JSON.stringify(data))
+    }
+
     listener = (graphId, msg) => {
         for (let [key, data] of Object.entries(msg)) {
             this._listenerMap[key](graphId, data)
         }
     }
 
-    _cloneGraphs = () => {
-        return [{ ...this.state.graphs }, { ...this.state.graphData }]
+    _getGraphCatNames = graphId => {
+        let cats = []
+        for (let catId of this.props.graphs[graphId].categories) {
+            cats.push(this.props.categories[catId].category)
+        }
+        return cats
+    }
+
+    _getGraphRange = graphId => {
+        return this.props.ranges[this.props.graphs[graphId].range]
     }
 
     onRegisterGraph = (graphId, data) => {
         this.props.addGraph(graphId)
-        let [newGraphs, newGraphData] = this._cloneGraphs()
-        newGraphs[graphId] = {
-            categories: {},
-            range: { rangeType: "past", pastAmount: 1, pastUnit: "hr" },
-        }
-        newGraphData[graphId] = { categories: {} }
-        this.setState({ graphs: newGraphs, graphData: newGraphData })
     }
 
     onRemoveGraph = (graphId, data) => {
         this.props.removeGraph(graphId)
-        let [newGraphs, newGraphData] = this._cloneGraphs()
-        let catData = newGraphs[graphId].categories
-        delete newGraphs[graphId]
-        delete newGraphData[graphId]
-        this.setState({ graphs: newGraphs, graphData: newGraphData })
 
-        let cmd = {
+        this._send({
             remove_categories: [
-                { unique_id: graphId, categories: Object.keys(catData) },
+                {
+                    unique_id: graphId,
+                    categories: this._getGraphCatNames(graphId),
+                },
             ],
-        }
-        this.ws.send(JSON.stringify(cmd))
+        })
     }
 
     onAddCategory = (graphId, catCfg) => {
         this.props.addCategory(graphId, catCfg)
-        let [newGraphs, newGraphData] = this._cloneGraphs()
-        newGraphs[graphId].categories[catCfg.category] = catCfg
-        newGraphData[graphId].categories[catCfg.category] = []
-        this.setState({ graphs: newGraphs, graphData: newGraphData })
 
-        let cmd = {
+        this._send({
             add_categories: [
                 {
                     unique_id: graphId,
-                    range: formatWsRangeData(newGraphs[graphId].range),
+                    range: formatWsRangeData(this._getGraphRange(graphId)),
                     categories: [catCfg.category],
                 },
             ],
-        }
-        this.ws.send(JSON.stringify(cmd))
+        })
     }
 
     onRemoveCategory = (graphId, data) => {
         this.props.removeCategory(graphId, data.category)
-        let [newGraphs, newGraphData] = this._cloneGraphs()
-        delete newGraphs[graphId].categories[data.category]
-        delete newGraphData[graphId].categories[data.category]
-        this.setState({ graphs: newGraphs, graphData: newGraphData })
 
-        let cmd = {
+        this._send({
             remove_categories: [
                 { unique_id: graphId, categories: [data.category] },
             ],
-        }
-        this.ws.send(JSON.stringify(cmd))
+        })
     }
 
     onModifyGraphRange = (graphId, rangeData) => {
         this.props.modifyRange(graphId, rangeData)
-        let [newGraphs, newGraphData] = this._cloneGraphs()
-        newGraphs[graphId] = { ...newGraphs[graphId], ...rangeData }
-        let categories = Object.keys(newGraphData[graphId].categories)
-        for (let category of categories) {
-            newGraphData[graphId].categories[category].length = 0
-        }
-        this.setState({ graphs: newGraphs })
 
-        let cmd = {
+        this._send({
             add_categories: [
                 {
                     unique_id: graphId,
                     range: formatWsRangeData(rangeData.range),
-                    categories: categories,
+                    categories: this._getGraphCatNames(graphId),
                 },
             ],
-        }
-        this.ws.send(JSON.stringify(cmd))
+        })
     }
 
     onMsgPointUpdate = categories => {
-        let newGraphData = { ...this.state.graphData }
+        let newCatPoints = {}
         for (let [category, readings] of Object.entries(categories)) {
             let points = []
             for (let [timeStr, reading] of Object.entries(readings)) {
@@ -220,23 +203,12 @@ class App extends Component {
                     y: reading,
                 })
             }
-            this.updateGraphPoints(newGraphData, category, points)
+            newCatPoints[category] = points
         }
-        console.log("graphdata", newGraphData)
-        this.setState({ graphData: newGraphData })
+        this.props.newDataPoints(newCatPoints)
     }
 
-    updateGraphPoints = (graphData, category, points) => {
-        for (let graphId of Object.keys(graphData)) {
-            let graphCats = graphData[graphId].categories
-            if (graphCats.hasOwnProperty(category)) {
-                let catData = graphCats[category]
-                insertPoints(catData, points)
-            }
-        }
-    }
-
-    factory = node => {
+    _factory = node => {
         switch (node.getComponent()) {
             case "graphTile":
                 return (
@@ -266,14 +238,7 @@ class App extends Component {
                 },
             },
             null
-            // () => {
-            //     console.log("graphs: ", this.state.graphs)
-            // }
         )
-    }
-
-    configButtonClicked = cfg => {
-        console.log("from click", cfg)
     }
 
     customizeTab = (node, data) => {
@@ -320,7 +285,7 @@ class App extends Component {
                 <div className="graphGrid">
                     <FlexLayout.Layout
                         model={this.state.model}
-                        factory={this.factory}
+                        factory={this._factory}
                         ref="layout"
                         onRenderTab={this.customizeTab}
                     />
@@ -348,6 +313,7 @@ const mapDispatchToProps = dispatch => {
             dispatch(removeCategory(graphId, category)),
         modifyRange: (graphId, rangeData) =>
             dispatch(modifyRange(graphId, rangeData)),
+        newDataPoints: data => dispatch(newDataPoints(data)),
     }
 }
 

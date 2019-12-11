@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import { connect } from "react-redux"
 import DateTimePicker from "react-datetime-picker"
 import CategoryTile from "./CategoryTile"
 
@@ -14,29 +15,49 @@ const NEW_CAT_DATA = {
     pointHoverBorderColor: "#999",
 }
 
+const getCategories = (catIds, catData) => {
+    let catItems = {}
+    for (let catId of catIds) {
+        catItems[catData[catId].category] = catData[catId]
+    }
+    return catItems
+}
+
 class GraphConfigPanel extends Component {
     constructor(props) {
         super(props)
 
-        let rangeType = "past"
-        let pastAmount = 1
-        let pastUnit = "hr"
-        let since = new Date()
-        let rangeStart = new Date()
-        let rangeEnd = new Date()
+        let graphId = props.graphId,
+            rangeType = "past",
+            pastAmount = 1,
+            pastUnit = "hr",
+            since = new Date(),
+            rangeStart = new Date(),
+            rangeEnd = new Date(),
+            catIds = []
 
-        if (props.graphs[props.graphId]) {
-            let data = props.graphs[props.graphId].range
-            console.log("cfg panel found graph data", data)
-            rangeType = data.rangeType
-            if (rangeType === "past") {
-                pastAmount = data.pastAmount
-                pastUnit = data.pastUnit
-            } else if (rangeType === "since") {
-                since = new Date(data.since)
-            } else if (rangeType === "timerange") {
-                rangeStart = new Date(data.start)
-                rangeEnd = new Date(data.end)
+        if (props.graphs[graphId]) {
+            let graph = props.graphs[graphId],
+                rangeData = props.ranges[graph.range]
+
+            rangeType = rangeData.rangeType
+            catIds = graph.categories
+
+            switch (rangeType) {
+                case "past": {
+                    pastAmount = rangeData.pastAmount
+                    pastUnit = rangeData.pastUnit
+                    break
+                }
+                case "since": {
+                    since = new Date(rangeData.since)
+                    break
+                }
+                case "timerange": {
+                    rangeStart = new Date(rangeData.start)
+                    rangeEnd = new Date(rangeData.end)
+                    break
+                }
             }
         }
 
@@ -49,7 +70,7 @@ class GraphConfigPanel extends Component {
             pastUnit: pastUnit,
             addingNewCat: false,
             editingRange: false,
-            categories: this.props.categories || {},
+            categories: getCategories(catIds, props.categories),
         }
 
         this.snapshot = {}
@@ -58,8 +79,18 @@ class GraphConfigPanel extends Component {
     }
 
     componentDidUpdate = prevProps => {
-        if (prevProps.categories != this.props.categories) {
-            this.setState({ categories: this.props.categories })
+        if (!this.props.graphs[this.props.graphId]) {
+            return true
+        }
+        let props = this.props,
+            graphId = props.graphId
+
+        let prevGraph = prevProps.graphs[props.graphId],
+            prevCatIds = prevGraph ? prevGraph.categories : [],
+            curCatIds = props.graphs[props.graphId].categories
+        if (prevCatIds != curCatIds) {
+            let catData = props.categories
+            this.setState({ categories: getCategories(curCatIds, catData) })
         }
     }
 
@@ -350,7 +381,7 @@ class GraphConfigPanel extends Component {
                             return (
                                 <CategoryTile
                                     key={key}
-                                    data={this.props.categories[key]}
+                                    data={this.state.categories[key]}
                                     category={key}
                                     onRemove={this.onCatRemove}
                                     onSave={this.onCatSave}
@@ -365,4 +396,12 @@ class GraphConfigPanel extends Component {
     }
 }
 
-export default GraphConfigPanel
+const mapStateToProps = state => {
+    return {
+        graphs: state.graphs,
+        ranges: state.ranges,
+        categories: state.categories,
+    }
+}
+
+export default connect(mapStateToProps)(GraphConfigPanel)

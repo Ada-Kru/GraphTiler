@@ -2,7 +2,20 @@ import React, { Component } from "react"
 import { connect } from "react-redux"
 import { Line, Bar, Radar, Polar } from "react-chartjs-2"
 import GraphConfigPanel from "./GraphConfigPanel"
+import insertPoints from "./insertPoints"
+import removeKeys from "./removeKeys"
 import moment from "moment"
+
+const arrEqual = (a, b) => {
+    if (a === b) return true
+    if (a == null || b == null) return false
+    if (a.length != b.length) return false
+
+    for (var i = 0; i < a.length; ++i) {
+        if (a[i] !== b[i]) return false
+    }
+    return true
+}
 
 const data = {
     datasets: [
@@ -72,40 +85,75 @@ const options = {
 class GraphTile extends Component {
     constructor(props) {
         super(props)
-        let node = props.node
-        let cfg = node.getConfig()
-        let id = cfg.graphId
-        let cats = props.graphs[id] ? props.graphs[id].categories : []
+        let cfg = props.node.getConfig()
+        let catIds = props.graphs.hasOwnProperty(cfg.graphId)
+            ? props.graphs[cfg.graphId].categories
+            : []
 
-        this.state = {
-            graphId: id,
-            configPanelOpen: cfg.configPanelOpen,
-            categories: cats,
-        }
+        this.state = { configPanelOpen: cfg.configPanelOpen, catIds: catIds }
+        this.graphId = cfg.graphId
+        this.catData = {}
 
-        this.props.listener(cfg.graphId, {
-            registerGraph: true,
-        })
-
-        node.setEventListener("configPanelOpen", () => {
+        props.listener(cfg.graphId, { registerGraph: true })
+        props.node.setEventListener("configPanelOpen", () => {
             this.setState(prevState => {
-                return {
-                    configPanelOpen: !prevState.configPanelOpen,
-                }
+                return { configPanelOpen: !prevState.configPanelOpen }
             })
         })
 
-        node.setEventListener("close", () => {
+        props.node.setEventListener("close", () => {
             this.props.listener(cfg.graphId, { removeGraph: true })
         })
     }
 
     componentDidUpdate = prevProps => {
-        let id = this.state.graphId
-        let props = this.props
-        let cats = props.graphs[id] ? props.graphs[id].categories : []
-        if (cats != this.state.categories) {
-            this.setState({ categories: cats })
+        let props = this.props,
+            state = this.state,
+            id = this.graphId,
+            catIds = props.graphs.hasOwnProperty(this.graphId)
+                ? props.graphs[this.graphId].categories
+                : []
+        if (!arrEqual(catIds, state.categories)) {
+            let catNames = this._getGraphCatNames(catIds),
+                currentCats = new Set(catNames),
+                newCatData = {}
+
+            for (let category of currentCats) {
+                newCatData[category] = this.catData.hasOwnProperty(category)
+                    ? this.catData[category]
+                    : []
+            }
+
+            this.catData = newCatData
+            this.setState({ categories: catIds })
+        }
+        if (prevProps.pointUpdateId !== props.pointUpdateId) {
+            this._updatePoints()
+            console.log(this.catData)
+        }
+    }
+
+    _getGraphCatNames = catIds => {
+        let catNames = []
+        for (let catId of catIds) {
+            catNames.push(this.props.categories[catId].category)
+        }
+        return catNames
+    }
+
+    _getRange = () => {
+        return this.props.ranges[this.props.graphs[this.graphId].range]
+    }
+
+    _updatePoints = () => {
+        if (!this.props.graphs.hasOwnProperty(this.graphId)) {
+            return
+        }
+
+        for (let [category, points] of Object.entries(this.props.pointUpdate)) {
+            if (this.catData.hasOwnProperty(category)) {
+                insertPoints(this.catData[category], points, this._getRange())
+            }
         }
     }
 
@@ -127,11 +175,9 @@ class GraphTile extends Component {
                         <Line data={data} options={options} />
                     </div>
                     <GraphConfigPanel
-                        graphId={state.graphId}
-                        graphs={props.graphs}
+                        graphId={this.graphId}
                         listener={props.listener}
                         availableCats={props.availableCats}
-                        categories={state.categories}
                     />
                 </div>
             )
@@ -144,6 +190,8 @@ const mapStateToProps = state => {
         graphs: state.graphs,
         ranges: state.ranges,
         categories: state.categories,
+        pointUpdate: state.pointUpdate,
+        pointUpdateId: state.pointUpdateId,
     }
 }
 
