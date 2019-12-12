@@ -4,6 +4,7 @@ import { Line, Bar, Radar, Polar } from "react-chartjs-2"
 import GraphConfigPanel from "./GraphConfigPanel"
 import insertPoints from "./insertPoints"
 import removeKeys from "./removeKeys"
+import DataSetContainer from "./DataSetContainer"
 import moment from "moment"
 
 const arrEqual = (a, b) => {
@@ -17,81 +18,44 @@ const arrEqual = (a, b) => {
     return true
 }
 
-const data = {
-    datasets: [
-        {
-            fill: true,
-            label: "Test Data",
-            lineTension: 0,
-            backgroundColor: "#444",
-            borderColor: "#0F0",
-            pointStyle: "rectRounded",
-            pointBackgroundColor: "#0F0",
-            pointHoverBackgroundColor: "#888",
-            pointHoverBorderColor: "#999",
-            pointHoverBorderWidth: 2,
-            data: [
-                { x: "2019-12-05 10:15", y: 65 },
-                { x: "2019-12-05 10:30", y: 59 },
-                { x: "2019-12-05 10:45", y: 80 },
-                { x: "2019-12-05 11:00", y: 81 },
-                { x: "2019-12-05 11:15", y: 56 },
-                { x: "2019-12-05 11:30", y: 55 },
-                { x: "2019-12-05 11:45", y: 40 },
-                { x: "2019-12-05 12:00", y: 56 },
-            ],
-        },
-    ],
-}
-
-const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    legend: {
-        display: false,
-    },
-    scales: {
-        xAxes: [
-            {
-                type: "time",
-                distribution: "linear",
-                bounds: "ticks",
-                time: {
-                    displayFormats: {
-                        hour: "hA MMM D",
-                        minute: "HH:mm",
-                    },
-                    labelString: "Date",
-                    parser: "YYYY-MM-DD HH:mm:ss",
-                },
-                ticks: {
-                    source: "data",
-                },
-            },
-        ],
-        yAxes: [
-            {
-                ticks: {
-                    beginAtZero: true,
-                },
-                scaleLabel: {
-                    labelString: "Test data",
-                },
-            },
-        ],
-    },
-}
+// const data = {
+//     datasets: [
+//         {
+//             fill: true,
+//             label: "Test Data",
+//             lineTension: 0,
+//             backgroundColor: "#444",
+//             borderColor: "#0F0",
+//             pointStyle: "rectRounded",
+//             pointBackgroundColor: "#0F0",
+//             pointHoverBackgroundColor: "#888",
+//             pointHoverBorderColor: "#999",
+//             pointHoverBorderWidth: 2,
+//             data: [
+//                 { x: "2019-12-05 10:15", y: 65 },
+//                 { x: "2019-12-05 10:30", y: 59 },
+//                 { x: "2019-12-05 10:45", y: 80 },
+//                 { x: "2019-12-05 11:00", y: 81 },
+//                 { x: "2019-12-05 11:15", y: 56 },
+//                 { x: "2019-12-05 11:30", y: 55 },
+//                 { x: "2019-12-05 11:45", y: 40 },
+//                 { x: "2019-12-05 12:00", y: 56 },
+//             ],
+//         },
+//     ],
+// }
 
 class GraphTile extends Component {
     constructor(props) {
         super(props)
         let cfg = props.node.getConfig()
-        let catIds = props.graphs.hasOwnProperty(cfg.graphId)
-            ? props.graphs[cfg.graphId].categories
-            : []
 
-        this.state = { configPanelOpen: cfg.configPanelOpen, catIds: catIds }
+        this.state = {
+            configPanelOpen: cfg.configPanelOpen,
+            catIds: this._getCatIds(),
+        }
         this.graphId = cfg.graphId
+        this.datasets = new DataSetContainer(this.graphId, props.reduxState)
         this.catData = {}
 
         props.listener(cfg.graphId, { registerGraph: true })
@@ -107,35 +71,31 @@ class GraphTile extends Component {
     }
 
     componentDidUpdate = prevProps => {
-        let props = this.props,
-            state = this.state,
-            id = this.graphId,
-            catIds = props.graphs.hasOwnProperty(this.graphId)
-                ? props.graphs[this.graphId].categories
-                : []
-        if (!arrEqual(catIds, state.categories)) {
-            let catNames = this._getGraphCatNames(catIds),
-                currentCats = new Set(catNames),
-                newCatData = {}
-
-            for (let category of currentCats) {
-                newCatData[category] = this.catData.hasOwnProperty(category)
-                    ? this.catData[category]
-                    : []
-            }
-
-            this.catData = newCatData
-            this.setState({ categories: catIds })
+        this.datasets.updateReduxState(this.props.reduxState)
+        if (!arrEqual(this._getCatIds(), this.state.catIds)) {
+            this.datasets.updateCats(this._getGraphCatNames())
+            console.log("datasets: ", this.datasets)
+            this.setState({ catIds: this._getCatIds() })
         }
-        if (prevProps.pointUpdateId !== props.pointUpdateId) {
+        if (prevProps.pointUpdateId !== this.props.pointUpdateId) {
             this._updatePoints()
-            console.log(this.catData)
+            console.log("catData:", this.catData)
         }
     }
 
-    _getGraphCatNames = catIds => {
+    _isRegistered = () => {
+        return this.props.graphs.hasOwnProperty(this.graphId)
+    }
+
+    _getCatIds = () => {
+        return this._isRegistered()
+            ? this.props.graphs[this.graphId].categories
+            : []
+    }
+
+    _getGraphCatNames = () => {
         let catNames = []
-        for (let catId of catIds) {
+        for (let catId of this._getCatIds()) {
             catNames.push(this.props.categories[catId].category)
         }
         return catNames
@@ -149,17 +109,10 @@ class GraphTile extends Component {
         if (!this.props.graphs.hasOwnProperty(this.graphId)) {
             return
         }
-
-        for (let [category, points] of Object.entries(this.props.pointUpdate)) {
-            if (this.catData.hasOwnProperty(category)) {
-                insertPoints(this.catData[category], points, this._getRange())
-            }
-        }
+        this.datasets.updatePoints()
     }
 
     render() {
-        let state = this.state
-        let props = this.props
         if (!this.state.configPanelOpen) {
             return (
                 <div className="graphTile">
@@ -172,12 +125,15 @@ class GraphTile extends Component {
             return (
                 <div className="graphTile">
                     <div className="graphHolder configOpen">
-                        <Line data={data} options={options} />
+                        <Line
+                            data={this.datasets.datasets}
+                            options={this.datasets.options}
+                        />
                     </div>
                     <GraphConfigPanel
                         graphId={this.graphId}
-                        listener={props.listener}
-                        availableCats={props.availableCats}
+                        listener={this.props.listener}
+                        availableCats={this.props.availableCats}
                     />
                 </div>
             )
@@ -187,6 +143,7 @@ class GraphTile extends Component {
 
 const mapStateToProps = state => {
     return {
+        reduxState: state,
         graphs: state.graphs,
         ranges: state.ranges,
         categories: state.categories,
