@@ -7,44 +7,6 @@ import removeKeys from "./removeKeys"
 import DataSetContainer from "./DataSetContainer"
 import moment from "moment"
 
-const arrEqual = (a, b) => {
-    if (a === b) return true
-    if (a == null || b == null) return false
-    if (a.length != b.length) return false
-
-    for (var i = 0; i < a.length; ++i) {
-        if (a[i] !== b[i]) return false
-    }
-    return true
-}
-
-// const data = {
-//     datasets: [
-//         {
-//             fill: true,
-//             label: "Test Data",
-//             lineTension: 0,
-//             backgroundColor: "#444",
-//             borderColor: "#0F0",
-//             pointStyle: "rectRounded",
-//             pointBackgroundColor: "#0F0",
-//             pointHoverBackgroundColor: "#888",
-//             pointHoverBorderColor: "#999",
-//             pointHoverBorderWidth: 2,
-//             data: [
-//                 { x: "2019-12-05 10:15", y: 65 },
-//                 { x: "2019-12-05 10:30", y: 59 },
-//                 { x: "2019-12-05 10:45", y: 80 },
-//                 { x: "2019-12-05 11:00", y: 81 },
-//                 { x: "2019-12-05 11:15", y: 56 },
-//                 { x: "2019-12-05 11:30", y: 55 },
-//                 { x: "2019-12-05 11:45", y: 40 },
-//                 { x: "2019-12-05 12:00", y: 56 },
-//             ],
-//         },
-//     ],
-// }
-
 class GraphTile extends Component {
     constructor(props) {
         super(props)
@@ -53,10 +15,13 @@ class GraphTile extends Component {
         this.state = {
             configPanelOpen: cfg.configPanelOpen,
             catIds: this._getCatIds(),
+            forceRedraw: false,
         }
         this.graphId = cfg.graphId
-        this.datasets = new DataSetContainer(this.graphId, props.reduxState)
-        this.catData = {}
+        this.datasets = new DataSetContainer(
+            this.graphId,
+            this._makeReduxState()
+        )
 
         props.listener(cfg.graphId, { registerGraph: true })
         props.node.setEventListener("configPanelOpen", () => {
@@ -71,15 +36,32 @@ class GraphTile extends Component {
     }
 
     componentDidUpdate = prevProps => {
-        this.datasets.updateReduxState(this.props.reduxState)
-        if (!arrEqual(this._getCatIds(), this.state.catIds)) {
+        let shouldRedraw = false,
+            graphUpdated =
+                prevProps.graphUpdateId !== this.props.graphUpdateId &&
+                this.props.graphsUpdated.includes(this.graphId)
+        this.datasets.updateReduxState(this._makeReduxState())
+
+        if (graphUpdated) {
+            shouldRedraw = true
             this.datasets.updateCats(this._getGraphCatNames())
             console.log("datasets: ", this.datasets)
             this.setState({ catIds: this._getCatIds() })
         }
         if (prevProps.pointUpdateId !== this.props.pointUpdateId) {
-            this._updatePoints()
-            console.log("catData:", this.catData)
+            shouldRedraw = this._updatePoints() || shouldRedraw
+        }
+        if (shouldRedraw) this.setState({ forceRedraw: shouldRedraw })
+        else if (this.state.forceRedraw) this.setState({ forceRedraw: false })
+    }
+
+    _makeReduxState = () => {
+        return {
+            graphs: this.props.graphs,
+            ranges: this.props.ranges,
+            categories: this.props.categories,
+            pointUpdate: this.props.pointUpdate,
+            pointUpdateId: this.props.pointUpdateId,
         }
     }
 
@@ -109,31 +91,46 @@ class GraphTile extends Component {
         if (!this.props.graphs.hasOwnProperty(this.graphId)) {
             return
         }
-        this.datasets.updatePoints()
+        return this.datasets.updatePoints()
+    }
+
+    onRangeChange = () => {
+        this.datasets.clearAllData()
+    }
+
+    _getDatasetKey = data => {
+        return data.category
+    }
+
+    _makeChart = () => {
+        return (
+            <Line
+                data={this.datasets.datasets}
+                options={this.datasets.options}
+                datasetKeyProvider={this._getDatasetKey}
+                redraw={this.state.forceRedraw}
+            />
+        )
     }
 
     render() {
         if (!this.state.configPanelOpen) {
             return (
                 <div className="graphTile">
-                    <div className="graphHolder">
-                        <Line data={data} options={options} />
-                    </div>
+                    <div className="graphHolder">{this._makeChart()}</div>
                 </div>
             )
         } else {
             return (
                 <div className="graphTile">
                     <div className="graphHolder configOpen">
-                        <Line
-                            data={this.datasets.datasets}
-                            options={this.datasets.options}
-                        />
+                        {this._makeChart()}
                     </div>
                     <GraphConfigPanel
                         graphId={this.graphId}
                         listener={this.props.listener}
                         availableCats={this.props.availableCats}
+                        onRangeChange={this.onRangeChange}
                     />
                 </div>
             )
@@ -143,12 +140,13 @@ class GraphTile extends Component {
 
 const mapStateToProps = state => {
     return {
-        reduxState: state,
         graphs: state.graphs,
         ranges: state.ranges,
         categories: state.categories,
         pointUpdate: state.pointUpdate,
         pointUpdateId: state.pointUpdateId,
+        graphUpdateId: state.graphUpdateId,
+        graphsUpdated: state.graphsUpdated,
     }
 }
 

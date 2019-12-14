@@ -14,6 +14,8 @@ const INITIAL_STATE = {
         categories: {},
         pointUpdate: {},
         pointUpdateId: 0,
+        graphsUpdated: [],
+        graphUpdateId: 0,
     },
     DEFAULT_RANGE = { rangeType: "past", pastAmount: 1, pastUnit: "hr" },
     GRAPH_TYPES = new Set([
@@ -34,7 +36,8 @@ const findGraphCatId = (cat, allCats, graphCats) => {
 
 let nextRangeId = 0,
     nextCatId = 0,
-    pointUpdateId = 0
+    pointUpdateId = 0,
+    graphUpdateId = 0
 
 const appReducer = (state = INITIAL_STATE, action) => {
     let type = action.type,
@@ -70,6 +73,8 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 ...state,
                 graphs: { ...graphs, [graphId]: graphData },
                 ranges: { ...ranges, [rangeId]: DEFAULT_RANGE },
+                graphUpdateId: ++graphUpdateId,
+                graphsUpdated: [graphId],
             }
         }
         case REMOVE_GRAPH: {
@@ -79,6 +84,8 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 graphs: removeKeys({ ...graphs }, new Set([graphId])),
                 ranges: removeKeys({ ...ranges }, new Set([graph.range])),
                 categories: removeKeys({ ...cats }, curCatIds),
+                graphUpdateId: ++graphUpdateId,
+                graphsUpdated: [graphId],
             }
         }
         case ADD_CATEGORY: {
@@ -91,6 +98,8 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 ...state,
                 categories: { ...cats, [catId]: action.payload.catData },
                 graphs: { ...state.graphs, [graphId]: newGraph },
+                graphUpdateId: ++graphUpdateId,
+                graphsUpdated: [graphId],
             }
         }
         case REMOVE_CATEGORY: {
@@ -106,12 +115,19 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 ...state,
                 graphs: { ...graphs, [graphId]: newGraph },
                 categories: removeKeys({ ...cats }, new Set([remId])),
+                graphUpdateId: ++graphUpdateId,
+                graphsUpdated: [graphId],
             }
         }
         case MODIFY_RANGE: {
             let rangeId = graph.range,
                 rangeData = action.payload.rangeData.range
-            return { ...state, ranges: { ...ranges, [rangeId]: rangeData } }
+            return {
+                ...state,
+                ranges: { ...ranges, [rangeId]: rangeData },
+                graphUpdateId: ++graphUpdateId,
+                graphsUpdated: [graphId],
+            }
         }
         default: {
             return state

@@ -176,7 +176,7 @@ class CategoryTile extends Component {
                                         <option value="rectRounded">Rounded Rectangle</option>
                                         <option value="rectRot">Rotated Rectangle</option>
                                         <option value="star">Star</option>
-                                        <option value="triangle">Triangel</option>
+                                        <option value="triangle">Triangle</option>
                                     </select>
                                 </label>
                             </span>

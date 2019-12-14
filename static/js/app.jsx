@@ -95,6 +95,16 @@ class App extends Component {
 
         this.ws.onopen = evt => {
             this.setState({ wsState: "connected" })
+            let catData = []
+            for (let graphId of Object.keys(this.props.graphs)) {
+                catData.push({
+                    unique_id: graphId,
+                    range: formatWsRangeData(this._getGraphRange(graphId)),
+                    categories: this._getGraphCatNames(graphId),
+                })
+            }
+
+            this._send({ add_categories: catData })
         }
 
         this.ws.onmessage = evt => {

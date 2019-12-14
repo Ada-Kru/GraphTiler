@@ -141,6 +141,7 @@ class GraphConfigPanel extends Component {
                 data.range.pastUnit = this.state.pastUnit
         }
 
+        this.props.onRangeChange()
         this.props.listener(this.props.graphId, { modifyGraphRange: data })
         this.setState({ editingRange: false })
     }

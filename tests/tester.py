@@ -1,7 +1,8 @@
 from requests import get, post
 
+cat_name = "PCBandwidth"
 
-resp = post(url="http://192.168.2.111:7123/remove-category/PCBandwidth")
+resp = post(url=f"http://192.168.2.111:7123/remove-category/{cat_name}")
 print(resp, resp.json())
 
 data = {
@@ -14,7 +15,7 @@ data = {
 }
 
 
-resp = post(url="http://192.168.2.111:7123/category/PCBandwidth", json=data)
+resp = post(url=f"http://192.168.2.111:7123/category/{cat_name}", json=data)
 print(resp, resp.json())
 #
 # data["min"] = 10
@@ -23,32 +24,33 @@ print(resp, resp.json())
 # # data.pop("units")
 #
 # resp = post(
-#     url="http://192.168.2.111:7123/modify-category/PCBandwidth", json=data
+#     url=f"http://192.168.2.111:7123/modify-category/{cat_name}", json=data
 # )
 # print(resp, resp.json())
 #
-# resp = get(url="http://192.168.2.111:7123/category/PCBandwidth")
+# resp = get(url=f"http://192.168.2.111:7123/category/{cat_name}")
 # print(resp, resp.json())
 
 
 data = {
     "readings": [
-        {"time": "2019-10-22 09:15:00 -0600", "reading": 50000},
+        {"time": "2019-10-22 09:15:00 -0600", "reading": 10000},
         {"time": "2019-10-22 09:16:10 -0600", "reading": 60000},
-        {"time": "2019-10-22 09:17:20 -0600", "reading": 70000},
-        {"time": "2019-10-22 09:18:30 -0600", "reading": 80000},
+        {"time": "2019-10-22 09:17:20 -0600", "reading": 30000},
+        {"time": "2019-10-22 09:18:30 -0600", "reading": 50000},
         {"time": "2019-10-22 09:14:40 -0600", "reading": 40000},
+        {"time": "2019-10-22 09:19:50 -0600", "reading": 20000},
     ]
 }
 resp = post(
-    url="http://192.168.2.111:7123/category/PCBandwidth/add", json=data
+    url=f"http://192.168.2.111:7123/category/{cat_name}/add", json=data
 )
 print(resp, resp.json())
 
 # data = {"reading": 80}
 #
 # resp = post(
-#     url="http://192.168.2.111:7123/category/PCBandwidth/now", json=data
+#     url=f"http://192.168.2.111:7123/category/{cat_name}/now", json=data
 # )
 # print(resp, resp.json())
 
@@ -61,11 +63,11 @@ print(resp, resp.json())
 # }
 #
 # resp = post(
-#     url="http://192.168.2.111:7123/category/PCBandwidth/remove", json=data
+#     url=f"http://192.168.2.111:7123/category/{cat_name}/remove", json=data
 # )
 # print(resp, resp.json())
 
-# resp = post(url="http://192.168.2.111:7123/category/PCBandwidth/remove-all")
+# resp = post(url=f"http://192.168.2.111:7123/category/{cat_name}/remove-all")
 # print(resp, resp.json())
 
 # data = {
@@ -77,6 +79,6 @@ print(resp, resp.json())
 # }
 #
 # resp = post(
-#     url="http://192.168.2.111:7123/category/PCBandwidth/get-points", json=data
+#     url=f"http://192.168.2.111:7123/category/{cat_name}/get-points", json=data
 # )
 # print(resp, resp.json())

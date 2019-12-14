@@ -11,6 +11,7 @@ class DataSetContainer {
         this.options = {
             responsive: true,
             maintainAspectRatio: false,
+            animation: { duration: 0 },
             legend: { display: true },
             scales: { xAxes: [], yAxes: [] },
         }
@@ -20,6 +21,7 @@ class DataSetContainer {
 
     _makeCatOptions = catName => {
         let catData = getCatData(catName, this._graphId, this._reduxState)
+        this.catData[catName] = [...this.catData[catName]]
         return {
             ...catData,
             category: catName,
@@ -112,7 +114,8 @@ class DataSetContainer {
 
     clearAllData = () => {
         for (let cat of Object.keys(this.catData)) {
-            this.catData[cat].length = 0
+            let arr = this.catData[cat]
+            arr.splice(0, arr.length)
         }
     }
 
@@ -160,22 +163,29 @@ class DataSetContainer {
     }
 
     updatePoints = () => {
-        let pointUpdate = this._reduxState.pointUpdate
+        let pointUpdate = this._reduxState.pointUpdate,
+            modified = false
         for (let [catName, points] of Object.entries(pointUpdate)) {
             if (this.catData.hasOwnProperty(catName)) {
-                this._insertPoints(this.catData[catName], points)
+                let curPoints = this.catData[catName]
+                modified = this._insertPoints(curPoints, points) || modified
             }
         }
+
+        return modified
     }
 
     _insertPoints = (curPoints, newPoints) => {
-        let range = getRange(this._graphId, this._reduxState)
-        let { start, end } = this._makeCheckRange(range)
+        let range = getRange(this._graphId, this._reduxState),
+            dataModified = false,
+            { start, end } = this._makeCheckRange(range)
+
         for (let point of newPoints) {
             if (!point.x.isBetween(start, end, null, "[]")) {
                 continue
             }
 
+            dataModified = true
             let i = this._findInsertIndex(curPoints, point)
             curPoints.splice(i, 0, point)
             let tm = point.x,
@@ -186,6 +196,8 @@ class DataSetContainer {
                 curPoints.splice(i + 1, 1)
             }
         }
+
+        return dataModified
     }
 }
 
