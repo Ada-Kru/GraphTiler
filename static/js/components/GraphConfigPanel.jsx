@@ -379,6 +379,7 @@ class GraphConfigPanel extends Component {
                                 onRemove={this.onCatRemove}
                                 onSave={this.onCatSave}
                                 onCancel={this.onCatCancel}
+                                graphId={this.props.graphId}
                                 editing={true}
                             />
                         ) : null}
@@ -391,6 +392,7 @@ class GraphConfigPanel extends Component {
                                     onRemove={this.onCatRemove}
                                     onSave={this.onCatSave}
                                     onCancel={this.onCatCancel}
+                                    graphId={this.props.graphId}
                                 />
                             )
                         })}

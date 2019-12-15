@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import { connect } from "react-redux"
 import removeKeys from "./removeKeys"
 
 class CategoryTile extends Component {
@@ -17,6 +18,7 @@ class CategoryTile extends Component {
         this.savedState = {}
         this.saveSnapshot()
         this.catForm = React.createRef()
+        this.catInput = React.createRef()
     }
 
     componentDidUpdate = prevProps => {
@@ -25,12 +27,36 @@ class CategoryTile extends Component {
         }
     }
 
+    _isRegistered = () => {
+        return this.props.graphs.hasOwnProperty(this.props.graphId)
+    }
+
+    _getCatIds = () => {
+        return this._isRegistered()
+            ? this.props.graphs[this.props.graphId].categories
+            : []
+    }
+
+    _getGraphCatNames = () => {
+        let catNames = []
+        for (let catId of this._getCatIds()) {
+            catNames.push(this.props.categories[catId].category)
+        }
+        return catNames
+    }
+
     saveSnapshot = () => {
         this.savedState = removeKeys({ ...this.state }, this.noSaveKeys)
     }
 
     save = () => {
-        if (!this.catForm.current.reportValidity()) {
+        if (!this.catForm.current.reportValidity()) return
+        let cats = this._getGraphCatNames(),
+            catInUse =
+                cats.includes(this.state.category) &&
+                !cats.includes(this.currentCategory)
+        if (catInUse) {
+            this.catInput.current.setCustomValidity("Category already exists!")
             return
         }
         this.props.onRemove({ category: this.currentCategory })
@@ -38,6 +64,10 @@ class CategoryTile extends Component {
         this.props.onSave(data)
         this.currentCategory = this.state.category
         this.setState({ editing: false })
+    }
+
+    onSaveButtonBlur = () => {
+        this.catInput.current.setCustomValidity("")
     }
 
     cancel = () => {
@@ -105,6 +135,7 @@ class CategoryTile extends Component {
                                         list="AvailableCats"
                                         defaultValue={this.state.category}
                                         onChange={this.onFormChange}
+                                        ref={this.catInput}
                                         name="category"
                                         autoFocus
                                         maxLength="100"
@@ -117,7 +148,6 @@ class CategoryTile extends Component {
                                         defaultValue={this.state.label}
                                         onChange={this.onFormChange}
                                         name="label"
-                                        autoFocus
                                         maxLength="100"
                                         required
                                     />
@@ -240,7 +270,12 @@ class CategoryTile extends Component {
                         </div>
                     </form>
                     <span className="cat-tile-footer">
-                        <button onClick={this.save}>Save</button>
+                        <button
+                            onClick={this.save}
+                            onBlur={this.onSaveButtonBlur}
+                        >
+                            Save
+                        </button>
                         <button onClick={this.cancel}>Cancel</button>
                     </span>
                 </div>
@@ -278,4 +313,11 @@ class CategoryTile extends Component {
     }
 }
 
-export default CategoryTile
+const mapStateToProps = state => {
+    return {
+        graphs: state.graphs,
+        categories: state.categories,
+    }
+}
+
+export default connect(mapStateToProps)(CategoryTile)
