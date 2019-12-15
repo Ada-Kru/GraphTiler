@@ -107,7 +107,7 @@ html {
 }
 
 .graphHolder.configOpen {
-    width: 70%;
+    width: 50%;
     float: left;
 }
 
@@ -116,7 +116,7 @@ html {
     flex-direction: column;
     color: white;
     background-color: #333;
-    width: 30%;
+    width: 50%;
     height: 100%;
     float: right;
     /* transition: width 0.2s; */
@@ -138,19 +138,28 @@ html {
     padding-top: 3%;
 }
 
-.config-row label {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    width: 100%;
+label {
+    order: 1;
+    flex: 1 1 50%;
 }
 
 fieldset {
     position: relative;
     border: 2px solid #222;
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.cat-tile-options fieldset {
+    width: 90%;
 }
 
 .range-cfg-fieldset {
     margin-top: 10px;
+}
+
+.range-cfg-fieldset label {
+    order: unset;
 }
 
 .fieldset-legend {
@@ -164,13 +173,9 @@ select {
     height: 20px;
 }
 
-label input {
-    width: 40%;
-    min-width: 20%;
-}
-
-label input,
-label select {
+.gt-input {
+    vertical-align: middle;
+    margin: 5px 20px;
     background-color: #444;
     color: #fff;
     border-top: 1px solid #555;
@@ -179,14 +184,14 @@ label select {
     border-right: 1px solid #888;
 }
 
-label input:disabled,
-label select:disabled {
+input:disabled,
+select:disabled {
     background-color: #222;
     color: #aaa;
     border: none;
 }
 
-label input[type="color"] {
+input[type="color"] {
     width: 40px;
     background-color: inherit;
     border: none;
@@ -260,21 +265,24 @@ label .react-datetimerange-picker {
 
 .cat-tile-button.right {
     position: absolute;
-	left: 97.5%;
+    left: 98.5%;
 }
 
 .cat-tile-options {
     display: flex;
-    flex-direction: column;
+    /* flex-direction: column; */
     justify-content: start;
     width: 100%;
     padding-left: 1%;
+    flex-flow: row wrap;
+    align-items: center;
 }
 
 .cat-tile-footer {
     display: flex;
     justify-content: space-around;
     padding-top: 5%;
+    width: 100%;
 }
 
 .cat-tile-footer button {

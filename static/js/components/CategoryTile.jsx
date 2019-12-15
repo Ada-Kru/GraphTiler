@@ -128,11 +128,14 @@ class CategoryTile extends Component {
                 <div className="cat-tile editing">
                     <form ref={this.catForm}>
                         <div className="cat-tile-options">
-                            <span className="config-row">
+                            <fieldset>
+                                <legend>Name</legend>
                                 <label>
                                     Category
                                     <input
+                                        className="gt-input"
                                         list="AvailableCats"
+                                        type="text"
                                         defaultValue={this.state.category}
                                         onChange={this.onFormChange}
                                         ref={this.catInput}
@@ -145,6 +148,8 @@ class CategoryTile extends Component {
                                 <label>
                                     Label
                                     <input
+                                        className="gt-input"
+                                        type="text"
                                         defaultValue={this.state.label}
                                         onChange={this.onFormChange}
                                         name="label"
@@ -152,22 +157,23 @@ class CategoryTile extends Component {
                                         required
                                     />
                                 </label>
-                            </span>
-                            <span className="config-row">
+                            </fieldset>
+                            <fieldset>
+                                <legend>Line</legend>
                                 <label>
                                     Line color
                                     <input
+                                        className="gt-input"
                                         type="color"
                                         value={this.state.borderColor}
                                         onChange={this.onFormChange}
                                         name="borderColor"
                                     />
                                 </label>
-                            </span>
-                            <span className="config-row">
                                 <label>
                                     Line width
                                     <input
+                                        className="gt-input"
                                         value={this.state.borderWidth}
                                         onChange={this.onFormChange}
                                         name="borderWidth"
@@ -179,6 +185,7 @@ class CategoryTile extends Component {
                                 <label>
                                     Roundness
                                     <input
+                                        className="gt-input"
                                         value={this.state.lineTension}
                                         onChange={this.onFormChange}
                                         name="lineTension"
@@ -188,11 +195,13 @@ class CategoryTile extends Component {
                                         type="number"
                                     />
                                 </label>
-                            </span>
-                            <span className="config-row">
+                            </fieldset>
+                            <fieldset>
+                                <legend>Points</legend>
                                 <label>
                                     Point border
                                     <input
+                                        className="gt-input"
                                         type="color"
                                         value={this.state.pointBorderColor}
                                         onChange={this.onFormChange}
@@ -202,17 +211,17 @@ class CategoryTile extends Component {
                                 <label>
                                     Point fill
                                     <input
+                                        className="gt-input"
                                         type="color"
                                         value={this.state.pointBackgroundColor}
                                         onChange={this.onFormChange}
                                         name="pointBackgroundColor"
                                     />
                                 </label>
-                            </span>
-                            <span className="config-row">
                                 <label>
                                     Point size
                                     <input
+                                        className="gt-input"
                                         value={this.state.pointRadius}
                                         onChange={this.onFormChange}
                                         name="pointRadius"
@@ -224,6 +233,7 @@ class CategoryTile extends Component {
                                 <label>
                                     Point style
                                     <select
+                                        className="gt-input"
                                         value={this.state.pointStyle}
                                         onChange={this.onFormChange}
                                         name="pointStyle"
@@ -244,11 +254,13 @@ class CategoryTile extends Component {
                                         </option>
                                     </select>
                                 </label>
-                            </span>
-                            <span className="config-row">
+                            </fieldset>
+                            <fieldset>
+                                <legend>Fill</legend>
                                 <label>
                                     Fill
                                     <select
+                                        className="gt-input"
                                         value={this.state.fill.toString()}
                                         onChange={this.onFormChangeBoolStr}
                                         name="fill"
@@ -260,13 +272,14 @@ class CategoryTile extends Component {
                                 <label>
                                     Fill color
                                     <input
+                                        className="gt-input"
                                         type="color"
                                         value={this.state.backgroundColor}
                                         onChange={this.onFormChange}
                                         name="backgroundColor"
                                     />
                                 </label>
-                            </span>
+                            </fieldset>
                         </div>
                     </form>
                     <span className="cat-tile-footer">
@@ -288,24 +301,22 @@ class CategoryTile extends Component {
                         {this.makeCfgBtn()} {this.makeCloseBtn(true)}
                     </legend>
                     <div className="cat-tile-options">
-                        <span className="config-row">
-                            <label>
-                                Line color
-                                <input
-                                    type="color"
-                                    value={this.state.borderColor}
-                                    disabled={true}
-                                />
-                            </label>
-                            <label>
-                                Point color
-                                <input
-                                    type="color"
-                                    value={this.state.pointBorderColor}
-                                    disabled={true}
-                                />
-                            </label>
-                        </span>
+                        <label>
+                            Line color
+                            <input
+                                type="color"
+                                value={this.state.borderColor}
+                                disabled={true}
+                            />
+                        </label>
+                        <label>
+                            Point color
+                            <input
+                                type="color"
+                                value={this.state.pointBorderColor}
+                                disabled={true}
+                            />
+                        </label>
                     </div>
                 </fieldset>
             )
