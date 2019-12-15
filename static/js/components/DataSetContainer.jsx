@@ -26,7 +26,6 @@ class DataSetContainer {
             ...catData,
             category: catName,
             data: this.catData[catName],
-            label: catName,
         }
     }
 

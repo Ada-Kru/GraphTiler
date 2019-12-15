@@ -5,14 +5,18 @@ import CategoryTile from "./CategoryTile"
 
 const DATETIME_FORMAT = "MM-dd-y hh:mm a"
 const NEW_CAT_DATA = {
+    label: "",
     borderColor: "#FFFFFF",
     fill: true,
+    borderWidth: 3,
     lineTension: 0,
-    backgroundColor: "#444",
+    backgroundColor: "#444444",
+    pointRadius: 2,
     pointStyle: "circle",
     pointBackgroundColor: "#FFFFFF",
-    pointHoverBackgroundColor: "#888",
-    pointHoverBorderColor: "#999",
+    pointBorderColor: "#FFFFFF",
+    pointHoverBackgroundColor: "#888888",
+    pointHoverBorderColor: "#999999",
 }
 
 const getCategories = (catIds, catData) => {

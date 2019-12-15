@@ -8,7 +8,7 @@ class CategoryTile extends Component {
         this.state = {
             editing: this.props.editing,
             category: props.category,
-            ...props.data
+            ...props.data,
         }
         this.noSaveKeys = new Set(["editing"])
 
@@ -56,28 +56,12 @@ class CategoryTile extends Component {
         }
     }
 
-    onCatChange = evt => {
-        this.setState({ category: evt.target.value })
+    onFormChange = evt => {
+        this.setState({ [evt.target.name]: evt.target.value })
     }
 
-    onLineColorChange = evt => {
-        this.setState({ borderColor: evt.target.value })
-    }
-
-    onLineTensionChange = evt => {
-        this.setState({ lineTension: evt.target.value })
-    }
-
-    onPointColorChange = evt => {
-        this.setState({ pointBackgroundColor: evt.target.value })
-    }
-
-    onPointStyleChange = evt => {
-        this.setState({ pointStyle: evt.target.value })
-    }
-
-    onFillChange = evt => {
-        this.setState({ fill: evt.target.value === "true" })
+    onFormChangeBoolStr = evt => {
+        this.setState({ [evt.target.name]: evt.target.value === "true" })
     }
 
     makeCfgBtn = () => {
@@ -120,7 +104,19 @@ class CategoryTile extends Component {
                                     <input
                                         list="AvailableCats"
                                         defaultValue={this.state.category}
-                                        onChange={this.onCatChange}
+                                        onChange={this.onFormChange}
+                                        name="category"
+                                        autoFocus
+                                        maxLength="100"
+                                        required
+                                    />
+                                </label>
+                                <label>
+                                    Label
+                                    <input
+                                        defaultValue={this.state.label}
+                                        onChange={this.onFormChange}
+                                        name="label"
                                         autoFocus
                                         maxLength="100"
                                         required
@@ -133,16 +129,29 @@ class CategoryTile extends Component {
                                     <input
                                         type="color"
                                         value={this.state.borderColor}
-                                        onChange={this.onLineColorChange}
+                                        onChange={this.onFormChange}
+                                        name="borderColor"
                                     />
                                 </label>
                             </span>
                             <span className="config-row">
                                 <label>
-                                    Line tension
+                                    Line width
+                                    <input
+                                        value={this.state.borderWidth}
+                                        onChange={this.onFormChange}
+                                        name="borderWidth"
+                                        min="1"
+                                        max="20"
+                                        type="number"
+                                    />
+                                </label>
+                                <label>
+                                    Roundness
                                     <input
                                         value={this.state.lineTension}
-                                        onChange={this.onLineTensionChange}
+                                        onChange={this.onFormChange}
+                                        name="lineTension"
                                         min="0"
                                         max="1"
                                         step="0.01"
@@ -152,31 +161,57 @@ class CategoryTile extends Component {
                             </span>
                             <span className="config-row">
                                 <label>
-                                    Point color
+                                    Point border
+                                    <input
+                                        type="color"
+                                        value={this.state.pointBorderColor}
+                                        onChange={this.onFormChange}
+                                        name="pointBorderColor"
+                                    />
+                                </label>
+                                <label>
+                                    Point fill
                                     <input
                                         type="color"
                                         value={this.state.pointBackgroundColor}
-                                        onChange={this.onPointColorChange}
+                                        onChange={this.onFormChange}
+                                        name="pointBackgroundColor"
                                     />
                                 </label>
                             </span>
                             <span className="config-row">
                                 <label>
+                                    Point size
+                                    <input
+                                        value={this.state.pointRadius}
+                                        onChange={this.onFormChange}
+                                        name="pointRadius"
+                                        min="0"
+                                        max="20"
+                                        type="number"
+                                    />
+                                </label>
+                                <label>
                                     Point style
                                     <select
                                         value={this.state.pointStyle}
-                                        onChange={this.onPointStyleChange}
+                                        onChange={this.onFormChange}
+                                        name="pointStyle"
                                     >
                                         <option value="circle">Circle</option>
                                         <option value="cross">Cross</option>
-                                        <option value="crossRot">Rotated Cross</option>
+                                        <option value="crossRot">X</option>
                                         <option value="dash">Dash</option>
                                         <option value="line">Line</option>
-                                        <option value="rect">Rectangle</option>
-                                        <option value="rectRounded">Rounded Rectangle</option>
-                                        <option value="rectRot">Rotated Rectangle</option>
+                                        <option value="rect">Square</option>
+                                        <option value="rectRounded">
+                                            Rounded Square
+                                        </option>
+                                        <option value="rectRot">Diamond</option>
                                         <option value="star">Star</option>
-                                        <option value="triangle">Triangle</option>
+                                        <option value="triangle">
+                                            Triangle
+                                        </option>
                                     </select>
                                 </label>
                             </span>
@@ -185,11 +220,21 @@ class CategoryTile extends Component {
                                     Fill
                                     <select
                                         value={this.state.fill.toString()}
-                                        onChange={this.onFillChange}
+                                        onChange={this.onFormChangeBoolStr}
+                                        name="fill"
                                     >
                                         <option value="true">True</option>
                                         <option value="false">False</option>
                                     </select>
+                                </label>
+                                <label>
+                                    Fill color
+                                    <input
+                                        type="color"
+                                        value={this.state.backgroundColor}
+                                        onChange={this.onFormChange}
+                                        name="backgroundColor"
+                                    />
                                 </label>
                             </span>
                         </div>
@@ -214,7 +259,14 @@ class CategoryTile extends Component {
                                 <input
                                     type="color"
                                     value={this.state.borderColor}
-                                    onChange={this.onLineColorChange}
+                                    disabled={true}
+                                />
+                            </label>
+                            <label>
+                                Point color
+                                <input
+                                    type="color"
+                                    value={this.state.pointBorderColor}
                                     disabled={true}
                                 />
                             </label>
