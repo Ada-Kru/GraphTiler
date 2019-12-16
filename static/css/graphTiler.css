@@ -155,11 +155,18 @@ fieldset {
 }
 
 .range-cfg-fieldset {
-    margin-top: 10px;
+    margin-top: 15px;
+    flex-flow: column;
 }
 
 .range-cfg-fieldset label {
     order: unset;
+    flex: none;
+}
+
+.flex-div {
+    display: flex;
+    flex-flow: row wrap;
 }
 
 .fieldset-legend {
@@ -176,6 +183,17 @@ select {
 .gt-input {
     vertical-align: middle;
     margin: 5px 20px;
+    background-color: #444;
+    color: #fff;
+    border-top: 1px solid #555;
+    border-left: 1px solid #555;
+    border-bottom: 1px solid #888;
+    border-right: 1px solid #888;
+}
+
+.legend-input {
+    margin-left: 5px;
+    vertical-align: middle;
     background-color: #444;
     color: #fff;
     border-top: 1px solid #555;
@@ -201,16 +219,28 @@ input[type="color"] {
 label .react-datetime-picker,
 label .react-datetimerange-picker {
     max-height: 24px;
+    margin: 5px 20px;
 }
 
 .react-datetime-picker__wrapper {
-    color: #fff;
-    background-color: #444;
     font-size: small;
+}
+
+.react-datetime-picker--enabled {
+    background-color: #444 !important;
     border-top: 1px solid #555 !important;
     border-left: 1px solid #555 !important;
     border-bottom: 1px solid #888 !important;
     border-right: 1px solid #888 !important;
+}
+
+.react-datetime-picker--disabled {
+    background-color: #222 !important;
+    border: none;
+}
+
+.react-datetime-picker__inputGroup__input {
+    color: #FFF;
 }
 
 .react-calendar {
@@ -266,6 +296,7 @@ label .react-datetimerange-picker {
 .cat-tile-button.right {
     position: absolute;
     left: 98.5%;
+    top: 0%;
 }
 
 .cat-tile-options {

@@ -236,56 +236,52 @@ class GraphConfigPanel extends Component {
                 rangeInputs = (
                     <label>
                         Past
-                        <span className="config-row">
-                            <input
-                                className="gt-input"
-                                value={this.state.pastAmount}
-                                onChange={this.onPastAmountChange}
-                                min="1"
-                                type="number"
-                            />
-                            <select
-                                className="gt-input"
-                                value={this.state.pastUnit}
-                                onChange={this.onPastUnitChange}
-                            >
-                                <option value="sec">Seconds</option>
-                                <option value="min">Minutes</option>
-                                <option value="hr">Hours</option>
-                            </select>
-                        </span>
+                        <input
+                            className="gt-input"
+                            value={this.state.pastAmount}
+                            onChange={this.onPastAmountChange}
+                            min="1"
+                            type="number"
+                        />
+                        <select
+                            className="gt-input"
+                            value={this.state.pastUnit}
+                            onChange={this.onPastUnitChange}
+                        >
+                            <option value="sec">Seconds</option>
+                            <option value="min">Minutes</option>
+                            <option value="hr">Hours</option>
+                        </select>
                     </label>
                 )
                 break
             case "timerange":
                 rangeInputs = (
-                    <div>
-                        <span className="config-row">
-                        <label>
-                            Start
-                            <DateTimePicker
-                                onChange={this.onRangeStartChange}
-                                value={this.state.rangeStart}
-                                calendarIcon={null}
-                                clearIcon={null}
-                                disableClock={true}
-                                format={DATETIME_FORMAT}
-                            />
-                        </label>
-                    </span>
-                    <span className="config-row">
-                        <label>
-                            End
-                            <DateTimePicker
-                                onChange={this.onRangeEndChange}
-                                value={this.state.rangeEnd}
-                                calendarIcon={null}
-                                clearIcon={null}
-                                disableClock={true}
-                                format={DATETIME_FORMAT}
-                            />
-                        </label>
-                    </span>
+                    <div className="flex-div">
+                            <label>
+                                Start
+                                <DateTimePicker
+                                    onChange={this.onRangeStartChange}
+                                    value={this.state.rangeStart}
+                                    calendarIcon={null}
+                                    clearIcon={null}
+                                    disableClock={true}
+                                    format={DATETIME_FORMAT}
+                                    disabled={!this.state.editingRange}
+                                />
+                            </label>
+                            <label>
+                                End
+                                <DateTimePicker
+                                    onChange={this.onRangeEndChange}
+                                    value={this.state.rangeEnd}
+                                    calendarIcon={null}
+                                    clearIcon={null}
+                                    disableClock={true}
+                                    format={DATETIME_FORMAT}
+                                    disabled={!this.state.editingRange}
+                                />
+                            </label>
                     </div>
                 )
                 break
@@ -300,11 +296,27 @@ class GraphConfigPanel extends Component {
                             clearIcon={null}
                             disableClock={true}
                             format={DATETIME_FORMAT}
+                            disabled={!this.state.editingRange}
                         />
                     </label>
                 )
                 break
         }
+
+        // <span className="config-row">
+        //     <label>
+        //         Range type
+        //         <select
+        //             className="gt-input"
+        //             value={this.state.rangeType}
+        //             onChange={this.onrangeTypeChange}
+        //         >
+        //             <option value="past">Past X</option>
+        //             <option value="timerange">Time range</option>
+        //             <option value="since">Since time</option>
+        //         </select>
+        //     </label>
+        // </span>
 
         return (
             <form ref={this.rangeForm} onSubmit={evt => evt.preventDefault()}>
@@ -315,19 +327,20 @@ class GraphConfigPanel extends Component {
                     className="range-cfg-fieldset"
                     disabled={!this.state.editingRange}
                 >
-                    <label>
-                        Range type
-                        <select
-                            className="gt-input"
-                            value={this.state.rangeType}
-                            onChange={this.onrangeTypeChange}
-                        >
-                            <option value="past">Past X</option>
-                            <option value="timerange">Time range</option>
-                            <option value="since">Since time</option>
-                        </select>
-                    </label>
-                    {rangeInputs}
+                    <fieldset>
+                        <legend>Range
+                            <select
+                                className="legend-input"
+                                value={this.state.rangeType}
+                                onChange={this.onrangeTypeChange}
+                            >
+                                <option value="past">Past X</option>
+                                <option value="timerange">Time range</option>
+                                <option value="since">Since time</option>
+                            </select>
+                        </legend>
+                        {rangeInputs}
+                    </fieldset>
                     {this.makeFooter()}
                 </fieldset>
             </form>
