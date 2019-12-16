@@ -5,6 +5,7 @@ import {
     REMOVE_CATEGORY,
     MODIFY_RANGE,
     NEW_DATA_POINTS,
+    UPDATE_GRAPH_CFG,
 } from "./appTypes"
 import removeKeys from "../../components/removeKeys"
 
@@ -54,9 +55,6 @@ const appReducer = (state = INITIAL_STATE, action) => {
         graph = graphs[graphId],
         ranges = state.ranges,
         cats = state.categories
-    // let graphIds = Object.keys(graphs)
-    // let rangesIds = Object.keys(ranges)
-    // let catIds = Object.keys(cats)
 
     switch (action.type) {
         case NEW_DATA_POINTS: {
@@ -68,7 +66,12 @@ const appReducer = (state = INITIAL_STATE, action) => {
         }
         case ADD_GRAPH: {
             let rangeId = (nextRangeId++).toString(),
-                graphData = { range: rangeId, categories: [] }
+                graphData = {
+                    range: rangeId,
+                    categories: [],
+                    legendDisplay: true,
+                    legendPosition: "top",
+                }
             return {
                 ...state,
                 graphs: { ...graphs, [graphId]: graphData },
@@ -125,6 +128,15 @@ const appReducer = (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 ranges: { ...ranges, [rangeId]: rangeData },
+                graphUpdateId: ++graphUpdateId,
+                graphsUpdated: [graphId],
+            }
+        }
+        case UPDATE_GRAPH_CFG: {
+            let newGraph = { ...graph, ...action.payload.cfg }
+            return {
+                ...state,
+                graphs: { ...graphs, [graphId]: newGraph },
                 graphUpdateId: ++graphUpdateId,
                 graphsUpdated: [graphId],
             }

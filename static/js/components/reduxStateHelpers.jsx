@@ -21,3 +21,7 @@ export const getCatData = (catName, graphId, state) => {
 export const getRange = (graphId, state) => {
     return state.ranges[state.graphs[graphId].range]
 }
+
+export const getGraphData = (graphId, state) => {
+    return state.graphs[graphId]
+}

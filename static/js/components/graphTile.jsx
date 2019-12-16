@@ -45,6 +45,7 @@ class GraphTile extends Component {
         if (graphUpdated) {
             shouldRedraw = true
             this.datasets.updateCats(this._getGraphCatNames())
+            this.datasets.updateGraphOptions()
             console.log("datasets: ", this.datasets)
             this.setState({ catIds: this._getCatIds() })
         }

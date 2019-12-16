@@ -1,4 +1,9 @@
-import { getGraphCatNames, getRange, getCatData } from "./reduxStateHelpers"
+import {
+    getGraphCatNames,
+    getRange,
+    getCatData,
+    getGraphData,
+} from "./reduxStateHelpers"
 import moment from "moment"
 
 const UNIT_MAP = { sec: "seconds", min: "minutes", hr: "hours" }
@@ -12,7 +17,6 @@ class DataSetContainer {
             responsive: true,
             maintainAspectRatio: false,
             animation: { duration: 0 },
-            legend: { display: true },
             scales: { xAxes: [], yAxes: [] },
         }
         this._reduxState = reduxState
@@ -94,6 +98,14 @@ class DataSetContainer {
             if (!newCats.has(catName)) removed.push(catName)
         }
         this._removeCategories(removed)
+    }
+
+    updateGraphOptions = () => {
+        let gd = getGraphData(this._graphId, this._reduxState)
+        this.options.legend = {
+            display: gd.legendDisplay,
+            position: gd.legendPosition,
+        }
     }
 
     updateCats = newCats => {

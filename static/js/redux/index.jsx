@@ -4,5 +4,6 @@ export {
     addCategory,
     removeCategory,
     modifyRange,
-    newDataPoints
+    newDataPoints,
+    updateGraphCfg,
 } from "./App/appActions"

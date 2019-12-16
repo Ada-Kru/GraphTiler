@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import { connect } from "react-redux"
+import { updateGraphCfg } from "../redux"
 import DateTimePicker from "react-datetime-picker"
 import CategoryTile from "./CategoryTile"
 
@@ -32,50 +33,49 @@ class GraphConfigPanel extends Component {
         super(props)
 
         let graphId = props.graphId,
-            rangeType = "past",
-            pastAmount = 1,
-            pastUnit = "hr",
-            since = new Date(),
-            rangeStart = new Date(),
-            rangeEnd = new Date(),
-            catIds = []
+            catIds = [],
+            state = {
+                rangeType: "past",
+                since: new Date(),
+                rangeStart: new Date(),
+                rangeEnd: new Date(),
+                pastAmount: 1,
+                pastUnit: "hr",
+                addingNewCat: false,
+                editingRange: false,
+                legendDisplay: true,
+                legendPosition: "top",
+            }
 
         if (props.graphs[graphId]) {
             let graph = props.graphs[graphId],
                 rangeData = props.ranges[graph.range]
 
-            rangeType = rangeData.rangeType
             catIds = graph.categories
+            state.rangeType = rangeData.rangeType
+            state.legendDisplay = graph.legendDisplay
+            state.legendPosition = graph.legendPosition
 
-            switch (rangeType) {
+            switch (state.rangeType) {
                 case "past": {
-                    pastAmount = rangeData.pastAmount
-                    pastUnit = rangeData.pastUnit
+                    state.pastAmount = rangeData.pastAmount
+                    state.pastUnit = rangeData.pastUnit
                     break
                 }
                 case "since": {
-                    since = new Date(rangeData.since)
+                    state.since = new Date(rangeData.since)
                     break
                 }
                 case "timerange": {
-                    rangeStart = new Date(rangeData.start)
-                    rangeEnd = new Date(rangeData.end)
+                    state.rangeStart = new Date(rangeData.start)
+                    state.rangeEnd = new Date(rangeData.end)
                     break
                 }
             }
         }
 
-        this.state = {
-            rangeType: rangeType,
-            since: since,
-            rangeStart: rangeStart,
-            rangeEnd: rangeEnd,
-            pastAmount: pastAmount,
-            pastUnit: pastUnit,
-            addingNewCat: false,
-            editingRange: false,
-            categories: getCategories(catIds, props.categories),
-        }
+        state.categories = getCategories(catIds, props.categories)
+        this.state = state
 
         this.snapshot = {}
         this.rangeForm = React.createRef()
@@ -186,6 +186,21 @@ class GraphConfigPanel extends Component {
         this.setState({ pastUnit: evt.target.value })
     }
 
+    onLegendChange = evt => {
+        let val = evt.target.value
+        this.setState(
+            { legendPosition: val, legendDisplay: val !== "disabled" },
+            () => this.onGraphConfigChange()
+        )
+    }
+
+    onGraphConfigChange = newCfg => {
+        this.props.updateGraphCfg(this.props.graphId, {
+            legendDisplay: this.state.legendDisplay,
+            legendPosition: this.state.legendPosition,
+        })
+    }
+
     onCatSave = data => {
         this.setState({ addingNewCat: false })
         this.props.listener(this.props.graphId, {
@@ -258,30 +273,30 @@ class GraphConfigPanel extends Component {
             case "timerange":
                 rangeInputs = (
                     <div className="flex-div">
-                            <label>
-                                Start
-                                <DateTimePicker
-                                    onChange={this.onRangeStartChange}
-                                    value={this.state.rangeStart}
-                                    calendarIcon={null}
-                                    clearIcon={null}
-                                    disableClock={true}
-                                    format={DATETIME_FORMAT}
-                                    disabled={!this.state.editingRange}
-                                />
-                            </label>
-                            <label>
-                                End
-                                <DateTimePicker
-                                    onChange={this.onRangeEndChange}
-                                    value={this.state.rangeEnd}
-                                    calendarIcon={null}
-                                    clearIcon={null}
-                                    disableClock={true}
-                                    format={DATETIME_FORMAT}
-                                    disabled={!this.state.editingRange}
-                                />
-                            </label>
+                        <label>
+                            Start
+                            <DateTimePicker
+                                onChange={this.onRangeStartChange}
+                                value={this.state.rangeStart}
+                                calendarIcon={null}
+                                clearIcon={null}
+                                disableClock={true}
+                                format={DATETIME_FORMAT}
+                                disabled={!this.state.editingRange}
+                            />
+                        </label>
+                        <label>
+                            End
+                            <DateTimePicker
+                                onChange={this.onRangeEndChange}
+                                value={this.state.rangeEnd}
+                                calendarIcon={null}
+                                clearIcon={null}
+                                disableClock={true}
+                                format={DATETIME_FORMAT}
+                                disabled={!this.state.editingRange}
+                            />
+                        </label>
                     </div>
                 )
                 break
@@ -303,21 +318,6 @@ class GraphConfigPanel extends Component {
                 break
         }
 
-        // <span className="config-row">
-        //     <label>
-        //         Range type
-        //         <select
-        //             className="gt-input"
-        //             value={this.state.rangeType}
-        //             onChange={this.onrangeTypeChange}
-        //         >
-        //             <option value="past">Past X</option>
-        //             <option value="timerange">Time range</option>
-        //             <option value="since">Since time</option>
-        //         </select>
-        //     </label>
-        // </span>
-
         return (
             <form ref={this.rangeForm} onSubmit={evt => evt.preventDefault()}>
                 <label className="fieldset-legend">
@@ -328,7 +328,8 @@ class GraphConfigPanel extends Component {
                     disabled={!this.state.editingRange}
                 >
                     <fieldset>
-                        <legend>Range
+                        <legend>
+                            Range
                             <select
                                 className="legend-input"
                                 value={this.state.rangeType}
@@ -357,7 +358,11 @@ class GraphConfigPanel extends Component {
                             <legend>Graph Options</legend>
                             <label>
                                 Legend position
-                                <select className="gt-input" defaultValue="top">
+                                <select
+                                    className="gt-input"
+                                    defaultValue="top"
+                                    onChange={this.onLegendChange}
+                                >
                                     <option value="top">Top</option>
                                     <option value="left">Left</option>
                                     <option value="bottom">Bottom</option>
@@ -417,4 +422,12 @@ const mapStateToProps = state => {
     }
 }
 
-export default connect(mapStateToProps)(GraphConfigPanel)
+const mapDispatchToProps = dispatch => {
+    let ugc = (graphId, cfg) => dispatch(updateGraphCfg(graphId, cfg))
+    return { updateGraphCfg: ugc }
+}
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(GraphConfigPanel)
