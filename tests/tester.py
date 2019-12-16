@@ -1,6 +1,7 @@
 from requests import get, post
+import sys
 
-cat_name = "PCBandwidth"
+cat_name = sys.argv[1] if len(sys.argv) == 2 else "PCBandwidth"
 
 resp = post(url=f"http://192.168.2.111:7123/remove-category/{cat_name}")
 print(resp, resp.json())

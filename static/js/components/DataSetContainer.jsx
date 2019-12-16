@@ -10,14 +10,13 @@ const UNIT_MAP = { sec: "seconds", min: "minutes", hr: "hours" }
 
 class DataSetContainer {
     constructor(graphId, reduxState) {
-        this.catData = {}
         this.catIndices = {}
         this.datasets = { datasets: [] }
         this.options = {
             responsive: true,
             maintainAspectRatio: false,
             animation: { duration: 0 },
-            scales: { xAxes: [], yAxes: [] },
+            scales: { xAxes: [this._makeXAxisSettings()], yAxes: [] },
         }
         this._reduxState = reduxState
         this._graphId = graphId
@@ -25,11 +24,11 @@ class DataSetContainer {
 
     _makeCatOptions = catName => {
         let catData = getCatData(catName, this._graphId, this._reduxState)
-        this.catData[catName] = [...this.catData[catName]]
         return {
             ...catData,
             category: catName,
-            data: this.catData[catName],
+            data: [...this._getCatPoints(catName)],
+            yAxisID: catName,
         }
     }
 
@@ -47,11 +46,19 @@ class DataSetContainer {
         }
     }
 
-    _makeYAxisSettings = label => {
+    _makeYAxisSettings = (id, label) => {
         return {
             ticks: { beginAtZero: true },
             scaleLabel: { labelString: label },
+            type: "linear",
+            id: id,
         }
+    }
+
+    _getCatPoints = catName => {
+        return this.catIndices.hasOwnProperty(catName)
+            ? this.datasets.datasets[this.catIndices[catName]].data
+            : []
     }
 
     _rebuildCatIndices = () => {
@@ -65,36 +72,35 @@ class DataSetContainer {
 
     _addCategory = catName => {
         let idx = this.datasets.datasets.length
-        this.catIndices[catName] = idx
-        this.catData[catName] = []
         this.datasets.datasets.push(this._makeCatOptions(catName))
-        this.options.scales.xAxes.push(this._makeXAxisSettings())
-        this.options.scales.yAxes.push(this._makeYAxisSettings(catName))
+        this.catIndices[catName] = idx
+        this.options.scales.yAxes.push(
+            this._makeYAxisSettings(catName, this.datasets.datasets[idx].label)
+        )
     }
 
     _updateCategory = catName => {
         let idx = this.catIndices[catName]
         this.datasets.datasets[idx] = this._makeCatOptions(catName)
-        // this.options.scales.xAxes[idx] = this._makeXAxisSettings()
-        // this.options.scales.yAxes[idx] = this._makeYAxisSettings(catName)
     }
 
     _removeCategories = remove => {
+        if (!remove.length) return
         for (let catName of remove) {
             let idx = this.catIndices[catName]
             this.datasets.datasets.splice(idx, 1)
-            this.options.scales.xAxes.splice(idx, 1)
-            this.options.scales.yAxes.splice(idx, 1)
-            delete this.catData[catName]
             delete this.catIndices[catName]
             this._rebuildCatIndices()
         }
+        this.options.scales.yAxes = this.options.scales.yAxes.filter(ele => {
+            return !remove.includes(ele.id)
+        })
     }
 
     _removeRemovedCats = newCategories => {
         let newCats = new Set(newCategories),
             removed = []
-        for (let catName of Object.keys(this.catData)) {
+        for (let catName of Object.keys(this.catIndices)) {
             if (!newCats.has(catName)) removed.push(catName)
         }
         this._removeCategories(removed)
@@ -111,12 +117,17 @@ class DataSetContainer {
     updateCats = newCats => {
         this._removeRemovedCats(newCats)
         for (let catName of newCats) {
-            if (!this.catData.hasOwnProperty(catName)) {
+            if (!this.catIndices.hasOwnProperty(catName)) {
                 this._addCategory(catName)
             } else {
                 this._updateCategory(catName)
             }
         }
+        //
+        // this.datasets.datasets = this.datasets.datasets.filter(ele => {
+        //     return this.catIndices.hasOwnProperty(ele.category)
+        // })
+        // console.log("dsds", this.datasets.datasets, this._reduxState)
     }
 
     updateReduxState = reduxState => {
@@ -124,9 +135,9 @@ class DataSetContainer {
     }
 
     clearAllData = () => {
-        for (let cat of Object.keys(this.catData)) {
-            let arr = this.catData[cat]
-            arr.splice(0, arr.length)
+        for (let catName of Object.keys(this.catIndices)) {
+            let points = this._getCatPoints(catName)
+            points.splice(0, points.length)
         }
     }
 
@@ -177,12 +188,11 @@ class DataSetContainer {
         let pointUpdate = this._reduxState.pointUpdate,
             modified = false
         for (let [catName, points] of Object.entries(pointUpdate)) {
-            if (this.catData.hasOwnProperty(catName)) {
-                let curPoints = this.catData[catName]
+            if (this.catIndices.hasOwnProperty(catName)) {
+                let curPoints = this._getCatPoints(catName)
                 modified = this._insertPoints(curPoints, points) || modified
             }
         }
-
         return modified
     }
 

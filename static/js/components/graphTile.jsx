@@ -16,6 +16,7 @@ class GraphTile extends Component {
             configPanelOpen: cfg.configPanelOpen,
             catIds: this._getCatIds(),
             forceRedraw: false,
+            key: 0
         }
         this.graphId = cfg.graphId
         this.datasets = new DataSetContainer(
@@ -52,8 +53,7 @@ class GraphTile extends Component {
         if (prevProps.pointUpdateId !== this.props.pointUpdateId) {
             shouldRedraw = this._updatePoints() || shouldRedraw
         }
-        if (shouldRedraw) this.setState({ forceRedraw: shouldRedraw })
-        else if (this.state.forceRedraw) this.setState({ forceRedraw: false })
+        if (shouldRedraw) this.setState({key: Math.random()})
     }
 
     _makeReduxState = () => {
@@ -103,13 +103,14 @@ class GraphTile extends Component {
         return data.category
     }
 
+    //redraw={this.state.forceRedraw}
     _makeChart = () => {
         return (
             <Line
                 data={this.datasets.datasets}
                 options={this.datasets.options}
                 datasetKeyProvider={this._getDatasetKey}
-                redraw={this.state.forceRedraw}
+                key={this.state.key}
             />
         )
     }
