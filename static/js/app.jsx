@@ -12,6 +12,7 @@ import {
     removeCategory,
     modifyRange,
     newDataPoints,
+    removeDataPoints
 } from "./redux"
 import uuid from "uuid/v4"
 import moment from "moment"
@@ -223,15 +224,18 @@ class App extends Component {
     }
 
     onRemovedBackendCat = removed => {
-        let newCatState = { ...this.state.availableCats }
+        let newCatState = { ...this.state.availableCats },
+            rem = {}
         for (let catName of removed) {
             delete newCatState[catName]
+            rem[catName] = {type: "all"}
         }
         this.setState({ availableCats: newCatState })
+        this.props.removeDataPoints(rem)
     }
 
     onBackendRemovedPoints = remData => {
-        
+        console.log(remData)
     }
 
     _factory = node => {
@@ -340,6 +344,7 @@ const mapDispatchToProps = dispatch => {
         modifyRange: (graphId, rangeData) =>
             dispatch(modifyRange(graphId, rangeData)),
         newDataPoints: data => dispatch(newDataPoints(data)),
+        removeDataPoints: ranges => dispatch(removeDataPoints(ranges)),
     }
 }
 

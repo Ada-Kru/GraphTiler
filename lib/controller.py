@@ -83,7 +83,7 @@ class GraphTilerController:
         return None
 
     def get_points(self, catname, data):
-        """Get data for the specified times."""
+        """Get data points for the specified times."""
         errors = self._validate_get_remove_points(data)
         if errors is not None:
             return {"errors": errors}
@@ -101,3 +101,7 @@ class GraphTilerController:
     def remove_all_points(self, catname):
         """Remove timepoints from a category."""
         return self._db.remove_all_points(catname)
+
+    def get_points_range_cats(self, data):
+        """Get data points. Used when categories are added to the frontend."""
+        return self._db.get_points_range_cats(data)

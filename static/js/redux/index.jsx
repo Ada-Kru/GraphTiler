@@ -6,4 +6,5 @@ export {
     modifyRange,
     newDataPoints,
     updateGraphCfg,
+    removeDataPoints,
 } from "./App/appActions"

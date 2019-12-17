@@ -16,7 +16,7 @@ class GraphTile extends Component {
             configPanelOpen: cfg.configPanelOpen,
             catIds: this._getCatIds(),
             forceRedraw: false,
-            key: 0
+            key: 0,
         }
         this.graphId = cfg.graphId
         this.datasets = new DataSetContainer(
@@ -51,9 +51,10 @@ class GraphTile extends Component {
             this.setState({ catIds: this._getCatIds() })
         }
         if (prevProps.pointUpdateId !== this.props.pointUpdateId) {
-            shouldRedraw = this._updatePoints() || shouldRedraw
+            shouldRedraw = this._onUpdatePoints() || shouldRedraw
+            shouldRedraw = this._onRemovePoints() || shouldRedraw
         }
-        if (shouldRedraw) this.setState({key: Math.random()})
+        if (shouldRedraw) this.setState({ key: Math.random() })
     }
 
     _makeReduxState = () => {
@@ -62,6 +63,7 @@ class GraphTile extends Component {
             ranges: this.props.ranges,
             categories: this.props.categories,
             pointUpdate: this.props.pointUpdate,
+            pointRemove: this.props.pointRemove,
             pointUpdateId: this.props.pointUpdateId,
         }
     }
@@ -88,11 +90,18 @@ class GraphTile extends Component {
         return this.props.ranges[this.props.graphs[this.graphId].range]
     }
 
-    _updatePoints = () => {
+    _onUpdatePoints = () => {
         if (!this.props.graphs.hasOwnProperty(this.graphId)) {
             return
         }
-        return this.datasets.updatePoints()
+        return this.datasets.updatedPoints()
+    }
+
+    _onRemovePoints = () => {
+        if (!this.props.graphs.hasOwnProperty(this.graphId)) {
+            return
+        }
+        return this.datasets.removedPoints()
     }
 
     onRangeChange = () => {
@@ -146,6 +155,7 @@ const mapStateToProps = state => {
         ranges: state.ranges,
         categories: state.categories,
         pointUpdate: state.pointUpdate,
+        pointRemove: state.pointRemove,
         pointUpdateId: state.pointUpdateId,
         graphUpdateId: state.graphUpdateId,
         graphsUpdated: state.graphsUpdated,

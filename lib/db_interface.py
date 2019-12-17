@@ -2,8 +2,15 @@ from pymongo import MongoClient, UpdateOne
 from lib.funcs import no_errors
 from lib.validation import ADD_READING_SCHEMA, ADD_SCHEMA, make_min_max_vali
 from cerberus import Validator
-from datetime import datetime
-from cfg import MONGO_PORT, MONGO_ADDRESS, TIME_FORMAT, TIME_FORMAT_NO_TZ
+from datetime import timezone, timedelta, datetime
+from collections import defaultdict
+from cfg import (
+    MONGO_PORT,
+    MONGO_ADDRESS,
+    TIME_FORMAT,
+    TIME_FORMAT_NO_TZ,
+    TIME_MULTS,
+)
 
 
 class DBInterface:
@@ -95,11 +102,11 @@ class DBInterface:
         self._db[f"catdata_default_{catname}"].drop()
         return no_errors()
 
-    def _get_and_format_points(self, points_dict, collection, filter):
+    def _get_and_format_points(self, points, collection, filter):
         """Get data points for a specified filter and add to dict in place."""
         for item in collection.find(filter):
             time = item["time"].strftime(TIME_FORMAT_NO_TZ)
-            points_dict[time] = item["reading"]
+            points[time] = item["reading"]
 
     def get_points(self, catname, data):
         """Get data points for a specific time or time range."""
@@ -164,3 +171,29 @@ class DBInterface:
         res = self._db[cat_data].delete_many({})
 
         return {"errors": None, "removed_count": res.deleted_count}
+
+    def get_points_range_cats(self, data):
+        """Get all valid points for when a frontend category is added."""
+        cat_points, now = defaultdict(dict), datetime.now(timezone.utc)
+        for range_data in data:
+            range = range_data["range"]
+            for catname in range_data["categories"]:
+                if self.get_category(catname) is None:
+                    continue
+
+                collection = self._db[f"catdata_default_{catname}"]
+                rtype, points = range["range_type"], {}
+                if rtype == "past":
+                    amnt, unit = range["past_amount"], range["past_unit"]
+                    delta = timedelta(seconds=amnt * TIME_MULTS[unit])
+                    filter = {"time": {"$gte": now - delta}}
+                elif rtype == "since":
+                    filter = {"time": {"$gte": range["since"]}}
+                elif rtype == "timerange":
+                    start, end = range["start"], range["end"]
+                    filter = {"time": {"$gte": start, "$lte": end}}
+
+                self._get_and_format_points(points, collection, filter)
+                cat_points[catname].update(points)
+
+        return cat_points

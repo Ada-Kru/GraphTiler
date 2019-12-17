@@ -5,7 +5,8 @@ import {
     REMOVE_CATEGORY,
     MODIFY_RANGE,
     NEW_DATA_POINTS,
-    UPDATE_GRAPH_CFG
+    UPDATE_GRAPH_CFG,
+    REMOVE_DATA_POINTS,
 } from "./appTypes"
 
 export const addGraph = graphId => {
@@ -37,8 +38,12 @@ export const modifyRange = (graphId, rangeData) => {
     }
 }
 
-export const newDataPoints = (data) => {
+export const newDataPoints = data => {
     return { type: NEW_DATA_POINTS, payload: data }
+}
+
+export const removeDataPoints = ranges => {
+    return { type: REMOVE_DATA_POINTS, payload: ranges }
 }
 
 export const updateGraphCfg = (graphId, cfg) => {

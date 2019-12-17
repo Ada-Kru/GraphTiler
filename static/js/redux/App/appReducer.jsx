@@ -5,6 +5,7 @@ import {
     REMOVE_CATEGORY,
     MODIFY_RANGE,
     NEW_DATA_POINTS,
+    REMOVE_DATA_POINTS,
     UPDATE_GRAPH_CFG,
 } from "./appTypes"
 import removeKeys from "../../components/removeKeys"
@@ -14,6 +15,7 @@ const INITIAL_STATE = {
         ranges: {},
         categories: {},
         pointUpdate: {},
+        pointRemove: {},
         pointUpdateId: 0,
         graphsUpdated: [],
         graphUpdateId: 0,
@@ -61,6 +63,15 @@ const appReducer = (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 pointUpdate: action.payload,
+                pointRemove: {},
+                pointUpdateId: ++pointUpdateId,
+            }
+        }
+        case REMOVE_DATA_POINTS: {
+            return {
+                ...state,
+                pointUpdate: {},
+                pointRemove: action.payload,
                 pointUpdateId: ++pointUpdateId,
             }
         }

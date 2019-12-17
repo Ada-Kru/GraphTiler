@@ -1,5 +1,5 @@
 from lib.validation_funcs import str_to_datetime
-from cfg import TIME_FORMAT_NO_TZ
+from cfg import TIME_FORMAT_NO_TZ, TIME_MULTS
 from datetime import timezone, timedelta, datetime
 from collections import defaultdict
 from json import dumps
@@ -13,7 +13,6 @@ class WsConnectionHandler:
     def __init__(self):
         self._categories = defaultdict(lambda: defaultdict(dict))
         self._connections = set()
-        self.mults = {"sec": 1, "min": 60, "hr": 3600}
 
     def add_connection(self, websocket):
         """Add a new websocket connection."""
@@ -78,7 +77,7 @@ class WsConnectionHandler:
                         rtype = rng["range_type"]
                         if rtype == "past":
                             amnt, unit = rng["past_amount"], rng["past_unit"]
-                            delta = timedelta(seconds=amnt * self.mults[unit])
+                            delta = timedelta(seconds=amnt * TIME_MULTS[unit])
                             if not (tm >= (now - delta)):
                                 continue
                         elif rtype == "since" and not (tm >= rng["since"]):
@@ -93,12 +92,12 @@ class WsConnectionHandler:
             if in_range:
                 await ws.send(dumps({"point_update": {category: in_range}}))
 
-    async def send_category_removed(self, category):
-        """Let all connections know that a category was removed."""
-        for ws in self._connections:
-            await ws.send(dumps({"category_removed": [category]}))
-
     async def send_category_added(self, cat_data):
         """Let all connections know that a category was added."""
         for ws in self._connections:
             await ws.send(dumps({"category_added": cat_data}))
+
+    async def send_category_removed(self, category):
+        """Let all connections know that a category was removed."""
+        for ws in self._connections:
+            await ws.send(dumps({"category_removed": [category]}))

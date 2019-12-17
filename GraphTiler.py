@@ -81,7 +81,7 @@ async def timepoints(name, action):
 
     if result["added_points"] and app.data_updates:
         await app.ws_handler.send_updates(name, result["added_points"])
-    if result["removed_count"]:
+    if "removed_count" in result and result["removed_count"]:
         await app.ws_handler.removed_points(name, data)
     return jsonify(result)
 
@@ -99,12 +99,22 @@ async def modify_category(name):
     return jsonify(ctrl.modify_category(name, await request.get_json()))
 
 
+async def add_cat_ranges(ws, data):
+    app.ws_handler.add_cat_ranges(ws, data)
+    cat_points_in_range = ctrl.get_points_range_cats(data)
+    await ws.send(dumps({"point_update": cat_points_in_range}))
+
+
+async def remove_cat_ranges(ws, data):
+    app.ws_handler.remove_cat_ranges(ws, data)
+
+
 async def ws_receive(ws):
     ws_handler = app.ws_handler
     msg_vali = Validator(WS_MSG_SCHEMA)
     command_map = {
-        "add_categories": ws_handler.add_cat_ranges,
-        "remove_categories": ws_handler.remove_cat_ranges,
+        "add_categories": add_cat_ranges,
+        "remove_categories": remove_cat_ranges,
     }
 
     try:
@@ -126,7 +136,7 @@ async def ws_receive(ws):
                 continue
 
             for key, data in msg.items():
-                command_map[key](ws, data)
+                await command_map[key](ws, data)
 
     except CancelledError:
         ws_handler.remove_connection(ws)

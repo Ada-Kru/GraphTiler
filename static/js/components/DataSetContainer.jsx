@@ -184,13 +184,41 @@ class DataSetContainer {
         return output
     }
 
-    updatePoints = () => {
+    updatedPoints = () => {
         let pointUpdate = this._reduxState.pointUpdate,
             modified = false
         for (let [catName, points] of Object.entries(pointUpdate)) {
             if (this.catIndices.hasOwnProperty(catName)) {
                 let curPoints = this._getCatPoints(catName)
                 modified = this._insertPoints(curPoints, points) || modified
+            }
+        }
+        return modified
+    }
+
+    removedPoints = () => {
+        let removed = this._reduxState.pointRemove,
+            modified = false
+        for (let [catName, range] of Object.entries(removed)) {
+            if (this.catIndices.hasOwnProperty(catName)) {
+                let curPoints = this._getCatPoints(catName)
+                modified = this._removePoints(curPoints, range) || modified
+            }
+        }
+        return modified
+    }
+
+    _removePoints = (curPoints, range) => {
+        let modified = false
+        switch (range.type) {
+            case "all": {
+                curPoints.splice(0, curPoints.length)
+                modified = true
+                break
+            }
+            default: {
+                console.log("UNKNOWN REM TYPE:", range)
+                break
             }
         }
         return modified
