@@ -92,3 +92,13 @@ class WsConnectionHandler:
 
             if in_range:
                 await ws.send(dumps({"point_update": {category: in_range}}))
+
+    async def send_category_removed(self, category):
+        """Let all connections know that a category was removed."""
+        for ws in self._connections:
+            await ws.send(dumps({"category_removed": [category]}))
+
+    async def send_category_added(self, cat_data):
+        """Let all connections know that a category was added."""
+        for ws in self._connections:
+            await ws.send(dumps({"category_added": cat_data}))

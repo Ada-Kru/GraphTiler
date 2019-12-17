@@ -63,22 +63,16 @@ class App extends Component {
         this.state = {
             model: FlexLayout.Model.fromJson(layout),
             wsState: "disconnected",
+            availableCats: {},
         }
 
         this.ws = null
         this.numGraphs = 0
-        this.availableCats = [
-            {
-                name: "PCBandwidth",
-                displayName: "Bandwidth",
-                units: "Bytes",
-                abrvUnit: "b",
-                decimalPlaces: 0,
-            },
-        ]
-
         this._wsMsgMap = {
             point_update: this.onMsgPointUpdate,
+            category_added: this.onAddedBackendCat,
+            category_removed: this.onRemovedBackendCat,
+            removed_points: this.onBackendRemovedPoints
         }
         this._listenerMap = {
             registerGraph: this.onRegisterGraph,
@@ -111,7 +105,9 @@ class App extends Component {
             let msg = JSON.parse(evt.data)
             console.log("websocket data:", msg)
             for (let [type, data] of Object.entries(msg)) {
-                this._wsMsgMap[type](data)
+                if (this._wsMsgMap.hasOwnProperty(type)) {
+                    this._wsMsgMap[type](data)
+                }
             }
         }
 
@@ -218,6 +214,26 @@ class App extends Component {
         this.props.newDataPoints(newCatPoints)
     }
 
+    onAddedBackendCat = newCats => {
+        let newCatState = { ...this.state.availableCats }
+        for (let catData of newCats) {
+            newCatState[catData.name] = catData
+        }
+        this.setState({ availableCats: newCatState })
+    }
+
+    onRemovedBackendCat = removed => {
+        let newCatState = { ...this.state.availableCats }
+        for (let catName of removed) {
+            delete newCatState[catName]
+        }
+        this.setState({ availableCats: newCatState })
+    }
+
+    onBackendRemovedPoints = remData => {
+        
+    }
+
     _factory = node => {
         switch (node.getComponent()) {
             case "graphTile":
@@ -280,10 +296,10 @@ class App extends Component {
         return (
             <div>
                 <datalist id="AvailableCats">
-                    {this.availableCats.map((item, idx) => {
+                    {Object.keys(this.state.availableCats).map((key) => {
                         return (
-                            <option key={item.name} value={item.name}>
-                                {item.name}
+                            <option key={key} value={key}>
+                                {key}
                             </option>
                         )
                     })}

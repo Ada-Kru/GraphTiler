@@ -55,12 +55,18 @@ async def category(name):
     if request.method == "GET":
         return jsonify(ctrl.get_category(name))
     else:
-        return jsonify(ctrl.add_category(name, await request.get_json()))
+        data = await request.get_json()
+        result = ctrl.add_category(name, data)
+        if result["errors"] is None:
+            data.pop("_id", None)
+            await app.ws_handler.send_category_added([data])
+        return jsonify(result)
 
 
 @app.route("/category/<name>/<action>", methods=["POST"])
 async def timepoints(name, action):
     result = {}
+    data = None
     if action == "get-points":
         result = ctrl.get_points(name, await request.get_json())
     elif action == "now":
@@ -68,18 +74,23 @@ async def timepoints(name, action):
     elif action == "add":
         result = ctrl.add(name, await request.get_json())
     elif action == "remove":
-        result = ctrl.remove_points(name, await request.get_json())
+        data = await request.get_json()
+        result = ctrl.remove_points(name, data)
     elif action == "remove-all":
         result = ctrl.remove_all_points(name)
 
     if result["added_points"] and app.data_updates:
         await app.ws_handler.send_updates(name, result["added_points"])
+    if result["removed_count"]:
+        await app.ws_handler.removed_points(name, data)
     return jsonify(result)
 
 
 @app.route("/remove-category/<name>", methods=["POST"])
 async def remove_category(name):
     result = ctrl.remove_category(name)
+    if result["errors"] is None:
+        await app.ws_handler.send_category_removed(name)
     return jsonify(result)
 
 
