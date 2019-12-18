@@ -238,17 +238,17 @@ class App extends Component {
         for (let range of Object.values(remData)) {
             if (range.hasOwnProperty("times")) {
                 range.times.forEach((x, idx, arr) => {
-                    arr[idx] = moment.utc(x, SEND_DATE_FORMAT)
+                    arr[idx] = moment.utc(x, RECV_DATE_FORMAT)
                 })
             }
             if (range.hasOwnProperty("since")) {
-                range.since = moment.utc(range.since, SEND_DATE_FORMAT)
+                range.since = moment.utc(range.since, RECV_DATE_FORMAT)
             }
             if (range.hasOwnProperty("range")) {
                 let start = range.range.start,
                     end = range.range.end
-                range.range.start = moment.parseZone(start, SEND_DATE_FORMAT)
-                range.range.end = moment.parseZone(end, SEND_DATE_FORMAT)
+                range.range.start = moment.utc(start, RECV_DATE_FORMAT)
+                range.range.end = moment.utc(end, RECV_DATE_FORMAT)
             }
         }
         this.props.removeDataPoints(remData)

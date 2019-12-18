@@ -20,6 +20,8 @@ class DataSetContainer {
         }
         this._reduxState = reduxState
         this._graphId = graphId
+        let mmt = moment()
+        this._tzOffset = mmt.utcOffset() - mmt.isDST() ? 60 : 0
     }
 
     _makeCatOptions = catName => {
@@ -38,9 +40,11 @@ class DataSetContainer {
             distribution: "linear",
             bounds: "ticks",
             time: {
-                displayFormats: { hour: "hA MMM D", minute: "HH:mm" },
+                // displayFormats: { hour: "hA MMM D", minute: "HH:mm" },
                 labelString: "Time",
-                parser: "YYYY-MM-DD HH:mm:ss",
+                parser: utcMoment => {
+                    return moment(utcMoment).subtract(this._tzOffset, "minutes")
+                },
             },
             ticks: { source: "data" },
         }
@@ -132,6 +136,7 @@ class DataSetContainer {
 
     updateReduxState = reduxState => {
         this._reduxState = reduxState
+        this._tzOffset = mmt.utcOffset() - mmt.isDST() ? 60 : 0
     }
 
     clearAllData = () => {
@@ -141,13 +146,14 @@ class DataSetContainer {
         }
     }
 
-    _findInsertIndex = (arr, value) => {
+    _findInsertIndex = (arr, time) => {
         let low = 0,
             high = arr.length
 
         while (low < high) {
             var mid = (low + high) >>> 1
-            if (arr[mid].x.isBefore(value.x)) {
+            if (arr[mid].x.isSame(time)) return mid
+            else if (arr[mid].x.isBefore(time)) {
                 low = mid + 1
             } else {
                 high = mid
@@ -249,8 +255,7 @@ class DataSetContainer {
         if (range.hasOwnProperty("range") && curPoints.length) {
             let start = this._findInsertIndex(curPoints, range.range.start)
             let end = this._findInsertIndex(curPoints, range.range.end)
-            console.log(start, end, curPoints)
-            curPoints.splice(start, end + 1)
+            curPoints.splice(start, end)
             modified = true
         }
         return modified
@@ -267,7 +272,7 @@ class DataSetContainer {
             }
 
             dataModified = true
-            let i = this._findInsertIndex(curPoints, point)
+            let i = this._findInsertIndex(curPoints, point.x)
             curPoints.splice(i, 0, point)
             let tm = point.x,
                 len = curPoints.length

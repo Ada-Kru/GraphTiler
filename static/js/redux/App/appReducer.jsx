@@ -20,7 +20,7 @@ const INITIAL_STATE = {
         graphsUpdated: [],
         graphUpdateId: 0,
     },
-    DEFAULT_RANGE = { rangeType: "past", pastAmount: 1, pastUnit: "hr" },
+    DEFAULT_RANGE = { rangeType: "past", pastAmount: 9999, pastUnit: "hr" },
     GRAPH_TYPES = new Set([
         REMOVE_GRAPH,
         ADD_CATEGORY,

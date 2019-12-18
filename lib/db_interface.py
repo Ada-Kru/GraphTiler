@@ -151,18 +151,25 @@ class DBInterface:
             ]
             res = cat_data.delete_many({"time": {"$in": times}})
             output["removed_count"] += res.deleted_count
+            data["times"] = [
+                (dt - dt.utcoffset()).strftime(TIME_FORMAT_NO_TZ)
+                for dt in times
+            ]
         if "range" in data:
             start = datetime.strptime(data["range"]["start"], TIME_FORMAT)
             end = datetime.strptime(data["range"]["end"], TIME_FORMAT)
-            # data["range"]["start"] = start
-            # data["range"]["end"] = end
             res = cat_data.delete_many({"time": {"$gte": start, "$lte": end}})
             output["removed_count"] += res.deleted_count
+            start = (start - start.utcoffset()).strftime(TIME_FORMAT_NO_TZ)
+            end = (end - end.utcoffset()).strftime(TIME_FORMAT_NO_TZ)
+            data["range"]["start"] = start
+            data["range"]["end"] = end
         if "since" in data:
             since = datetime.strptime(data["since"], TIME_FORMAT)
-            # data["since"] = since
             res = cat_data.delete_many({"time": {"$gte": since}})
             output["removed_count"] += res.deleted_count
+            since = (since - since.utcoffset()).strftime(TIME_FORMAT_NO_TZ)
+            data["since"] = since
 
         output["errors"] = None
         return output
