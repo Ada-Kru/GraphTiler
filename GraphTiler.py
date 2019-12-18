@@ -79,9 +79,9 @@ async def timepoints(name, action):
     elif action == "remove-all":
         result = ctrl.remove_all_points(name)
 
-    if result["added_points"] and app.data_updates:
+    if "added_points" in result and app.data_updates:
         await app.ws_handler.send_updates(name, result["added_points"])
-    if "removed_count" in result and result["removed_count"]:
+    elif "removed_count" in result and result["removed_count"]:
         await app.ws_handler.removed_points(name, data)
     return jsonify(result)
 

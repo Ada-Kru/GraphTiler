@@ -156,6 +156,22 @@ class DataSetContainer {
         return low
     }
 
+    _findTimePoint = (arr, value) => {
+        let low = 0,
+            high = arr.length
+
+        while (low < high) {
+            var mid = (low + high) >>> 1
+            if (arr[mid].x.isSame(value)) return mid
+            else if (arr[mid].x.isBefore(value)) {
+                low = mid + 1
+            } else {
+                high = mid
+            }
+        }
+        return -1
+    }
+
     _makeCheckRange = () => {
         let output = {},
             range = getRange(this._graphId, this._reduxState)
@@ -209,17 +225,33 @@ class DataSetContainer {
     }
 
     _removePoints = (curPoints, range) => {
+        if (!curPoints.length) return
         let modified = false
-        switch (range.type) {
-            case "all": {
-                curPoints.splice(0, curPoints.length)
-                modified = true
-                break
+        if (range.hasOwnProperty("all")) {
+            curPoints.splice(0, curPoints.length)
+            modified = true
+        }
+        if (range.hasOwnProperty("times")) {
+            for (let tm of range.times) {
+                if (!curPoints.length) break
+                let idx = this._findTimePoint(curPoints, tm)
+                if (idx !== -1 && curPoints[idx].x.isSame(tm)) {
+                    curPoints.splice(idx, 1)
+                    modified = true
+                }
             }
-            default: {
-                console.log("UNKNOWN REM TYPE:", range)
-                break
-            }
+        }
+        if (range.hasOwnProperty("since") && curPoints.length) {
+            let idx = this._findInsertIndex(curPoints, range.since)
+            curPoints.splice(idx, curPoints.length)
+            modified = true
+        }
+        if (range.hasOwnProperty("range") && curPoints.length) {
+            let start = this._findInsertIndex(curPoints, range.range.start)
+            let end = this._findInsertIndex(curPoints, range.range.end)
+            console.log(start, end, curPoints)
+            curPoints.splice(start, end + 1)
+            modified = true
         }
         return modified
     }

@@ -12,7 +12,7 @@ import {
     removeCategory,
     modifyRange,
     newDataPoints,
-    removeDataPoints
+    removeDataPoints,
 } from "./redux"
 import uuid from "uuid/v4"
 import moment from "moment"
@@ -73,7 +73,7 @@ class App extends Component {
             point_update: this.onMsgPointUpdate,
             category_added: this.onAddedBackendCat,
             category_removed: this.onRemovedBackendCat,
-            removed_points: this.onBackendRemovedPoints
+            removed_points: this.onBackendRemovedPoints,
         }
         this._listenerMap = {
             registerGraph: this.onRegisterGraph,
@@ -228,14 +228,30 @@ class App extends Component {
             rem = {}
         for (let catName of removed) {
             delete newCatState[catName]
-            rem[catName] = {type: "all"}
+            rem[catName] = { all: true }
         }
         this.setState({ availableCats: newCatState })
         this.props.removeDataPoints(rem)
     }
 
     onBackendRemovedPoints = remData => {
-        console.log(remData)
+        for (let range of Object.values(remData)) {
+            if (range.hasOwnProperty("times")) {
+                range.times.forEach((x, idx, arr) => {
+                    arr[idx] = moment.utc(x, SEND_DATE_FORMAT)
+                })
+            }
+            if (range.hasOwnProperty("since")) {
+                range.since = moment.utc(range.since, SEND_DATE_FORMAT)
+            }
+            if (range.hasOwnProperty("range")) {
+                let start = range.range.start,
+                    end = range.range.end
+                range.range.start = moment.parseZone(start, SEND_DATE_FORMAT)
+                range.range.end = moment.parseZone(end, SEND_DATE_FORMAT)
+            }
+        }
+        this.props.removeDataPoints(remData)
     }
 
     _factory = node => {
@@ -300,7 +316,7 @@ class App extends Component {
         return (
             <div>
                 <datalist id="AvailableCats">
-                    {Object.keys(this.state.availableCats).map((key) => {
+                    {Object.keys(this.state.availableCats).map(key => {
                         return (
                             <option key={key} value={key}>
                                 {key}

@@ -145,21 +145,23 @@ class DBInterface:
         cat_data = self._db[f"catdata_default_{catname}"]
 
         if "times" in data:
-            data["times"] = [
+            times = [
                 datetime.strptime(time_str, TIME_FORMAT)
                 for time_str in data["times"]
             ]
-            times = data["times"]
             res = cat_data.delete_many({"time": {"$in": times}})
             output["removed_count"] += res.deleted_count
         if "range" in data:
             start = datetime.strptime(data["range"]["start"], TIME_FORMAT)
             end = datetime.strptime(data["range"]["end"], TIME_FORMAT)
+            # data["range"]["start"] = start
+            # data["range"]["end"] = end
             res = cat_data.delete_many({"time": {"$gte": start, "$lte": end}})
             output["removed_count"] += res.deleted_count
         if "since" in data:
-            start = datetime.strptime(data["since"], TIME_FORMAT)
-            res = cat_data.delete_many({"time": {"$gte": start}})
+            since = datetime.strptime(data["since"], TIME_FORMAT)
+            # data["since"] = since
+            res = cat_data.delete_many({"time": {"$gte": since}})
             output["removed_count"] += res.deleted_count
 
         output["errors"] = None
