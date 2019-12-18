@@ -45,6 +45,8 @@ class GraphConfigPanel extends Component {
                 editingRange: false,
                 legendDisplay: true,
                 legendPosition: "top",
+                downsampThreshold: 0,
+                downsampEnabled: false,
             }
 
         if (props.graphs[graphId]) {
@@ -55,6 +57,8 @@ class GraphConfigPanel extends Component {
             state.rangeType = rangeData.rangeType
             state.legendDisplay = graph.legendDisplay
             state.legendPosition = graph.legendPosition
+            state.downsampThreshold = graph.downsampThreshold
+            state.downsampEnabled = graph.downsampEnabled
 
             switch (state.rangeType) {
                 case "past": {
@@ -194,10 +198,20 @@ class GraphConfigPanel extends Component {
         )
     }
 
+    onDownsamplingChange = evt => {
+        let val = evt.target.value
+        this.setState(
+            { downsampThreshold: parseInt(val), downsampEnabled: val !== "0" },
+            () => this.onGraphConfigChange()
+        )
+    }
+
     onGraphConfigChange = newCfg => {
         this.props.updateGraphCfg(this.props.graphId, {
             legendDisplay: this.state.legendDisplay,
             legendPosition: this.state.legendPosition,
+            downsampEnabled: this.state.downsampEnabled,
+            downsampThreshold: this.state.downsampThreshold,
         })
     }
 
@@ -368,6 +382,23 @@ class GraphConfigPanel extends Component {
                                     <option value="bottom">Bottom</option>
                                     <option value="right">Right</option>
                                     <option value="disabled">Disabled</option>
+                                </select>
+                            </label>
+                            <label>
+                                Max visible points
+                                <select
+                                    className="gt-input"
+                                    defaultValue="0"
+                                    onChange={this.onDownsamplingChange}
+                                >
+                                    <option value="60">60</option>
+                                    <option value="100">100</option>
+                                    <option value="150">150</option>
+                                    <option value="200">200</option>
+                                    <option value="300">300</option>
+                                    <option value="500">500</option>
+                                    <option value="1000">1000</option>
+                                    <option value="0">All</option>
                                 </select>
                             </label>
                         </fieldset>

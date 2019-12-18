@@ -14,6 +14,11 @@ class DataSetContainer {
         this.datasets = { datasets: [] }
         this.options = {
             responsive: true,
+            downsample: {
+                enabled: true,
+                threshold: 50,
+                restoreOriginalData: true,
+            },
             maintainAspectRatio: false,
             animation: { duration: 0 },
             scales: { xAxes: [this._makeXAxisSettings()], yAxes: [] },
@@ -40,13 +45,13 @@ class DataSetContainer {
             distribution: "linear",
             bounds: "ticks",
             time: {
-                // displayFormats: { hour: "hA MMM D", minute: "HH:mm" },
+                displayFormats: { hour: "hA MMM D", minute: "HH:mm" },
                 labelString: "Time",
                 parser: utcMoment => {
                     return moment(utcMoment).subtract(this._tzOffset, "minutes")
                 },
             },
-            ticks: { source: "data" },
+            ticks: { sampleSize: 50 },
         }
     }
 
@@ -116,6 +121,11 @@ class DataSetContainer {
             display: gd.legendDisplay,
             position: gd.legendPosition,
         }
+        this.options.downsample = {
+            enabled: gd.downsampEnabled,
+            threshold: gd.downsampThreshold,
+            restoreOriginalData: true,
+        }
     }
 
     updateCats = newCats => {
@@ -127,15 +137,11 @@ class DataSetContainer {
                 this._updateCategory(catName)
             }
         }
-        //
-        // this.datasets.datasets = this.datasets.datasets.filter(ele => {
-        //     return this.catIndices.hasOwnProperty(ele.category)
-        // })
-        // console.log("dsds", this.datasets.datasets, this._reduxState)
     }
 
     updateReduxState = reduxState => {
         this._reduxState = reduxState
+        let mmt = moment()
         this._tzOffset = mmt.utcOffset() - mmt.isDST() ? 60 : 0
     }
 

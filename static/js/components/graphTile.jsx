@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import { connect } from "react-redux"
-import { Line, Bar, Radar, Polar } from "react-chartjs-2"
+import { Line, Bar, Radar, Polar, Chart } from "react-chartjs-2"
+import DownsamplePlugin from "chartjs-plugin-downsample"
 import GraphConfigPanel from "./GraphConfigPanel"
 import insertPoints from "./insertPoints"
 import removeKeys from "./removeKeys"
@@ -55,6 +56,10 @@ class GraphTile extends Component {
             shouldRedraw = this._onRemovePoints() || shouldRedraw
         }
         if (shouldRedraw) this.setState({ key: Math.random() })
+    }
+
+    UNSAFE_componentWillMount = () => {
+        Chart.plugins.register(DownsamplePlugin)
     }
 
     _makeReduxState = () => {
@@ -112,7 +117,6 @@ class GraphTile extends Component {
         return data.category
     }
 
-    //redraw={this.state.forceRedraw}
     _makeChart = () => {
         return (
             <Line
