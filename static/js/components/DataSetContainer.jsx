@@ -11,6 +11,7 @@ const UNIT_MAP = { sec: "seconds", min: "minutes", hr: "hours" }
 class DataSetContainer {
     constructor(graphId, reduxState) {
         this.catIndices = {}
+        this.fullData = {}
         this.datasets = { datasets: [] }
         this.options = {
             responsive: true,
@@ -66,7 +67,7 @@ class DataSetContainer {
 
     _getCatPoints = catName => {
         return this.catIndices.hasOwnProperty(catName)
-            ? this.datasets.datasets[this.catIndices[catName]].data
+            ? this.fullData[catName]
             : []
     }
 
@@ -80,6 +81,7 @@ class DataSetContainer {
     }
 
     _addCategory = catName => {
+        this.fullData[catName] = []
         let idx = this.datasets.datasets.length
         this.datasets.datasets.push(this._makeCatOptions(catName))
         this.catIndices[catName] = idx
@@ -99,6 +101,7 @@ class DataSetContainer {
             let idx = this.catIndices[catName]
             this.datasets.datasets.splice(idx, 1)
             delete this.catIndices[catName]
+            delete this.fullData[catName]
             this._rebuildCatIndices()
         }
         this.options.scales.yAxes = this.options.scales.yAxes.filter(ele => {
@@ -147,8 +150,10 @@ class DataSetContainer {
 
     clearAllData = () => {
         for (let catName of Object.keys(this.catIndices)) {
-            let points = this._getCatPoints(catName)
+            let points = this._getCatPoints(catName),
+                idx = this.catIndices[catName]
             points.splice(0, points.length)
+            this.datasets.datasets[idx].data = []
         }
     }
 
@@ -197,8 +202,8 @@ class DataSetContainer {
             }
             case "since": {
                 output.start = moment.utc(range.since)
-                // Set end of range to extremely large date to allow for points
-                // created for future dates
+                // Set end of range to an "impossibly" large date to allow for
+                // points created for future dates
                 output.end = moment.utc(new Date("9999"))
                 break
             }
@@ -217,8 +222,12 @@ class DataSetContainer {
             modified = false
         for (let [catName, points] of Object.entries(pointUpdate)) {
             if (this.catIndices.hasOwnProperty(catName)) {
-                let curPoints = this._getCatPoints(catName)
-                modified = this._insertPoints(curPoints, points) || modified
+                let allPoints = this._getCatPoints(catName)
+                modified = this._insertPoints(allPoints, points) || modified
+                if (modified) {
+                    let idx = this.catIndices[catName]
+                    this.datasets.datasets[idx].data = [...allPoints]
+                }
             }
         }
         return modified
@@ -229,8 +238,12 @@ class DataSetContainer {
             modified = false
         for (let [catName, range] of Object.entries(removed)) {
             if (this.catIndices.hasOwnProperty(catName)) {
-                let curPoints = this._getCatPoints(catName)
-                modified = this._removePoints(curPoints, range) || modified
+                let allPoints = this._getCatPoints(catName)
+                modified = this._removePoints(allPoints, range) || modified
+                if (modified) {
+                    let idx = this.catIndices[catName]
+                    this.datasets.datasets[idx].data = [...allPoints]
+                }
             }
         }
         return modified

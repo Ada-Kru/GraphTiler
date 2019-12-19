@@ -34,34 +34,62 @@ class WsConnectionHandler:
     #     """Remove an entire category for all connections."""
     #     self._categories.pop(category, None)
 
+    def _is_equal_range(self, a, b):
+        """Check if ranges are equal."""
+        type = a["range_type"]
+        if type != b["range_type"]:
+            return False
+        if type == "past":
+            return (
+                a["past_unit"] == b["past_unit"]
+                and a["past_amount"] == b["past_amount"]
+            )
+        if type == "since":
+            return a["since"] == b["since"]
+        else:
+            return a["start"] == b["start"] and a["end"] == b["end"]
+
     def add_cat_ranges(self, websocket, data):
         """Add categories to a websocket connection."""
-        self.remove_cat_ranges(websocket, data)
-
         for cat_data in data:
+            if "range" not in cat_data:
+                continue
             unique_id, range_data = cat_data["unique_id"], cat_data["range"]
             for key in ("start", "end", "since"):
                 if key in range_data:
                     range_data[key] = str_to_datetime(range_data[key])
 
+        different_ranges = self.remove_cat_ranges(websocket, data)
+        for cat_data in data:
             for category in cat_data["categories"]:
                 self._categories[category][websocket][unique_id] = range_data
+        return different_ranges
 
     def remove_cat_ranges(self, websocket, data):
         """Add categories to a websocket connection."""
+        different = []
         for cat_data in data:
             for category in cat_data["categories"]:
+                diff = []
+                different.append(diff)
                 if category not in self._categories:
+                    diff.append(category)
                     continue
 
                 stored_cat = self._categories[category]
                 if websocket in stored_cat:
-                    stored_cat[websocket].pop(cat_data["unique_id"], None)
+                    sc = stored_cat[websocket]
+                    stored_range = sc.pop(cat_data["unique_id"], None)
+                    if "range" in cat_data:
+                        cr = cat_data["range"]
+                        if not self._is_equal_range(cr, stored_range):
+                            diff.append(category)
                     if not stored_cat[websocket]:
                         del stored_cat[websocket]
 
                 if not stored_cat:
                     del self._categories[category]
+        return different
 
     async def send_updates(self, category, updates, skip_vali=False):
         """Send updates for the category that are within the time range."""

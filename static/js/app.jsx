@@ -165,15 +165,17 @@ class App extends Component {
     onAddCategory = (graphId, catCfg) => {
         this.props.addCategory(graphId, catCfg)
 
-        this._send({
-            add_categories: [
-                {
-                    unique_id: graphId,
-                    range: formatWsRangeData(this._getGraphRange(graphId)),
-                    categories: [catCfg.category],
-                },
-            ],
-        })
+        if (!this._getGraphCatNames(graphId).includes(catCfg.category)) {
+            this._send({
+                add_categories: [
+                    {
+                        unique_id: graphId,
+                        range: formatWsRangeData(this._getGraphRange(graphId)),
+                        categories: [catCfg.category],
+                    },
+                ],
+            })
+        }
     }
 
     onRemoveCategory = (graphId, data) => {
