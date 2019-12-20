@@ -98,10 +98,11 @@ html {
     position: relative;
     height: 100%;
     width: 100%;
-    min-width: 0;
+    min-width: 50;
 }
 
 .graphHolder {
+    position: relative;
     height: 100%;
     width: 100%;
 }
@@ -138,14 +139,17 @@ html {
     padding-top: 3%;
 }
 
-label {
+/* label {
     order: 1;
     flex: 1 1 50%;
-}
+} */
 
 fieldset {
     position: relative;
     border: 2px solid #222;
+}
+
+.fieldset-wrapper {
     display: flex;
     flex-flow: row wrap;
 }
@@ -202,6 +206,10 @@ select {
     border-right: 1px solid #888;
 }
 
+input[type="number"] {
+    max-width: 60px;
+}
+
 input:disabled,
 select:disabled {
     background-color: #222;
@@ -214,6 +222,7 @@ input[type="color"] {
     background-color: inherit;
     border: none;
     min-width: 20px;
+    cursor: pointer;
 }
 
 label .react-datetime-picker,

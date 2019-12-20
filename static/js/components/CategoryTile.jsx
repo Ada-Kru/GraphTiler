@@ -130,6 +130,7 @@ class CategoryTile extends Component {
                         <div className="cat-tile-options">
                             <fieldset>
                                 <legend>Name</legend>
+                                <div className="fieldset-wrapper">
                                 <label>
                                     Category
                                     <input
@@ -157,9 +158,11 @@ class CategoryTile extends Component {
                                         required
                                     />
                                 </label>
+                                </div>
                             </fieldset>
                             <fieldset>
                                 <legend>Line</legend>
+                                <div className="fieldset-wrapper">
                                 <label>
                                     Line color
                                     <input
@@ -195,9 +198,11 @@ class CategoryTile extends Component {
                                         type="number"
                                     />
                                 </label>
+                                </div>
                             </fieldset>
                             <fieldset>
                                 <legend>Points</legend>
+                                <div className="fieldset-wrapper">
                                 <label>
                                     Point border
                                     <input
@@ -254,9 +259,11 @@ class CategoryTile extends Component {
                                         </option>
                                     </select>
                                 </label>
+                                </div>
                             </fieldset>
                             <fieldset>
                                 <legend>Fill</legend>
+                                <div className="fieldset-wrapper">
                                 <label>
                                     Fill
                                     <select
@@ -279,6 +286,7 @@ class CategoryTile extends Component {
                                         name="backgroundColor"
                                     />
                                 </label>
+                                </div>
                             </fieldset>
                         </div>
                     </form>

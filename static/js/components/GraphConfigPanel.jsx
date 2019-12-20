@@ -263,6 +263,7 @@ class GraphConfigPanel extends Component {
         switch (this.state.rangeType) {
             case "past":
                 rangeInputs = (
+                    <div className="flex-div">
                     <label>
                         Past
                         <input
@@ -272,6 +273,7 @@ class GraphConfigPanel extends Component {
                             min="1"
                             type="number"
                         />
+                        </label>
                         <select
                             className="gt-input"
                             value={this.state.pastUnit}
@@ -281,7 +283,7 @@ class GraphConfigPanel extends Component {
                             <option value="min">Minutes</option>
                             <option value="hr">Hours</option>
                         </select>
-                    </label>
+                        </div>
                 )
                 break
             case "timerange":
@@ -354,7 +356,9 @@ class GraphConfigPanel extends Component {
                                 <option value="since">Since time</option>
                             </select>
                         </legend>
+                        <div className="fieldset-wrapper">
                         {rangeInputs}
+                        </div>
                     </fieldset>
                     {this.makeFooter()}
                 </fieldset>
@@ -370,6 +374,7 @@ class GraphConfigPanel extends Component {
                     <form>
                         <fieldset>
                             <legend>Graph Options</legend>
+                            <div className="fieldset-wrapper">
                             <label>
                                 Legend position
                                 <select
@@ -401,6 +406,7 @@ class GraphConfigPanel extends Component {
                                     <option value="0">All</option>
                                 </select>
                             </label>
+                            </div>
                         </fieldset>
                     </form>
                     <span className="config-row">
