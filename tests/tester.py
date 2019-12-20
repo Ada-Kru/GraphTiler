@@ -27,7 +27,7 @@ data = {
     "max": 1000000,
 }
 
-
+#
 resp = post(url=f"http://192.168.2.111:7123/category/{CAT_NAME}", json=data)
 print(resp, resp.json())
 

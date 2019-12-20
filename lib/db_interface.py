@@ -1,6 +1,8 @@
-from pymongo import MongoClient, UpdateOne
+from pymongo import MongoClient, UpdateOne, DESCENDING
+from pymongo.errors import CollectionInvalid
 from lib.funcs import no_errors
 from lib.validation import ADD_READING_SCHEMA, ADD_SCHEMA, make_min_max_vali
+from lib.validation_funcs import str_to_datetime
 from cerberus import Validator
 from datetime import timezone, timedelta, datetime
 from collections import defaultdict
@@ -11,6 +13,17 @@ from cfg import (
     TIME_FORMAT_NO_TZ,
     TIME_MULTS,
 )
+
+KEY_ERR_MSG = "'time' and 'reading' are required keys for data points."
+DATE_ERR_MSG = "Invalid date.  Date format must be "
+"'YYYY-MM-DD HH:MM ±HHMM' where '±HHMM' is the time zone offset (ex. "
+"'2020-01-20 18:45 -0600'). All numbers must have leading zeros and "
+"hours are in 24 hour format."
+READING_ERR_MSG = "Reading is not a number."
+MIN_VAL_ERR_MSG = "Reading value is lower than the minimum allowed for this "
+"category."
+MAX_VAL_ERR_MSG = "Reading value is higher than the maximum allowed for this "
+"category."
 
 
 class DBInterface:
@@ -24,9 +37,7 @@ class DBInterface:
 
     def add_points(self, catname, data):
         """Add data points to the database."""
-        errors = []
-        db_updates = []
-        added_points = []
+        errors, db_updates, added_points = [], [], []
         cat_info = self.get_category(catname)
 
         if not cat_info:
@@ -34,24 +45,36 @@ class DBInterface:
                 {"index": -1, "error": f'Category "{catname}" not found.'}
             )
             return {"errors": errors}
-        min_max_vali = make_min_max_vali(cat_info)
+        # min_max_vali = make_min_max_vali(cat_info)
+        min_val = cat_info["min"] if "min" in cat_info else None
+        max_val = cat_info["max"] if "max" in cat_info else None
 
         if not self._add_vali.validate(data):
             errors.append({"index": -1, "error": self._add_vali.errors})
             return {"errors": errors}
 
         for i, point in enumerate(data["readings"]):
-            if not self._point_vali.validate(point):
-                errors.append({"index": i, "error": self._point_vali.errors})
-            elif not min_max_vali.validate(point):
-                errors.append({"index": i, "error": min_max_vali.errors})
-            else:
-                point["time"] = datetime.strptime(point["time"], TIME_FORMAT)
-                update = UpdateOne(
-                    {"time": point["time"]}, {"$set": point}, upsert=True
-                )
-                db_updates.append(update)
-                added_points.append(point)
+            if "time" not in point or "reading" not in point:
+                errors.append({"index": i, "error": KEY_ERR_MSG})
+                continue
+            tm, reading = str_to_datetime(point["time"]), point["reading"]
+            if tm is False:
+                errors.append({"index": i, "error": DATE_ERR_MSG})
+                continue
+            point["time"] = tm
+            if not isinstance(reading, int) and not isinstance(reading, float):
+                errors.append({"index": i, "error": READING_ERR_MSG})
+                continue
+            if min_val is not None and reading < min_val:
+                errors.append({"index": i, "error": MIN_VAL_ERR_MSG})
+                continue
+            elif max_val is not None and reading > max_val:
+                errors.append({"index": i, "error": MAX_VAL_ERR_MSG})
+                continue
+
+            update = UpdateOne({"time": tm}, {"$set": point}, upsert=True)
+            db_updates.append(update)
+            added_points.append(point)
 
         if db_updates:
             self._db[f"catdata_default_{catname}"].bulk_write(db_updates)
@@ -69,14 +92,19 @@ class DBInterface:
 
     def add_category(self, catname, data):
         """Add categories to the database."""
-        if self.get_category(catname):
+        colname = f"catdata_default_{catname}"
+        try:
+            self._db.create_collection(colname)
+        except CollectionInvalid:
             return {
                 "errors": {
                     "name": f'A category named "{catname}" already exists.'
                 }
             }
+
         data["name"] = catname
         self._db.categories.insert_one(data)
+        self._db[colname].create_index([("time", DESCENDING)], unique=True)
         return no_errors()
 
     def modify_category(self, catname, data):
