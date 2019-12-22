@@ -1,7 +1,7 @@
 from pymongo import MongoClient, UpdateOne, DESCENDING
 from pymongo.errors import CollectionInvalid
 from lib.funcs import no_errors
-from lib.validation import ADD_READING_SCHEMA, ADD_SCHEMA, make_min_max_vali
+from lib.validation import ADD_SCHEMA
 from lib.validation_funcs import str_to_datetime
 from cerberus import Validator
 from datetime import timezone, timedelta, datetime
@@ -33,7 +33,6 @@ class DBInterface:
         self._client = MongoClient(f"mongodb://{MONGO_ADDRESS}:{MONGO_PORT}")
         self._db = self._client.graphTiler
         self._add_vali = Validator(ADD_SCHEMA, require_all=True)
-        self._point_vali = Validator(ADD_READING_SCHEMA, require_all=True)
 
     def add_points(self, catname, data):
         """Add data points to the database."""
@@ -45,7 +44,6 @@ class DBInterface:
                 {"index": -1, "error": f'Category "{catname}" not found.'}
             )
             return {"errors": errors}
-        # min_max_vali = make_min_max_vali(cat_info)
         min_val = cat_info["min"] if "min" in cat_info else None
         max_val = cat_info["max"] if "max" in cat_info else None
 

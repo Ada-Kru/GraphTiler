@@ -56,8 +56,9 @@ class DataSetContainer {
         }
     }
 
-    _makeYAxisSettings = (id, label) => {
+    _makeYAxisSettings = (id, label, display) => {
         return {
+            display: display,
             ticks: { beginAtZero: true },
             scaleLabel: { labelString: label },
             type: "linear",
@@ -82,17 +83,24 @@ class DataSetContainer {
 
     _addCategory = catName => {
         this.fullData[catName] = []
-        let idx = this.datasets.datasets.length
+        let idx = this.datasets.datasets.length,
+            catData = getCatData(catName, this._graphId, this._reduxState)
         this.datasets.datasets.push(this._makeCatOptions(catName))
         this.catIndices[catName] = idx
         this.options.scales.yAxes.push(
-            this._makeYAxisSettings(catName, this.datasets.datasets[idx].label)
+            this._makeYAxisSettings(
+                catName,
+                this.datasets.datasets[idx].label,
+                catData.showYAxis
+            )
         )
     }
 
     _updateCategory = catName => {
-        let idx = this.catIndices[catName]
+        let idx = this.catIndices[catName],
+            catData = getCatData(catName, this._graphId, this._reduxState)
         this.datasets.datasets[idx] = this._makeCatOptions(catName)
+        this.options.scales.yAxes[idx].display = catData.showYAxis
     }
 
     _removeCategories = remove => {
@@ -128,6 +136,9 @@ class DataSetContainer {
             enabled: gd.downsampEnabled,
             threshold: gd.downsampThreshold,
             restoreOriginalData: true,
+        }
+        if (this.options.scales.xAxes.length) {
+            this.options.scales.xAxes[0].display = gd.showXAxis
         }
     }
 

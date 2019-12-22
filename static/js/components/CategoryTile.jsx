@@ -158,6 +158,18 @@ class CategoryTile extends Component {
                                         required
                                     />
                                 </label>
+                                <label>
+                                    Y axis units
+                                    <select
+                                        className="gt-input"
+                                        defaultValue={this.state.showYAxis}
+                                        onChange={this.onFormChangeBoolStr}
+                                        name="showYAxis"
+                                    >
+                                        <option value="true">On</option>
+                                        <option value="false">Off</option>
+                                    </select>
+                                </label>
                                 </div>
                             </fieldset>
                             <fieldset>
@@ -268,12 +280,12 @@ class CategoryTile extends Component {
                                     Fill
                                     <select
                                         className="gt-input"
-                                        value={this.state.fill.toString()}
+                                        value={this.state.fill}
                                         onChange={this.onFormChangeBoolStr}
                                         name="fill"
                                     >
-                                        <option value="true">True</option>
-                                        <option value="false">False</option>
+                                        <option value="true">On</option>
+                                        <option value="false">Off</option>
                                     </select>
                                 </label>
                                 <label>

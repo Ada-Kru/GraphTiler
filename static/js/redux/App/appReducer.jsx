@@ -82,8 +82,12 @@ const appReducer = (state = INITIAL_STATE, action) => {
                     categories: [],
                     legendDisplay: true,
                     legendPosition: "top",
+                    showXAxis: true,
                     downsampEnabled: false,
-                    downsampThreshold: 100,
+                    downsampThreshold: 0,
+                    gradientDegrees: 0,
+                    gradient1: "#222222",
+                    gradient2: "#222222",
                 }
             return {
                 ...state,

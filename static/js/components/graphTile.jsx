@@ -16,7 +16,7 @@ class GraphTile extends Component {
         this.state = {
             configPanelOpen: cfg.configPanelOpen,
             catIds: this._getCatIds(),
-            forceRedraw: false,
+            gradient: null,
             key: 0,
         }
         this.graphId = cfg.graphId
@@ -48,7 +48,15 @@ class GraphTile extends Component {
             shouldRedraw = true
             this.datasets.updateCats(this._getGraphCatNames())
             this.datasets.updateGraphOptions()
-            console.log("datasets: ", this.datasets)
+            let gd = this._getGraphData()
+            this.setState({
+                gradient: {
+                    gradientDegrees: gd.gradientDegrees,
+                    gradient1: gd.gradient1,
+                    gradient2: gd.gradient2,
+                },
+            })
+            // console.log("datasets: ", this.datasets)
             this.setState({ catIds: this._getCatIds() })
         }
         if (prevProps.pointUpdateId !== this.props.pointUpdateId) {
@@ -91,6 +99,10 @@ class GraphTile extends Component {
         return catNames
     }
 
+    _getGraphData = () => {
+        return this.props.graphs[this.graphId]
+    }
+
     _getRange = () => {
         return this.props.ranges[this.props.graphs[this.graphId].range]
     }
@@ -128,17 +140,32 @@ class GraphTile extends Component {
         )
     }
 
+    _makeGradientStyle = () => {
+        if (this.state.gradient == null) return {}
+        let gd = this.state.gradient,
+            lg = `linear-gradient(${gd.gradientDegrees}deg, ${gd.gradient1}, ${gd.gradient2})`
+        return {background: lg}
+    }
+
     render() {
         if (!this.state.configPanelOpen) {
             return (
                 <div className="graphTile">
-                    <div className="graphHolder">{this._makeChart()}</div>
+                    <div
+                        className="graphHolder"
+                        style={this._makeGradientStyle()}
+                    >
+                        {this._makeChart()}
+                    </div>
                 </div>
             )
         } else {
             return (
                 <div className="graphTile">
-                    <div className="graphHolder configOpen">
+                    <div
+                        className="graphHolder configOpen"
+                        style={this._makeGradientStyle()}
+                    >
                         {this._makeChart()}
                     </div>
                     <GraphConfigPanel

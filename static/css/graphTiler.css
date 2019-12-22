@@ -155,7 +155,7 @@ fieldset {
 }
 
 .cat-tile-options fieldset {
-    width: 90%;
+    width: 100%;
 }
 
 .range-cfg-fieldset {
@@ -305,7 +305,8 @@ label .react-datetimerange-picker {
 .cat-tile-button.right {
     position: absolute;
     left: 98.5%;
-    top: 0%;
+    /* top: 0%; */
+    right: -1% !important;
 }
 
 .cat-tile-options {
@@ -321,7 +322,7 @@ label .react-datetimerange-picker {
 .cat-tile-footer {
     display: flex;
     justify-content: space-around;
-    padding-top: 5%;
+    padding-top: 1%;
     width: 100%;
 }
 

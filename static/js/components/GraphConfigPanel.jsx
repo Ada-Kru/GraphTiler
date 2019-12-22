@@ -18,6 +18,7 @@ const NEW_CAT_DATA = {
     pointBorderColor: "#FFFFFF",
     pointHoverBackgroundColor: "#888888",
     pointHoverBorderColor: "#999999",
+    showYAxis: true
 }
 
 const getCategories = (catIds, catData) => {
@@ -45,8 +46,12 @@ class GraphConfigPanel extends Component {
                 editingRange: false,
                 legendDisplay: true,
                 legendPosition: "top",
+                showXAxis: true,
                 downsampThreshold: 0,
                 downsampEnabled: false,
+                gradientDegrees: 0,
+                gradient1: "#222222",
+                gradient2: "#222222",
             }
 
         if (props.graphs[graphId]) {
@@ -57,8 +62,12 @@ class GraphConfigPanel extends Component {
             state.rangeType = rangeData.rangeType
             state.legendDisplay = graph.legendDisplay
             state.legendPosition = graph.legendPosition
+            state.showXAxis = graph.showXAxis
             state.downsampThreshold = graph.downsampThreshold
             state.downsampEnabled = graph.downsampEnabled
+            state.gradientDegrees = graph.gradientDegrees
+            state.gradient1 = graph.gradient1
+            state.gradient2 = graph.gradient2
 
             switch (state.rangeType) {
                 case "past": {
@@ -190,11 +199,24 @@ class GraphConfigPanel extends Component {
         this.setState({ pastUnit: evt.target.value })
     }
 
+    onGraphOptionsChange = evt => {
+        if (!evt.target.checkValidity()) return
+        this.setState({ [evt.target.name]: evt.target.value }, () =>
+            this.onGraphConfigChange()
+        )
+    }
+
     onLegendChange = evt => {
         let val = evt.target.value
         this.setState(
             { legendPosition: val, legendDisplay: val !== "disabled" },
             () => this.onGraphConfigChange()
+        )
+    }
+
+    onXAxisLabelChange = evt => {
+        this.setState({ showXAxis: evt.target.value === "true" }, () =>
+            this.onGraphConfigChange()
         )
     }
 
@@ -206,12 +228,16 @@ class GraphConfigPanel extends Component {
         )
     }
 
-    onGraphConfigChange = newCfg => {
+    onGraphConfigChange = () => {
         this.props.updateGraphCfg(this.props.graphId, {
             legendDisplay: this.state.legendDisplay,
             legendPosition: this.state.legendPosition,
+            showXAxis: this.state.showXAxis,
             downsampEnabled: this.state.downsampEnabled,
             downsampThreshold: this.state.downsampThreshold,
+            gradientDegrees: this.state.gradientDegrees,
+            gradient1: this.state.gradient1,
+            gradient2: this.state.gradient2,
         })
     }
 
@@ -264,15 +290,15 @@ class GraphConfigPanel extends Component {
             case "past":
                 rangeInputs = (
                     <div className="flex-div">
-                    <label>
-                        Past
-                        <input
-                            className="gt-input"
-                            value={this.state.pastAmount}
-                            onChange={this.onPastAmountChange}
-                            min="1"
-                            type="number"
-                        />
+                        <label>
+                            Past
+                            <input
+                                className="gt-input"
+                                value={this.state.pastAmount}
+                                onChange={this.onPastAmountChange}
+                                min="1"
+                                type="number"
+                            />
                         </label>
                         <select
                             className="gt-input"
@@ -283,7 +309,7 @@ class GraphConfigPanel extends Component {
                             <option value="min">Minutes</option>
                             <option value="hr">Hours</option>
                         </select>
-                        </div>
+                    </div>
                 )
                 break
             case "timerange":
@@ -356,11 +382,105 @@ class GraphConfigPanel extends Component {
                                 <option value="since">Since time</option>
                             </select>
                         </legend>
-                        <div className="fieldset-wrapper">
-                        {rangeInputs}
-                        </div>
+                        <div className="fieldset-wrapper">{rangeInputs}</div>
                     </fieldset>
                     {this.makeFooter()}
+                </fieldset>
+            </form>
+        )
+    }
+
+    makeGraphOptionsForm = () => {
+        return (
+            <form>
+                <fieldset>
+                    <legend>Graph Options</legend>
+                    <div className="fieldset-wrapper">
+                        <label>
+                            Legend position
+                            <select
+                                className="gt-input"
+                                value={this.state.legendPosition}
+                                onChange={this.onLegendChange}
+                            >
+                                <option value="top">Top</option>
+                                <option value="left">Left</option>
+                                <option value="bottom">Bottom</option>
+                                <option value="right">Right</option>
+                                <option value="disabled">Disabled</option>
+                            </select>
+                        </label>
+                        <label>
+                            X axis labels
+                            <select
+                                className="gt-input"
+                                defaultValue={this.state.showXAxis}
+                                onChange={this.onXAxisLabelChange}
+                                name="showXAxis"
+                            >
+                                <option value="true">On</option>
+                                <option value="false">Off</option>
+                            </select>
+                        </label>
+                        <label>
+                            Max visible points
+                            <select
+                                className="gt-input"
+                                defaultValue={this.state.downsampThreshold}
+                                onChange={this.onDownsamplingChange}
+                            >
+                                <option value="60">60</option>
+                                <option value="100">100</option>
+                                <option value="150">150</option>
+                                <option value="200">200</option>
+                                <option value="300">300</option>
+                                <option value="500">500</option>
+                                <option value="1000">1000</option>
+                                <option value="0">All</option>
+                            </select>
+                        </label>
+                        <fieldset>
+                            <legend>Background</legend>
+                            <div className="fieldset-wrapper">
+                                <label>
+                                    Rotation degrees
+                                    <input
+                                        className="gt-input"
+                                        value={this.state.gradientDegrees || 0}
+                                        onChange={this.onGraphOptionsChange}
+                                        name="gradientDegrees"
+                                        min="0"
+                                        max="359"
+                                        type="number"
+                                    />
+                                </label>
+                                <label>
+                                    Color 1
+                                    <input
+                                        className="gt-input"
+                                        type="color"
+                                        value={
+                                            this.state.gradient1 || "#222222"
+                                        }
+                                        onChange={this.onGraphOptionsChange}
+                                        name="gradient1"
+                                    />
+                                </label>
+                                <label>
+                                    Color 2
+                                    <input
+                                        className="gt-input"
+                                        type="color"
+                                        value={
+                                            this.state.gradient2 || "#222222"
+                                        }
+                                        onChange={this.onGraphOptionsChange}
+                                        name="gradient2"
+                                    />
+                                </label>
+                            </div>
+                        </fieldset>
+                    </div>
                 </fieldset>
             </form>
         )
@@ -371,44 +491,7 @@ class GraphConfigPanel extends Component {
             <div className="configPanel y-scroll">
                 <div className="graphSettings">
                     {this.makeConfigForm()}
-                    <form>
-                        <fieldset>
-                            <legend>Graph Options</legend>
-                            <div className="fieldset-wrapper">
-                            <label>
-                                Legend position
-                                <select
-                                    className="gt-input"
-                                    defaultValue="top"
-                                    onChange={this.onLegendChange}
-                                >
-                                    <option value="top">Top</option>
-                                    <option value="left">Left</option>
-                                    <option value="bottom">Bottom</option>
-                                    <option value="right">Right</option>
-                                    <option value="disabled">Disabled</option>
-                                </select>
-                            </label>
-                            <label>
-                                Max visible points
-                                <select
-                                    className="gt-input"
-                                    defaultValue="0"
-                                    onChange={this.onDownsamplingChange}
-                                >
-                                    <option value="60">60</option>
-                                    <option value="100">100</option>
-                                    <option value="150">150</option>
-                                    <option value="200">200</option>
-                                    <option value="300">300</option>
-                                    <option value="500">500</option>
-                                    <option value="1000">1000</option>
-                                    <option value="0">All</option>
-                                </select>
-                            </label>
-                            </div>
-                        </fieldset>
-                    </form>
+                    {this.makeGraphOptionsForm()}
                     <span className="config-row">
                         Categories
                         <span
