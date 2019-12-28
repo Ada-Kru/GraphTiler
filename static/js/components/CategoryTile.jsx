@@ -147,7 +147,7 @@ class CategoryTile extends Component {
                                     />
                                 </label>
                                 <label>
-                                    Label
+                                    Display name
                                     <input
                                         className="gt-input"
                                         type="text"
@@ -158,6 +158,11 @@ class CategoryTile extends Component {
                                         required
                                     />
                                 </label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <legend>Axis</legend>
+                                <div className="fieldset-wrapper">
                                 <label>
                                     Y axis units
                                     <select
@@ -169,6 +174,16 @@ class CategoryTile extends Component {
                                         <option value="true">On</option>
                                         <option value="false">Off</option>
                                     </select>
+                                </label>
+                                <label>
+                                    Axis color
+                                    <input
+                                        className="gt-input"
+                                        type="color"
+                                        value={this.state.yAxisColor}
+                                        onChange={this.onFormChange}
+                                        name="yAxisColor"
+                                    />
                                 </label>
                                 </div>
                             </fieldset>

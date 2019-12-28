@@ -7,12 +7,19 @@ import {
 import moment from "moment"
 
 const UNIT_MAP = { sec: "seconds", min: "minutes", hr: "hours" }
+const DEFAULT_GRAPH_DATA = { showXAxis: true, xAxisColor: "#AAAAAA" }
 
 class DataSetContainer {
     constructor(graphId, reduxState) {
         this.catIndices = {}
         this.fullData = {}
         this.datasets = { datasets: [] }
+        this._reduxState = reduxState
+        this._graphId = graphId
+        let mmt = moment()
+        this._tzOffset = mmt.utcOffset() - mmt.isDST() ? 60 : 0
+        let graphData =
+            getGraphData(this._graphId, this._reduxState) || DEFAULT_GRAPH_DATA
         this.options = {
             responsive: true,
             downsample: {
@@ -22,12 +29,8 @@ class DataSetContainer {
             },
             maintainAspectRatio: false,
             animation: { duration: 0 },
-            scales: { xAxes: [this._makeXAxisSettings()], yAxes: [] },
+            scales: { xAxes: [this._makeXAxisSettings(graphData)], yAxes: [] },
         }
-        this._reduxState = reduxState
-        this._graphId = graphId
-        let mmt = moment()
-        this._tzOffset = mmt.utcOffset() - mmt.isDST() ? 60 : 0
     }
 
     _makeCatOptions = catName => {
@@ -40,8 +43,9 @@ class DataSetContainer {
         }
     }
 
-    _makeXAxisSettings = () => {
+    _makeXAxisSettings = graphData => {
         return {
+            display: graphData.showXAxis,
             type: "time",
             distribution: "linear",
             bounds: "ticks",
@@ -52,17 +56,17 @@ class DataSetContainer {
                     return moment(utcMoment).subtract(this._tzOffset, "minutes")
                 },
             },
-            ticks: { sampleSize: 50 },
+            ticks: { sampleSize: 50, fontColor: graphData.xAxisColor },
         }
     }
 
-    _makeYAxisSettings = (id, label, display) => {
+    _makeYAxisSettings = catData => {
         return {
-            display: display,
-            ticks: { beginAtZero: true },
-            scaleLabel: { labelString: label },
+            display: catData.showYAxis,
+            ticks: { beginAtZero: true, fontColor: catData.yAxisColor },
+            scaleLabel: { labelString: catData.label },
             type: "linear",
-            id: id,
+            id: catData.category,
         }
     }
 
@@ -87,20 +91,14 @@ class DataSetContainer {
             catData = getCatData(catName, this._graphId, this._reduxState)
         this.datasets.datasets.push(this._makeCatOptions(catName))
         this.catIndices[catName] = idx
-        this.options.scales.yAxes.push(
-            this._makeYAxisSettings(
-                catName,
-                this.datasets.datasets[idx].label,
-                catData.showYAxis
-            )
-        )
+        this.options.scales.yAxes.push(this._makeYAxisSettings(catData))
     }
 
     _updateCategory = catName => {
         let idx = this.catIndices[catName],
             catData = getCatData(catName, this._graphId, this._reduxState)
         this.datasets.datasets[idx] = this._makeCatOptions(catName)
-        this.options.scales.yAxes[idx].display = catData.showYAxis
+        this.options.scales.yAxes[idx] = this._makeYAxisSettings(catData)
     }
 
     _removeCategories = remove => {
@@ -137,9 +135,8 @@ class DataSetContainer {
             threshold: gd.downsampThreshold,
             restoreOriginalData: true,
         }
-        if (this.options.scales.xAxes.length) {
-            this.options.scales.xAxes[0].display = gd.showXAxis
-        }
+        let graphData = getGraphData(this._graphId, this._reduxState)
+        this.options.scales.xAxes[0] = this._makeXAxisSettings(graphData)
     }
 
     updateCats = newCats => {

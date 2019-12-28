@@ -83,6 +83,7 @@ const appReducer = (state = INITIAL_STATE, action) => {
                     legendDisplay: true,
                     legendPosition: "top",
                     showXAxis: true,
+                    xAxisColor: "#AAAAAA",
                     downsampEnabled: false,
                     downsampThreshold: 0,
                     gradientDegrees: 0,
@@ -95,6 +96,8 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 ranges: { ...ranges, [rangeId]: DEFAULT_RANGE },
                 graphUpdateId: ++graphUpdateId,
                 graphsUpdated: [graphId],
+                pointUpdate: {},
+                pointRemove: {},
             }
         }
         case REMOVE_GRAPH: {
@@ -106,6 +109,8 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 categories: removeKeys({ ...cats }, curCatIds),
                 graphUpdateId: ++graphUpdateId,
                 graphsUpdated: [graphId],
+                pointUpdate: {},
+                pointRemove: {},
             }
         }
         case ADD_CATEGORY: {
@@ -120,6 +125,8 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 graphs: { ...state.graphs, [graphId]: newGraph },
                 graphUpdateId: ++graphUpdateId,
                 graphsUpdated: [graphId],
+                pointUpdate: {},
+                pointRemove: {},
             }
         }
         case REMOVE_CATEGORY: {
@@ -137,6 +144,8 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 categories: removeKeys({ ...cats }, new Set([remId])),
                 graphUpdateId: ++graphUpdateId,
                 graphsUpdated: [graphId],
+                pointUpdate: {},
+                pointRemove: {},
             }
         }
         case MODIFY_RANGE: {
@@ -147,6 +156,8 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 ranges: { ...ranges, [rangeId]: rangeData },
                 graphUpdateId: ++graphUpdateId,
                 graphsUpdated: [graphId],
+                pointUpdate: {},
+                pointRemove: {},
             }
         }
         case UPDATE_GRAPH_CFG: {
@@ -156,6 +167,8 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 graphs: { ...graphs, [graphId]: newGraph },
                 graphUpdateId: ++graphUpdateId,
                 graphsUpdated: [graphId],
+                pointUpdate: {},
+                pointRemove: {},
             }
         }
         default: {

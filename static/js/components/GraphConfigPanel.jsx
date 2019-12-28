@@ -18,7 +18,8 @@ const NEW_CAT_DATA = {
     pointBorderColor: "#FFFFFF",
     pointHoverBackgroundColor: "#888888",
     pointHoverBorderColor: "#999999",
-    showYAxis: true
+    showYAxis: true,
+    yAxisColor: "#AAAAAA",
 }
 
 const getCategories = (catIds, catData) => {
@@ -47,6 +48,7 @@ class GraphConfigPanel extends Component {
                 legendDisplay: true,
                 legendPosition: "top",
                 showXAxis: true,
+                xAxisColor: "#AAAAAA",
                 downsampThreshold: 0,
                 downsampEnabled: false,
                 gradientDegrees: 0,
@@ -63,6 +65,7 @@ class GraphConfigPanel extends Component {
             state.legendDisplay = graph.legendDisplay
             state.legendPosition = graph.legendPosition
             state.showXAxis = graph.showXAxis
+            state.xAxisColor = graph.xAxisColor
             state.downsampThreshold = graph.downsampThreshold
             state.downsampEnabled = graph.downsampEnabled
             state.gradientDegrees = graph.gradientDegrees
@@ -93,6 +96,24 @@ class GraphConfigPanel extends Component {
         this.snapshot = {}
         this.rangeForm = React.createRef()
         this.saveButton = React.createRef()
+        this.xAxisColorInput = React.createRef()
+        this.gradient1Input = React.createRef()
+        this.gradient2Input = React.createRef()
+    }
+
+    componentDidMount = () => {
+        this.xAxisColorInput.current.addEventListener(
+            "change",
+            this.onGraphOptionsChange
+        )
+        this.gradient1Input.current.addEventListener(
+            "change",
+            this.onGraphOptionsChange
+        )
+        this.gradient2Input.current.addEventListener(
+            "change",
+            this.onGraphOptionsChange
+        )
     }
 
     componentDidUpdate = prevProps => {
@@ -233,6 +254,7 @@ class GraphConfigPanel extends Component {
             legendDisplay: this.state.legendDisplay,
             legendPosition: this.state.legendPosition,
             showXAxis: this.state.showXAxis,
+            xAxisColor: this.state.xAxisColor,
             downsampEnabled: this.state.downsampEnabled,
             downsampThreshold: this.state.downsampThreshold,
             gradientDegrees: this.state.gradientDegrees,
@@ -396,51 +418,77 @@ class GraphConfigPanel extends Component {
                 <fieldset>
                     <legend>Graph Options</legend>
                     <div className="fieldset-wrapper">
-                        <label>
-                            Legend position
-                            <select
-                                className="gt-input"
-                                value={this.state.legendPosition}
-                                onChange={this.onLegendChange}
-                            >
-                                <option value="top">Top</option>
-                                <option value="left">Left</option>
-                                <option value="bottom">Bottom</option>
-                                <option value="right">Right</option>
-                                <option value="disabled">Disabled</option>
-                            </select>
-                        </label>
-                        <label>
-                            X axis labels
-                            <select
-                                className="gt-input"
-                                defaultValue={this.state.showXAxis}
-                                onChange={this.onXAxisLabelChange}
-                                name="showXAxis"
-                            >
-                                <option value="true">On</option>
-                                <option value="false">Off</option>
-                            </select>
-                        </label>
-                        <label>
-                            Max visible points
-                            <select
-                                className="gt-input"
-                                defaultValue={this.state.downsampThreshold}
-                                onChange={this.onDownsamplingChange}
-                            >
-                                <option value="60">60</option>
-                                <option value="100">100</option>
-                                <option value="150">150</option>
-                                <option value="200">200</option>
-                                <option value="300">300</option>
-                                <option value="500">500</option>
-                                <option value="1000">1000</option>
-                                <option value="0">All</option>
-                            </select>
-                        </label>
                         <fieldset>
-                            <legend>Background</legend>
+                            <legend>Data</legend>
+                            <div className="fieldset-wrapper">
+                                <label>
+                                    Legend position
+                                    <select
+                                        className="gt-input"
+                                        value={this.state.legendPosition}
+                                        onChange={this.onLegendChange}
+                                    >
+                                        <option value="top">Top</option>
+                                        <option value="left">Left</option>
+                                        <option value="bottom">Bottom</option>
+                                        <option value="right">Right</option>
+                                        <option value="disabled">
+                                            Disabled
+                                        </option>
+                                    </select>
+                                </label>
+                                <label>
+                                    Max points
+                                    <select
+                                        className="gt-input"
+                                        defaultValue={
+                                            this.state.downsampThreshold
+                                        }
+                                        onChange={this.onDownsamplingChange}
+                                    >
+                                        <option value="60">60</option>
+                                        <option value="100">100</option>
+                                        <option value="150">150</option>
+                                        <option value="200">200</option>
+                                        <option value="300">300</option>
+                                        <option value="500">500</option>
+                                        <option value="1000">1000</option>
+                                        <option value="0">All</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <legend>X Axis</legend>
+                            <div className="fieldset-wrapper">
+                                <label>
+                                    Labels
+                                    <select
+                                        className="gt-input"
+                                        defaultValue={this.state.showXAxis}
+                                        onChange={this.onXAxisLabelChange}
+                                        name="showXAxis"
+                                    >
+                                        <option value="true">On</option>
+                                        <option value="false">Off</option>
+                                    </select>
+                                </label>
+                                <label>
+                                    X axis color
+                                    <input
+                                        className="gt-input"
+                                        type="color"
+                                        ref={this.xAxisColorInput}
+                                        defaultValue={
+                                            this.state.xAxisColor || "#AAAAAA"
+                                        }
+                                        name="xAxisColor"
+                                    />
+                                </label>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <legend>Background Gradient</legend>
                             <div className="fieldset-wrapper">
                                 <label>
                                     Rotation degrees
@@ -459,10 +507,10 @@ class GraphConfigPanel extends Component {
                                     <input
                                         className="gt-input"
                                         type="color"
-                                        value={
+                                        ref={this.gradient1Input}
+                                        defaultValue={
                                             this.state.gradient1 || "#222222"
                                         }
-                                        onChange={this.onGraphOptionsChange}
                                         name="gradient1"
                                     />
                                 </label>
@@ -471,10 +519,10 @@ class GraphConfigPanel extends Component {
                                     <input
                                         className="gt-input"
                                         type="color"
-                                        value={
+                                        ref={this.gradient2Input}
+                                        defaultValue={
                                             this.state.gradient2 || "#222222"
                                         }
-                                        onChange={this.onGraphOptionsChange}
                                         name="gradient2"
                                     />
                                 </label>
