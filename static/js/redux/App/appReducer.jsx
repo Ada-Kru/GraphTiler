@@ -26,7 +26,8 @@ const INITIAL_STATE = {
         ADD_CATEGORY,
         REMOVE_CATEGORY,
         MODIFY_RANGE,
-    ])
+    ]),
+    EMPTY_DATA_POINTS = { pointUpdate: {}, pointRemove: {} }
 
 const findGraphCatId = (cat, allCats, graphCats) => {
     for (let [key, val] of Object.entries(allCats)) {
@@ -35,6 +36,22 @@ const findGraphCatId = (cat, allCats, graphCats) => {
         }
     }
     return ""
+}
+
+const makeGraphData = rangeId => {
+    return {
+        range: rangeId,
+        categories: [],
+        legendDisplay: true,
+        legendPosition: "top",
+        showXAxis: true,
+        xAxisColor: "#AAAAAA",
+        downsampEnabled: false,
+        downsampThreshold: 0,
+        gradientDegrees: 0,
+        gradient1: "#222222",
+        gradient2: "#222222",
+    }
 }
 
 let nextRangeId = 0,
@@ -77,27 +94,14 @@ const appReducer = (state = INITIAL_STATE, action) => {
         }
         case ADD_GRAPH: {
             let rangeId = (nextRangeId++).toString(),
-                graphData = {
-                    range: rangeId,
-                    categories: [],
-                    legendDisplay: true,
-                    legendPosition: "top",
-                    showXAxis: true,
-                    xAxisColor: "#AAAAAA",
-                    downsampEnabled: false,
-                    downsampThreshold: 0,
-                    gradientDegrees: 0,
-                    gradient1: "#222222",
-                    gradient2: "#222222",
-                }
+                graphData = makeGraphData(rangeId)
             return {
                 ...state,
                 graphs: { ...graphs, [graphId]: graphData },
                 ranges: { ...ranges, [rangeId]: DEFAULT_RANGE },
                 graphUpdateId: ++graphUpdateId,
                 graphsUpdated: [graphId],
-                pointUpdate: {},
-                pointRemove: {},
+                ...EMPTY_DATA_POINTS,
             }
         }
         case REMOVE_GRAPH: {
@@ -109,8 +113,7 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 categories: removeKeys({ ...cats }, curCatIds),
                 graphUpdateId: ++graphUpdateId,
                 graphsUpdated: [graphId],
-                pointUpdate: {},
-                pointRemove: {},
+                ...EMPTY_DATA_POINTS,
             }
         }
         case ADD_CATEGORY: {
@@ -125,8 +128,7 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 graphs: { ...state.graphs, [graphId]: newGraph },
                 graphUpdateId: ++graphUpdateId,
                 graphsUpdated: [graphId],
-                pointUpdate: {},
-                pointRemove: {},
+                ...EMPTY_DATA_POINTS,
             }
         }
         case REMOVE_CATEGORY: {
@@ -144,8 +146,7 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 categories: removeKeys({ ...cats }, new Set([remId])),
                 graphUpdateId: ++graphUpdateId,
                 graphsUpdated: [graphId],
-                pointUpdate: {},
-                pointRemove: {},
+                ...EMPTY_DATA_POINTS,
             }
         }
         case MODIFY_RANGE: {
@@ -156,8 +157,7 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 ranges: { ...ranges, [rangeId]: rangeData },
                 graphUpdateId: ++graphUpdateId,
                 graphsUpdated: [graphId],
-                pointUpdate: {},
-                pointRemove: {},
+                ...EMPTY_DATA_POINTS,
             }
         }
         case UPDATE_GRAPH_CFG: {
@@ -167,8 +167,7 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 graphs: { ...graphs, [graphId]: newGraph },
                 graphUpdateId: ++graphUpdateId,
                 graphsUpdated: [graphId],
-                pointUpdate: {},
-                pointRemove: {},
+                ...EMPTY_DATA_POINTS,
             }
         }
         default: {

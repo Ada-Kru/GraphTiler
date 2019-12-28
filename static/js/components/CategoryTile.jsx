@@ -2,6 +2,9 @@ import React, { Component } from "react"
 import { connect } from "react-redux"
 import removeKeys from "./removeKeys"
 
+const CAT_COLOR_DISPLAY_WIDTH = 50,
+    CAT_COLOR_DISPLAY_HEIGHT = 25
+
 class CategoryTile extends Component {
     static defaultProps = { editing: false, onCancel: null }
     constructor(props) {
@@ -122,6 +125,33 @@ class CategoryTile extends Component {
         )
     }
 
+    makeCatColorDisplay = () => {
+        let w = CAT_COLOR_DISPLAY_WIDTH,
+            h = CAT_COLOR_DISPLAY_HEIGHT,
+            lineFill = this.state.fill ? this.state.backgroundColor : "#0000"
+
+        return (
+            <svg className="cat-color-svg" height={h} width={w}>
+                <polyline
+                    points={`0,${h} ${w / 2},${h / 2} ${w},${h}`}
+                    style={{
+                        fill: lineFill,
+                        stroke: this.state.borderColor,
+                        strokeWidth: 3,
+                    }}
+                />
+                <circle
+                    cx={w / 2}
+                    cy={h / 2}
+                    r="5"
+                    stroke={this.state.pointBorderColor}
+                    strokeWidth="3"
+                    fill={this.state.pointBackgroundColor}
+                />
+            </svg>
+        )
+    }
+
     render() {
         if (this.state.editing) {
             return (
@@ -131,188 +161,194 @@ class CategoryTile extends Component {
                             <fieldset>
                                 <legend>Name</legend>
                                 <div className="fieldset-wrapper">
-                                <label>
-                                    Category
-                                    <input
-                                        className="gt-input"
-                                        list="AvailableCats"
-                                        type="text"
-                                        defaultValue={this.state.category}
-                                        onChange={this.onFormChange}
-                                        ref={this.catInput}
-                                        name="category"
-                                        autoFocus
-                                        maxLength="100"
-                                        required
-                                    />
-                                </label>
-                                <label>
-                                    Display name
-                                    <input
-                                        className="gt-input"
-                                        type="text"
-                                        defaultValue={this.state.label}
-                                        onChange={this.onFormChange}
-                                        name="label"
-                                        maxLength="100"
-                                        required
-                                    />
-                                </label>
+                                    <label>
+                                        Category
+                                        <input
+                                            className="gt-input"
+                                            list="AvailableCats"
+                                            type="text"
+                                            defaultValue={this.state.category}
+                                            onChange={this.onFormChange}
+                                            ref={this.catInput}
+                                            name="category"
+                                            autoFocus
+                                            maxLength="100"
+                                            required
+                                        />
+                                    </label>
+                                    <label>
+                                        Display name
+                                        <input
+                                            className="gt-input"
+                                            type="text"
+                                            defaultValue={this.state.label}
+                                            onChange={this.onFormChange}
+                                            name="label"
+                                            maxLength="100"
+                                            required
+                                        />
+                                    </label>
                                 </div>
                             </fieldset>
                             <fieldset>
                                 <legend>Axis</legend>
                                 <div className="fieldset-wrapper">
-                                <label>
-                                    Y axis units
-                                    <select
-                                        className="gt-input"
-                                        defaultValue={this.state.showYAxis}
-                                        onChange={this.onFormChangeBoolStr}
-                                        name="showYAxis"
-                                    >
-                                        <option value="true">On</option>
-                                        <option value="false">Off</option>
-                                    </select>
-                                </label>
-                                <label>
-                                    Axis color
-                                    <input
-                                        className="gt-input"
-                                        type="color"
-                                        value={this.state.yAxisColor}
-                                        onChange={this.onFormChange}
-                                        name="yAxisColor"
-                                    />
-                                </label>
+                                    <label>
+                                        Y axis units
+                                        <select
+                                            className="gt-input"
+                                            defaultValue={this.state.showYAxis}
+                                            onChange={this.onFormChangeBoolStr}
+                                            name="showYAxis"
+                                        >
+                                            <option value="true">On</option>
+                                            <option value="false">Off</option>
+                                        </select>
+                                    </label>
+                                    <label>
+                                        Axis color
+                                        <input
+                                            className="gt-input"
+                                            type="color"
+                                            value={this.state.yAxisColor}
+                                            onChange={this.onFormChange}
+                                            name="yAxisColor"
+                                        />
+                                    </label>
                                 </div>
                             </fieldset>
                             <fieldset>
                                 <legend>Line</legend>
                                 <div className="fieldset-wrapper">
-                                <label>
-                                    Line color
-                                    <input
-                                        className="gt-input"
-                                        type="color"
-                                        value={this.state.borderColor}
-                                        onChange={this.onFormChange}
-                                        name="borderColor"
-                                    />
-                                </label>
-                                <label>
-                                    Line width
-                                    <input
-                                        className="gt-input"
-                                        value={this.state.borderWidth}
-                                        onChange={this.onFormChange}
-                                        name="borderWidth"
-                                        min="1"
-                                        max="20"
-                                        type="number"
-                                    />
-                                </label>
-                                <label>
-                                    Roundness
-                                    <input
-                                        className="gt-input"
-                                        value={this.state.lineTension}
-                                        onChange={this.onFormChange}
-                                        name="lineTension"
-                                        min="0"
-                                        max="1"
-                                        step="0.01"
-                                        type="number"
-                                    />
-                                </label>
+                                    <label>
+                                        Line color
+                                        <input
+                                            className="gt-input"
+                                            type="color"
+                                            value={this.state.borderColor}
+                                            onChange={this.onFormChange}
+                                            name="borderColor"
+                                        />
+                                    </label>
+                                    <label>
+                                        Line width
+                                        <input
+                                            className="gt-input"
+                                            value={this.state.borderWidth}
+                                            onChange={this.onFormChange}
+                                            name="borderWidth"
+                                            min="1"
+                                            max="20"
+                                            type="number"
+                                        />
+                                    </label>
+                                    <label>
+                                        Roundness
+                                        <input
+                                            className="gt-input"
+                                            value={this.state.lineTension}
+                                            onChange={this.onFormChange}
+                                            name="lineTension"
+                                            min="0"
+                                            max="1"
+                                            step="0.01"
+                                            type="number"
+                                        />
+                                    </label>
                                 </div>
                             </fieldset>
                             <fieldset>
                                 <legend>Points</legend>
                                 <div className="fieldset-wrapper">
-                                <label>
-                                    Point border
-                                    <input
-                                        className="gt-input"
-                                        type="color"
-                                        value={this.state.pointBorderColor}
-                                        onChange={this.onFormChange}
-                                        name="pointBorderColor"
-                                    />
-                                </label>
-                                <label>
-                                    Point fill
-                                    <input
-                                        className="gt-input"
-                                        type="color"
-                                        value={this.state.pointBackgroundColor}
-                                        onChange={this.onFormChange}
-                                        name="pointBackgroundColor"
-                                    />
-                                </label>
-                                <label>
-                                    Point size
-                                    <input
-                                        className="gt-input"
-                                        value={this.state.pointRadius}
-                                        onChange={this.onFormChange}
-                                        name="pointRadius"
-                                        min="0"
-                                        max="20"
-                                        type="number"
-                                    />
-                                </label>
-                                <label>
-                                    Point style
-                                    <select
-                                        className="gt-input"
-                                        value={this.state.pointStyle}
-                                        onChange={this.onFormChange}
-                                        name="pointStyle"
-                                    >
-                                        <option value="circle">Circle</option>
-                                        <option value="cross">Cross</option>
-                                        <option value="crossRot">X</option>
-                                        <option value="dash">Dash</option>
-                                        <option value="line">Line</option>
-                                        <option value="rect">Square</option>
-                                        <option value="rectRounded">
-                                            Rounded Square
-                                        </option>
-                                        <option value="rectRot">Diamond</option>
-                                        <option value="star">Star</option>
-                                        <option value="triangle">
-                                            Triangle
-                                        </option>
-                                    </select>
-                                </label>
+                                    <label>
+                                        Point border
+                                        <input
+                                            className="gt-input"
+                                            type="color"
+                                            value={this.state.pointBorderColor}
+                                            onChange={this.onFormChange}
+                                            name="pointBorderColor"
+                                        />
+                                    </label>
+                                    <label>
+                                        Point fill
+                                        <input
+                                            className="gt-input"
+                                            type="color"
+                                            value={
+                                                this.state.pointBackgroundColor
+                                            }
+                                            onChange={this.onFormChange}
+                                            name="pointBackgroundColor"
+                                        />
+                                    </label>
+                                    <label>
+                                        Point size
+                                        <input
+                                            className="gt-input"
+                                            value={this.state.pointRadius}
+                                            onChange={this.onFormChange}
+                                            name="pointRadius"
+                                            min="0"
+                                            max="20"
+                                            type="number"
+                                        />
+                                    </label>
+                                    <label>
+                                        Point style
+                                        <select
+                                            className="gt-input"
+                                            value={this.state.pointStyle}
+                                            onChange={this.onFormChange}
+                                            name="pointStyle"
+                                        >
+                                            <option value="circle">
+                                                Circle
+                                            </option>
+                                            <option value="cross">Cross</option>
+                                            <option value="crossRot">X</option>
+                                            <option value="dash">Dash</option>
+                                            <option value="line">Line</option>
+                                            <option value="rect">Square</option>
+                                            <option value="rectRounded">
+                                                Rounded Square
+                                            </option>
+                                            <option value="rectRot">
+                                                Diamond
+                                            </option>
+                                            <option value="star">Star</option>
+                                            <option value="triangle">
+                                                Triangle
+                                            </option>
+                                        </select>
+                                    </label>
                                 </div>
                             </fieldset>
                             <fieldset>
                                 <legend>Fill</legend>
                                 <div className="fieldset-wrapper">
-                                <label>
-                                    Fill
-                                    <select
-                                        className="gt-input"
-                                        value={this.state.fill}
-                                        onChange={this.onFormChangeBoolStr}
-                                        name="fill"
-                                    >
-                                        <option value="true">On</option>
-                                        <option value="false">Off</option>
-                                    </select>
-                                </label>
-                                <label>
-                                    Fill color
-                                    <input
-                                        className="gt-input"
-                                        type="color"
-                                        value={this.state.backgroundColor}
-                                        onChange={this.onFormChange}
-                                        name="backgroundColor"
-                                    />
-                                </label>
+                                    <label>
+                                        Fill
+                                        <select
+                                            className="gt-input"
+                                            value={this.state.fill}
+                                            onChange={this.onFormChangeBoolStr}
+                                            name="fill"
+                                        >
+                                            <option value="true">On</option>
+                                            <option value="false">Off</option>
+                                        </select>
+                                    </label>
+                                    <label>
+                                        Fill color
+                                        <input
+                                            className="gt-input"
+                                            type="color"
+                                            value={this.state.backgroundColor}
+                                            onChange={this.onFormChange}
+                                            name="backgroundColor"
+                                        />
+                                    </label>
                                 </div>
                             </fieldset>
                         </div>
@@ -337,20 +373,8 @@ class CategoryTile extends Component {
                     </legend>
                     <div className="cat-tile-options">
                         <label>
-                            Line color
-                            <input
-                                type="color"
-                                value={this.state.borderColor}
-                                disabled={true}
-                            />
-                        </label>
-                        <label>
-                            Point color
-                            <input
-                                type="color"
-                                value={this.state.pointBorderColor}
-                                disabled={true}
-                            />
+                            Colors
+                            {this.makeCatColorDisplay()}
                         </label>
                     </div>
                 </fieldset>

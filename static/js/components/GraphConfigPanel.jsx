@@ -3,6 +3,7 @@ import { connect } from "react-redux"
 import { updateGraphCfg } from "../redux"
 import DateTimePicker from "react-datetime-picker"
 import CategoryTile from "./CategoryTile"
+import removeKeys from "./removeKeys"
 
 const DATETIME_FORMAT = "MM-dd-y hh:mm a"
 const NEW_CAT_DATA = {
@@ -21,6 +22,17 @@ const NEW_CAT_DATA = {
     showYAxis: true,
     yAxisColor: "#AAAAAA",
 }
+const NON_CHART_KEYS = new Set([
+    "categories",
+    "rangeType",
+    "since",
+    "rangeStart",
+    "rangeEnd",
+    "pastAmount",
+    "pastUnit",
+    "addingNewCat",
+    "editingRange",
+])
 
 const getCategories = (catIds, catData) => {
     let catItems = {}
@@ -196,28 +208,12 @@ class GraphConfigPanel extends Component {
         this.setState({ addingNewCat: true })
     }
 
-    onrangeTypeChange = evt => {
-        this.setState({ rangeType: evt.target.value })
+    onFormChange = evt => {
+        this.setState({ [evt.target.name]: evt.target.value })
     }
 
-    onSinceChange = newSince => {
-        this.setState({ since: newSince })
-    }
-
-    onRangeStartChange = newStart => {
-        this.setState({ rangeStart: newStart })
-    }
-
-    onRangeEndChange = newEnd => {
-        this.setState({ rangeEnd: newEnd })
-    }
-
-    onPastAmountChange = evt => {
-        this.setState({ pastAmount: evt.target.value })
-    }
-
-    onPastUnitChange = evt => {
-        this.setState({ pastUnit: evt.target.value })
+    onTimeChange = (name, value) => {
+        this.setState({ [name]: value })
     }
 
     onGraphOptionsChange = evt => {
@@ -227,40 +223,33 @@ class GraphConfigPanel extends Component {
         )
     }
 
-    onLegendChange = evt => {
-        let val = evt.target.value
-        this.setState(
-            { legendPosition: val, legendDisplay: val !== "disabled" },
-            () => this.onGraphConfigChange()
-        )
-    }
-
-    onXAxisLabelChange = evt => {
-        this.setState({ showXAxis: evt.target.value === "true" }, () =>
-            this.onGraphConfigChange()
-        )
-    }
-
-    onDownsamplingChange = evt => {
-        let val = evt.target.value
-        this.setState(
-            { downsampThreshold: parseInt(val), downsampEnabled: val !== "0" },
-            () => this.onGraphConfigChange()
-        )
+    onGraphDisplayChange = evt => {
+        let val = evt.target.value,
+            update = {}
+        switch (evt.target.name) {
+            case "legendPosition":
+                update = {
+                    legendPosition: val,
+                    legendDisplay: val !== "disabled",
+                }
+                break
+            case "showXAxis":
+                update = { showXAxis: val === "true" }
+                break
+            case "downsampThreshold":
+                update = {
+                    downsampThreshold: parseInt(val),
+                    downsampEnabled: val !== "0",
+                }
+                break
+        }
+        this.setState(update, () => this.onGraphConfigChange())
     }
 
     onGraphConfigChange = () => {
-        this.props.updateGraphCfg(this.props.graphId, {
-            legendDisplay: this.state.legendDisplay,
-            legendPosition: this.state.legendPosition,
-            showXAxis: this.state.showXAxis,
-            xAxisColor: this.state.xAxisColor,
-            downsampEnabled: this.state.downsampEnabled,
-            downsampThreshold: this.state.downsampThreshold,
-            gradientDegrees: this.state.gradientDegrees,
-            gradient1: this.state.gradient1,
-            gradient2: this.state.gradient2,
-        })
+        let chartCfg = { ...this.state }
+        removeKeys(chartCfg, NON_CHART_KEYS)
+        this.props.updateGraphCfg(this.props.graphId, chartCfg)
     }
 
     onCatSave = data => {
@@ -317,7 +306,8 @@ class GraphConfigPanel extends Component {
                             <input
                                 className="gt-input"
                                 value={this.state.pastAmount}
-                                onChange={this.onPastAmountChange}
+                                onChange={this.onFormChange}
+                                name="pastAmount"
                                 min="1"
                                 type="number"
                             />
@@ -325,7 +315,8 @@ class GraphConfigPanel extends Component {
                         <select
                             className="gt-input"
                             value={this.state.pastUnit}
-                            onChange={this.onPastUnitChange}
+                            onChange={this.onFormChange}
+                            name="pastUnit"
                         >
                             <option value="sec">Seconds</option>
                             <option value="min">Minutes</option>
@@ -340,7 +331,9 @@ class GraphConfigPanel extends Component {
                         <label>
                             Start
                             <DateTimePicker
-                                onChange={this.onRangeStartChange}
+                                onChange={val => {
+                                    this.onTimeChange("rangeStart", val)
+                                }}
                                 value={this.state.rangeStart}
                                 calendarIcon={null}
                                 clearIcon={null}
@@ -352,7 +345,9 @@ class GraphConfigPanel extends Component {
                         <label>
                             End
                             <DateTimePicker
-                                onChange={this.onRangeEndChange}
+                                onChange={val => {
+                                    this.onTimeChange("rangeEnd", val)
+                                }}
                                 value={this.state.rangeEnd}
                                 calendarIcon={null}
                                 clearIcon={null}
@@ -369,7 +364,9 @@ class GraphConfigPanel extends Component {
                     <label>
                         Since
                         <DateTimePicker
-                            onChange={this.onSinceChange}
+                            onChange={val => {
+                                this.onTimeChange("since", val)
+                            }}
                             value={this.state.since}
                             calendarIcon={null}
                             clearIcon={null}
@@ -397,7 +394,8 @@ class GraphConfigPanel extends Component {
                             <select
                                 className="legend-input"
                                 value={this.state.rangeType}
-                                onChange={this.onrangeTypeChange}
+                                onChange={this.onFormChange}
+                                name="rangeType"
                             >
                                 <option value="past">Past X</option>
                                 <option value="timerange">Time range</option>
@@ -422,29 +420,14 @@ class GraphConfigPanel extends Component {
                             <legend>Data</legend>
                             <div className="fieldset-wrapper">
                                 <label>
-                                    Legend position
-                                    <select
-                                        className="gt-input"
-                                        value={this.state.legendPosition}
-                                        onChange={this.onLegendChange}
-                                    >
-                                        <option value="top">Top</option>
-                                        <option value="left">Left</option>
-                                        <option value="bottom">Bottom</option>
-                                        <option value="right">Right</option>
-                                        <option value="disabled">
-                                            Disabled
-                                        </option>
-                                    </select>
-                                </label>
-                                <label>
                                     Max points
                                     <select
                                         className="gt-input"
                                         defaultValue={
                                             this.state.downsampThreshold
                                         }
-                                        onChange={this.onDownsamplingChange}
+                                        onChange={this.onGraphDisplayChange}
+                                        name="downsampThreshold"
                                     >
                                         <option value="60">60</option>
                                         <option value="100">100</option>
@@ -454,6 +437,23 @@ class GraphConfigPanel extends Component {
                                         <option value="500">500</option>
                                         <option value="1000">1000</option>
                                         <option value="0">All</option>
+                                    </select>
+                                </label>
+                                <label>
+                                    Legend position
+                                    <select
+                                        className="gt-input"
+                                        value={this.state.legendPosition}
+                                        onChange={this.onGraphDisplayChange}
+                                        name="legendPosition"
+                                    >
+                                        <option value="top">Top</option>
+                                        <option value="left">Left</option>
+                                        <option value="bottom">Bottom</option>
+                                        <option value="right">Right</option>
+                                        <option value="disabled">
+                                            Disabled
+                                        </option>
                                     </select>
                                 </label>
                             </div>
@@ -466,7 +466,7 @@ class GraphConfigPanel extends Component {
                                     <select
                                         className="gt-input"
                                         defaultValue={this.state.showXAxis}
-                                        onChange={this.onXAxisLabelChange}
+                                        onChange={this.onGraphDisplayChange}
                                         name="showXAxis"
                                     >
                                         <option value="true">On</option>
