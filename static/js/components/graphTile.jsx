@@ -24,6 +24,7 @@ class GraphTile extends Component {
             this.graphId,
             this._makeReduxState()
         )
+        this.timerId = null
 
         props.listener(cfg.graphId, { registerGraph: true })
         props.node.setEventListener("configPanelOpen", () => {
@@ -48,6 +49,7 @@ class GraphTile extends Component {
             shouldRedraw = true
             this.datasets.updateCats(this._getGraphCatNames())
             this.datasets.updateGraphOptions()
+            this._setRangeTimer()
             let gd = this._getGraphData()
             this.setState({
                 gradient: {
@@ -63,11 +65,18 @@ class GraphTile extends Component {
             shouldRedraw = this._onUpdatePoints() || shouldRedraw
             shouldRedraw = this._onRemovePoints() || shouldRedraw
         }
-        if (shouldRedraw) this.setState({ key: Math.random() })
+        if (shouldRedraw && this._getRange().rangeType !== "past") {
+            this._updateGraph()
+        }
     }
 
     UNSAFE_componentWillMount = () => {
         Chart.plugins.register(DownsamplePlugin)
+    }
+
+    _updateGraph = () => {
+        this.datasets.onBeforeUpdate()
+        this.setState({ key: Math.random() })
     }
 
     _makeReduxState = () => {
@@ -121,6 +130,26 @@ class GraphTile extends Component {
         return this.datasets.removedPoints()
     }
 
+    _setRangeTimer = () => {
+        let range = this._getRange()
+        clearInterval(this.timerId)
+        this.timerId = null
+
+        if (range.rangeType === "past") {
+            let pastSeconds = range.pastAmount
+            if (range.pastUnit === "min") {
+                pastSeconds *= 60
+            } else if (range.pastUnit === "hr") {
+                pastSeconds *= 3600
+            }
+            this.timerId = setInterval(() => {
+                if (this.datasets.removePointsBeforeTime(pastSeconds)) {
+                    this._updateGraph()
+                }
+            }, 1000)
+        }
+    }
+
     onRangeChange = () => {
         this.datasets.clearAllData()
     }
@@ -144,7 +173,7 @@ class GraphTile extends Component {
         if (this.state.gradient == null) return {}
         let gd = this.state.gradient,
             lg = `linear-gradient(${gd.gradientDegrees}deg, ${gd.gradient1}, ${gd.gradient2})`
-        return {background: lg}
+        return { background: lg }
     }
 
     render() {

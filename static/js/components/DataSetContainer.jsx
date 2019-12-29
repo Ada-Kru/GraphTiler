@@ -7,7 +7,12 @@ import {
 import moment from "moment"
 
 const UNIT_MAP = { sec: "seconds", min: "minutes", hr: "hours" }
-const DEFAULT_GRAPH_DATA = { showXAxis: true, xAxisColor: "#AAAAAA" }
+const DEFAULT_GRAPH_CFG = {
+    showXAxis: true,
+    fitTimeAxis: true,
+    xAxisColor: "#AAAAAA",
+}
+const DEFAULT_RANGE_CFG = { rangeType: "past", pastAmount: 1, pastUnit: "hr" }
 
 class DataSetContainer {
     constructor(graphId, reduxState) {
@@ -16,10 +21,7 @@ class DataSetContainer {
         this.datasets = { datasets: [] }
         this._reduxState = reduxState
         this._graphId = graphId
-        let mmt = moment()
-        this._tzOffset = mmt.utcOffset() - mmt.isDST() ? 60 : 0
-        let graphData =
-            getGraphData(this._graphId, this._reduxState) || DEFAULT_GRAPH_DATA
+        this._setTzOffset()
         this.options = {
             responsive: true,
             downsample: {
@@ -29,8 +31,13 @@ class DataSetContainer {
             },
             maintainAspectRatio: false,
             animation: { duration: 0 },
-            scales: { xAxes: [this._makeXAxisSettings(graphData)], yAxes: [] },
+            scales: { xAxes: [this._makeXAxisSettings()], yAxes: [] },
         }
+    }
+
+    _setTzOffset = () => {
+        let mmt = moment()
+        this._tzOffset = mmt.utcOffset() - mmt.isDST() ? 0 : 60
     }
 
     _makeCatOptions = catName => {
@@ -43,21 +50,60 @@ class DataSetContainer {
         }
     }
 
-    _makeXAxisSettings = graphData => {
+    _makeXAxisSettings = () => {
+        let gid = this._graphId,
+            graphCfg = getGraphData(gid, this._reduxState) || DEFAULT_GRAPH_CFG,
+            rangeCfg = getRange(gid, this._reduxState) || DEFAULT_RANGE_CFG,
+            scaleBounds = graphCfg.fitTimeAxis
+                ? {}
+                : this._makeScaleBounds(rangeCfg)
+
         return {
-            display: graphData.showXAxis,
+            display: graphCfg.showXAxis,
             type: "time",
             distribution: "linear",
             bounds: "ticks",
             time: {
-                displayFormats: { hour: "hA MMM D", minute: "HH:mm" },
+                displayFormats: {
+                    hour: "hA MMM D",
+                    minute: "HH:mm",
+                    second: "HH:mm:ss",
+                    millisecond: "HH:mm:ss",
+                },
                 labelString: "Time",
                 parser: utcMoment => {
                     return moment(utcMoment).subtract(this._tzOffset, "minutes")
                 },
             },
-            ticks: { sampleSize: 50, fontColor: graphData.xAxisColor },
+            ticks: {
+                sampleSize: 50,
+                fontColor: graphCfg.xAxisColor,
+                ...scaleBounds,
+            },
         }
+    }
+
+    _makeScaleBounds = rangeCfg => {
+        let bounds = {}
+        switch (rangeCfg.rangeType) {
+            case "past":
+                let seconds = rangeCfg.pastAmount
+                if (rangeCfg.pastUnit === "min") {
+                    seconds *= 60
+                } else if (rangeCfg.pastUnit === "hr") {
+                    seconds *= 3600
+                }
+                bounds.min = moment.utc().subtract(seconds, "seconds")
+                break
+            case "since":
+                bounds.min = moment.utc(new Date(rangeCfg.since))
+                break
+            case "timerange":
+                bounds.min = moment.utc(new Date(rangeCfg.rangeStart))
+                bounds.max = moment.utc(new Date(rangeCfg.rangeEnd))
+                break
+        }
+        return bounds
     }
 
     _makeYAxisSettings = catData => {
@@ -135,8 +181,7 @@ class DataSetContainer {
             threshold: gd.downsampThreshold,
             restoreOriginalData: true,
         }
-        let graphData = getGraphData(this._graphId, this._reduxState)
-        this.options.scales.xAxes[0] = this._makeXAxisSettings(graphData)
+        this.options.scales.xAxes[0] = this._makeXAxisSettings()
     }
 
     updateCats = newCats => {
@@ -152,8 +197,7 @@ class DataSetContainer {
 
     updateReduxState = reduxState => {
         this._reduxState = reduxState
-        let mmt = moment()
-        this._tzOffset = mmt.utcOffset() - mmt.isDST() ? 60 : 0
+        this._setTzOffset()
     }
 
     clearAllData = () => {
@@ -223,6 +267,37 @@ class DataSetContainer {
         }
 
         return output
+    }
+
+    onBeforeUpdate = () => {
+        let gid = this._graphId,
+            graphCfg = getGraphData(gid, this._reduxState) || DEFAULT_GRAPH_CFG
+        if (!graphCfg.fitTimeAxis) {
+            this.options.scales.xAxes[0] = this._makeXAxisSettings()
+        }
+    }
+
+    removePointsBeforeTime = pastSeconds => {
+        let modified = false,
+            oldestAllowed = moment.utc().subtract(pastSeconds, "seconds")
+
+        for (let [catName, idx] of Object.entries(this.catIndices)) {
+            let allPoints = this._getCatPoints(catName),
+                numToRemove = 0
+            for (let i = 0; i < allPoints.length; i++) {
+                if (!allPoints[i].x.isBefore(oldestAllowed)) {
+                    break
+                }
+                numToRemove++
+            }
+            if (numToRemove > 0) {
+                modified = true
+                allPoints.splice(0, numToRemove)
+                this.datasets.datasets[idx].data = [...allPoints]
+            }
+        }
+
+        return modified
     }
 
     updatedPoints = () => {

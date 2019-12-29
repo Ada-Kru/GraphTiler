@@ -45,6 +45,7 @@ const makeGraphData = rangeId => {
         legendDisplay: true,
         legendPosition: "top",
         showXAxis: true,
+        fitTimeAxis: true,
         xAxisColor: "#AAAAAA",
         downsampEnabled: false,
         downsampThreshold: 0,

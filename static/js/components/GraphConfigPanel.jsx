@@ -60,6 +60,7 @@ class GraphConfigPanel extends Component {
                 legendDisplay: true,
                 legendPosition: "top",
                 showXAxis: true,
+                fitTimeAxis: true,
                 xAxisColor: "#AAAAAA",
                 downsampThreshold: 0,
                 downsampEnabled: false,
@@ -77,6 +78,7 @@ class GraphConfigPanel extends Component {
             state.legendDisplay = graph.legendDisplay
             state.legendPosition = graph.legendPosition
             state.showXAxis = graph.showXAxis
+            state.fitTimeAxis = graph.fitTimeAxis
             state.xAxisColor = graph.xAxisColor
             state.downsampThreshold = graph.downsampThreshold
             state.downsampEnabled = graph.downsampEnabled
@@ -235,6 +237,9 @@ class GraphConfigPanel extends Component {
                 break
             case "showXAxis":
                 update = { showXAxis: val === "true" }
+                break
+            case "fitTimeAxis":
+                update = { fitTimeAxis: val === "true" }
                 break
             case "downsampThreshold":
                 update = {
@@ -459,7 +464,7 @@ class GraphConfigPanel extends Component {
                             </div>
                         </fieldset>
                         <fieldset>
-                            <legend>X Axis</legend>
+                            <legend>Time Axis</legend>
                             <div className="fieldset-wrapper">
                                 <label>
                                     Labels
@@ -474,7 +479,19 @@ class GraphConfigPanel extends Component {
                                     </select>
                                 </label>
                                 <label>
-                                    X axis color
+                                    Fit to data
+                                    <select
+                                        className="gt-input"
+                                        value={this.state.fitTimeAxis}
+                                        onChange={this.onGraphDisplayChange}
+                                        name="fitTimeAxis"
+                                    >
+                                        <option value="true">True</option>
+                                        <option value="false">False</option>
+                                    </select>
+                                </label>
+                                <label>
+                                    Axis color
                                     <input
                                         className="gt-input"
                                         type="color"

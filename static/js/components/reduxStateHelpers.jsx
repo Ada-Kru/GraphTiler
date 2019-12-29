@@ -19,7 +19,8 @@ export const getCatData = (catName, graphId, state) => {
 }
 
 export const getRange = (graphId, state) => {
-    return state.ranges[state.graphs[graphId].range]
+    let graph = state.graphs[graphId]
+    return graph !== undefined ? state.ranges[graph.range] : null
 }
 
 export const getGraphData = (graphId, state) => {
