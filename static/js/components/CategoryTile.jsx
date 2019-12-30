@@ -30,14 +30,8 @@ class CategoryTile extends Component {
         }
     }
 
-    _isRegistered = () => {
-        return this.props.graphs.hasOwnProperty(this.props.graphId)
-    }
-
     _getCatIds = () => {
-        return this._isRegistered()
-            ? this.props.graphs[this.props.graphId].categories
-            : []
+        return this.props.graphs[this.props.graphId].categories
     }
 
     _getGraphCatNames = () => {
@@ -191,33 +185,6 @@ class CategoryTile extends Component {
                                 </div>
                             </fieldset>
                             <fieldset>
-                                <legend>Axis</legend>
-                                <div className="fieldset-wrapper">
-                                    <label>
-                                        Y axis units
-                                        <select
-                                            className="gt-input"
-                                            defaultValue={this.state.showYAxis}
-                                            onChange={this.onFormChangeBoolStr}
-                                            name="showYAxis"
-                                        >
-                                            <option value="true">On</option>
-                                            <option value="false">Off</option>
-                                        </select>
-                                    </label>
-                                    <label>
-                                        Axis color
-                                        <input
-                                            className="gt-input"
-                                            type="color"
-                                            value={this.state.yAxisColor}
-                                            onChange={this.onFormChange}
-                                            name="yAxisColor"
-                                        />
-                                    </label>
-                                </div>
-                            </fieldset>
-                            <fieldset>
                                 <legend>Line</legend>
                                 <div className="fieldset-wrapper">
                                     <label>
@@ -347,6 +314,33 @@ class CategoryTile extends Component {
                                             value={this.state.backgroundColor}
                                             onChange={this.onFormChange}
                                             name="backgroundColor"
+                                        />
+                                    </label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <legend>Axis</legend>
+                                <div className="fieldset-wrapper">
+                                    <label>
+                                        Y axis units
+                                        <select
+                                            className="gt-input"
+                                            defaultValue={this.state.showYAxis}
+                                            onChange={this.onFormChangeBoolStr}
+                                            name="showYAxis"
+                                        >
+                                            <option value="true">On</option>
+                                            <option value="false">Off</option>
+                                        </select>
+                                    </label>
+                                    <label>
+                                        Axis color
+                                        <input
+                                            className="gt-input"
+                                            type="color"
+                                            value={this.state.yAxisColor}
+                                            onChange={this.onFormChange}
+                                            name="yAxisColor"
                                         />
                                     </label>
                                 </div>

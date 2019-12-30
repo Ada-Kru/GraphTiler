@@ -28,15 +28,10 @@ let layout = {
         children: [
             {
                 type: "tabset",
+                id: "mainTabset",
                 weight: 50,
                 selected: 0,
-                children: [
-                    {
-                        component: "graphTile",
-                        name: "TEST",
-                        config: { graphId: "test", configPanelOpen: true },
-                    },
-                ],
+                children: [],
             },
         ],
     },
@@ -82,6 +77,7 @@ class App extends Component {
             removeCategory: this.onRemoveCategory,
             modifyGraphRange: this.onModifyGraphRange,
         }
+        this.layout = React.createRef()
     }
 
     setupWebsocket = () => {
@@ -275,7 +271,7 @@ class App extends Component {
             return
         }
         this.numGraphs++
-        this.refs.layout.addTabWithDragAndDropIndirect(
+        this.layout.current.addTabWithDragAndDropIndirect(
             "Drag to location to add a graph<br>ESC to cancel",
             {
                 component: "graphTile",
@@ -287,6 +283,13 @@ class App extends Component {
             },
             null
         )
+    }
+
+    onAction = action => {
+        if (action.type === "FlexLayout_AddNode") {
+            this.props.addGraph(action.data.json.config.graphId)
+        }
+        return action
     }
 
     customizeTab = (node, data) => {
@@ -311,6 +314,12 @@ class App extends Component {
     }
 
     componentDidMount() {
+        this.props.addGraph("test")
+        this.layout.current.addTabToTabSet("#2", {
+            component: "graphTile",
+            name: "TEST",
+            config: { graphId: "test", configPanelOpen: true },
+        })
         this.setupWebsocket()
     }
 
@@ -334,8 +343,9 @@ class App extends Component {
                     <FlexLayout.Layout
                         model={this.state.model}
                         factory={this._factory}
-                        ref="layout"
+                        ref={this.layout}
                         onRenderTab={this.customizeTab}
+                        onAction={this.onAction}
                     />
                 </div>
             </div>

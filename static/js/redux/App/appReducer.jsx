@@ -42,6 +42,9 @@ const makeGraphData = rangeId => {
     return {
         range: rangeId,
         categories: [],
+        since: new Date(),
+        start: new Date(),
+        end: new Date(),
         legendDisplay: true,
         legendPosition: "top",
         showXAxis: true,

@@ -13,20 +13,19 @@ class GraphTile extends Component {
         super(props)
         let cfg = props.node.getConfig()
 
+        this.graphId = cfg.graphId
         this.state = {
             configPanelOpen: cfg.configPanelOpen,
             catIds: this._getCatIds(),
             gradient: null,
             key: 0,
         }
-        this.graphId = cfg.graphId
         this.datasets = new DataSetContainer(
             this.graphId,
             this._makeReduxState()
         )
         this.timerId = null
 
-        props.listener(cfg.graphId, { registerGraph: true })
         props.node.setEventListener("configPanelOpen", () => {
             this.setState(prevState => {
                 return { configPanelOpen: !prevState.configPanelOpen }
@@ -34,12 +33,14 @@ class GraphTile extends Component {
         })
 
         props.node.setEventListener("close", () => {
+            clearInterval(this.timerId)
             this.props.listener(cfg.graphId, { removeGraph: true })
         })
     }
 
     componentDidUpdate = prevProps => {
         let shouldRedraw = false,
+            pointsUpdated = false,
             graphUpdated =
                 prevProps.graphUpdateId !== this.props.graphUpdateId &&
                 this.props.graphsUpdated.includes(this.graphId)
@@ -62,10 +63,13 @@ class GraphTile extends Component {
             this.setState({ catIds: this._getCatIds() })
         }
         if (prevProps.pointUpdateId !== this.props.pointUpdateId) {
-            shouldRedraw = this._onUpdatePoints() || shouldRedraw
-            shouldRedraw = this._onRemovePoints() || shouldRedraw
+            pointsUpdated = this._onUpdatePoints() || pointsUpdated
+            pointsUpdated = this._onRemovePoints() || pointsUpdated
         }
-        if (shouldRedraw && this._getRange().rangeType !== "past") {
+        if (
+            shouldRedraw ||
+            (pointsUpdated && this._getRange().rangeType !== "past")
+        ) {
             this._updateGraph()
         }
     }
@@ -90,14 +94,8 @@ class GraphTile extends Component {
         }
     }
 
-    _isRegistered = () => {
-        return this.props.graphs.hasOwnProperty(this.graphId)
-    }
-
     _getCatIds = () => {
-        return this._isRegistered()
-            ? this.props.graphs[this.graphId].categories
-            : []
+        return this.props.graphs[this.graphId].categories
     }
 
     _getGraphCatNames = () => {

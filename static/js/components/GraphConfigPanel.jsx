@@ -26,8 +26,8 @@ const NON_CHART_KEYS = new Set([
     "categories",
     "rangeType",
     "since",
-    "rangeStart",
-    "rangeEnd",
+    "start",
+    "end",
     "pastAmount",
     "pastUnit",
     "addingNewCat",
@@ -47,65 +47,32 @@ class GraphConfigPanel extends Component {
         super(props)
 
         let graphId = props.graphId,
-            catIds = [],
-            state = {
-                rangeType: "past",
-                since: new Date(),
-                rangeStart: new Date(),
-                rangeEnd: new Date(),
-                pastAmount: 1,
-                pastUnit: "hr",
-                addingNewCat: false,
-                editingRange: false,
-                legendDisplay: true,
-                legendPosition: "top",
-                showXAxis: true,
-                fitTimeAxis: true,
-                xAxisColor: "#AAAAAA",
-                downsampThreshold: 0,
-                downsampEnabled: false,
-                gradientDegrees: 0,
-                gradient1: "#222222",
-                gradient2: "#222222",
-            }
-
-        if (props.graphs[graphId]) {
-            let graph = props.graphs[graphId],
-                rangeData = props.ranges[graph.range]
-
+            graph = props.graphs[props.graphId],
+            rangeData = props.ranges[graph.range],
             catIds = graph.categories
-            state.rangeType = rangeData.rangeType
-            state.legendDisplay = graph.legendDisplay
-            state.legendPosition = graph.legendPosition
-            state.showXAxis = graph.showXAxis
-            state.fitTimeAxis = graph.fitTimeAxis
-            state.xAxisColor = graph.xAxisColor
-            state.downsampThreshold = graph.downsampThreshold
-            state.downsampEnabled = graph.downsampEnabled
-            state.gradientDegrees = graph.gradientDegrees
-            state.gradient1 = graph.gradient1
-            state.gradient2 = graph.gradient2
+        this.state = {
+            ...graph,
+            categories: getCategories(catIds, props.categories),
+            rangeType: rangeData.rangeType,
+        }
+        delete this.state.range
 
-            switch (state.rangeType) {
-                case "past": {
-                    state.pastAmount = rangeData.pastAmount
-                    state.pastUnit = rangeData.pastUnit
-                    break
-                }
-                case "since": {
-                    state.since = new Date(rangeData.since)
-                    break
-                }
-                case "timerange": {
-                    state.rangeStart = new Date(rangeData.start)
-                    state.rangeEnd = new Date(rangeData.end)
-                    break
-                }
+        switch (this.state.rangeType) {
+            case "past": {
+                this.state.pastAmount = rangeData.pastAmount
+                this.state.pastUnit = rangeData.pastUnit
+                break
+            }
+            case "since": {
+                this.state.since = new Date(rangeData.since)
+                break
+            }
+            case "timerange": {
+                this.state.start = new Date(rangeData.start)
+                this.state.end = new Date(rangeData.end)
+                break
             }
         }
-
-        state.categories = getCategories(catIds, props.categories)
-        this.state = state
 
         this.snapshot = {}
         this.rangeForm = React.createRef()
@@ -150,8 +117,8 @@ class GraphConfigPanel extends Component {
         this.snapshot = {
             rangeType: this.state.rangeType,
             since: this.state.since,
-            rangeStart: this.state.rangeStart,
-            rangeEnd: this.state.rangeEnd,
+            start: this.state.start,
+            end: this.state.end,
             pastAmount: this.state.pastAmount,
             pastUnit: this.state.pastUnit,
         }
@@ -172,7 +139,7 @@ class GraphConfigPanel extends Component {
         }
         if (
             this.state.rangeType === "timerange" &&
-            this.state.rangeStart >= this.state.rangeEnd
+            this.state.start >= this.state.end
         ) {
             this.saveButton.current.setCustomValidity(
                 "End of time range must be later than start!"
@@ -185,8 +152,8 @@ class GraphConfigPanel extends Component {
                 data.range.since = this.state.since
                 break
             case "timerange":
-                data.range.start = this.state.rangeStart
-                data.range.end = this.state.rangeEnd
+                data.range.start = this.state.start
+                data.range.end = this.state.end
                 break
             case "past":
                 data.range.pastAmount = parseInt(this.state.pastAmount)
@@ -337,9 +304,9 @@ class GraphConfigPanel extends Component {
                             Start
                             <DateTimePicker
                                 onChange={val => {
-                                    this.onTimeChange("rangeStart", val)
+                                    this.onTimeChange("start", val)
                                 }}
-                                value={this.state.rangeStart}
+                                value={this.state.start}
                                 calendarIcon={null}
                                 clearIcon={null}
                                 disableClock={true}
@@ -351,9 +318,9 @@ class GraphConfigPanel extends Component {
                             End
                             <DateTimePicker
                                 onChange={val => {
-                                    this.onTimeChange("rangeEnd", val)
+                                    this.onTimeChange("end", val)
                                 }}
-                                value={this.state.rangeEnd}
+                                value={this.state.end}
                                 calendarIcon={null}
                                 clearIcon={null}
                                 disableClock={true}
