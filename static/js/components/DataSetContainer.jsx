@@ -65,7 +65,7 @@ class DataSetContainer {
             bounds: "ticks",
             time: {
                 displayFormats: {
-                    hour: "hA MMM D",
+                    hour: "HH MMM D",
                     minute: "HH:mm",
                     second: "HH:mm:ss",
                     millisecond: "HH:mm:ss",
@@ -78,6 +78,8 @@ class DataSetContainer {
             ticks: {
                 sampleSize: 50,
                 fontColor: graphCfg.xAxisColor,
+                autoSkip: true,
+                maxTicksLimit: 30,
                 ...scaleBounds,
             },
         }
@@ -99,8 +101,8 @@ class DataSetContainer {
                 bounds.min = moment.utc(new Date(rangeCfg.since))
                 break
             case "timerange":
-                bounds.min = moment.utc(new Date(rangeCfg.rangeStart))
-                bounds.max = moment.utc(new Date(rangeCfg.rangeEnd))
+                bounds.min = moment.utc(new Date(rangeCfg.start))
+                bounds.max = moment.utc(new Date(rangeCfg.end))
                 break
         }
         return bounds
@@ -260,8 +262,8 @@ class DataSetContainer {
                 break
             }
             case "timerange": {
-                output.start = moment(range.rangeStart)
-                output.end = moment(range.rangeEnd)
+                output.start = moment(range.start)
+                output.end = moment(range.end)
                 break
             }
         }
