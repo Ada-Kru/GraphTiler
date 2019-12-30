@@ -2,6 +2,7 @@ export {
     addGraph,
     removeGraph,
     addCategory,
+    modifyCategory,
     removeCategory,
     modifyRange,
     newDataPoints,

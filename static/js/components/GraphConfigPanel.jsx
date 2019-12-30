@@ -226,9 +226,12 @@ class GraphConfigPanel extends Component {
 
     onCatSave = data => {
         this.setState({ addingNewCat: false })
-        this.props.listener(this.props.graphId, {
-            addCategory: data,
-        })
+        this.props.listener(this.props.graphId, { addCategory: data })
+    }
+
+    onCatModify = data => {
+        this.setState({ addingNewCat: false })
+        this.props.listener(this.props.graphId, { modifyCategory: data })
     }
 
     onCatCancel = () => {
@@ -237,9 +240,7 @@ class GraphConfigPanel extends Component {
 
     onCatRemove = data => {
         if (data.category.length) {
-            this.props.listener(this.props.graphId, {
-                removeCategory: data,
-            })
+            this.props.listener(this.props.graphId, { removeCategory: data })
         }
     }
 
@@ -539,8 +540,9 @@ class GraphConfigPanel extends Component {
                             <CategoryTile
                                 data={NEW_CAT_DATA}
                                 category=""
-                                onRemove={this.onCatRemove}
                                 onSave={this.onCatSave}
+                                onModify={this.onCatModify}
+                                onRemove={this.onCatRemove}
                                 onCancel={this.onCatCancel}
                                 graphId={this.props.graphId}
                                 editing={true}
@@ -552,8 +554,9 @@ class GraphConfigPanel extends Component {
                                     key={key}
                                     data={this.state.categories[key]}
                                     category={key}
-                                    onRemove={this.onCatRemove}
                                     onSave={this.onCatSave}
+                                    onModify={this.onCatModify}
+                                    onRemove={this.onCatRemove}
                                     onCancel={this.onCatCancel}
                                     graphId={this.props.graphId}
                                 />

@@ -2,6 +2,7 @@ import {
     ADD_GRAPH,
     REMOVE_GRAPH,
     ADD_CATEGORY,
+    MODIFY_CATEGORY,
     REMOVE_CATEGORY,
     MODIFY_RANGE,
     NEW_DATA_POINTS,
@@ -130,6 +131,24 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 ...state,
                 categories: { ...cats, [catId]: action.payload.catData },
                 graphs: { ...state.graphs, [graphId]: newGraph },
+                graphUpdateId: ++graphUpdateId,
+                graphsUpdated: [graphId],
+                ...EMPTY_DATA_POINTS,
+            }
+        }
+        case MODIFY_CATEGORY: {
+            let category = action.payload.catData.category,
+                catId = ''
+                for (let id of graph.categories) {
+                    if (state.categories[id].category === category) {
+                        catId = id
+                        break
+                    }
+                }
+
+            return {
+                ...state,
+                categories: { ...cats, [catId]: action.payload.catData },
                 graphUpdateId: ++graphUpdateId,
                 graphsUpdated: [graphId],
                 ...EMPTY_DATA_POINTS,

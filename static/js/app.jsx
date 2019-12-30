@@ -9,6 +9,7 @@ import {
     addGraph,
     removeGraph,
     addCategory,
+    modifyCategory,
     removeCategory,
     modifyRange,
     newDataPoints,
@@ -74,6 +75,7 @@ class App extends Component {
             registerGraph: this.onRegisterGraph,
             removeGraph: this.onRemoveGraph,
             addCategory: this.onAddCategory,
+            modifyCategory: this.onModifyCategory,
             removeCategory: this.onRemoveCategory,
             modifyGraphRange: this.onModifyGraphRange,
         }
@@ -172,6 +174,10 @@ class App extends Component {
                 ],
             })
         }
+    }
+
+    onModifyCategory = (graphId, catCfg) => {
+        this.props.modifyCategory(graphId, catCfg)
     }
 
     onRemoveCategory = (graphId, data) => {
@@ -367,6 +373,8 @@ const mapDispatchToProps = dispatch => {
         removeGraph: graphId => dispatch(removeGraph(graphId)),
         addCategory: (graphId, catData) =>
             dispatch(addCategory(graphId, catData)),
+        modifyCategory: (graphId, catData) =>
+            dispatch(modifyCategory(graphId, catData)),
         removeCategory: (graphId, category) =>
             dispatch(removeCategory(graphId, category)),
         modifyRange: (graphId, rangeData) =>

@@ -49,16 +49,18 @@ class CategoryTile extends Component {
     save = () => {
         if (!this.catForm.current.reportValidity()) return
         let cats = this._getGraphCatNames(),
-            catInUse =
-                cats.includes(this.state.category) &&
-                !cats.includes(this.currentCategory)
-        if (catInUse) {
+            categoryChanged = this.currentCategory !== this.state.category
+        if (categoryChanged && cats.includes(this.state.category)) {
             this.catInput.current.setCustomValidity("Category already exists!")
             return
         }
-        this.props.onRemove({ category: this.currentCategory })
         let data = removeKeys({ ...this.state }, this.noSaveKeys)
-        this.props.onSave(data)
+        if (categoryChanged) {
+            this.props.onRemove({ category: this.currentCategory })
+            this.props.onSave(data)
+        } else {
+            this.props.onModify(data)
+        }
         this.currentCategory = this.state.category
         this.setState({ editing: false })
     }

@@ -2,6 +2,7 @@ import {
     ADD_GRAPH,
     REMOVE_GRAPH,
     ADD_CATEGORY,
+    MODIFY_CATEGORY,
     REMOVE_CATEGORY,
     MODIFY_RANGE,
     NEW_DATA_POINTS,
@@ -20,6 +21,13 @@ export const removeGraph = graphId => {
 export const addCategory = (graphId, catData) => {
     return {
         type: ADD_CATEGORY,
+        payload: { graphId: graphId, catData: catData },
+    }
+}
+
+export const modifyCategory = (graphId, catData) => {
+    return {
+        type: MODIFY_CATEGORY,
         payload: { graphId: graphId, catData: catData },
     }
 }
