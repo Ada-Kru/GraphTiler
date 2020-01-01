@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import { connect } from "react-redux"
-import removeKeys from "./removeKeys"
+import removeKeys from "../functions/removeKeys"
 
 const CAT_COLOR_DISPLAY_WIDTH = 50,
     CAT_COLOR_DISPLAY_HEIGHT = 25

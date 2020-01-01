@@ -3,8 +3,6 @@ import { connect } from "react-redux"
 import SideControls from "./components/SideControls"
 import GraphTile from "./components/GraphTile"
 import FlexLayout from "flexlayout-react"
-import removeKeys from "./components/removeKeys"
-import insertPoints from "./components/insertPoints"
 import {
     addGraph,
     removeGraph,
@@ -148,8 +146,6 @@ class App extends Component {
     }
 
     onRemoveGraph = (graphId, data) => {
-        this.props.removeGraph(graphId)
-
         this._send({
             remove_categories: [
                 {
@@ -158,6 +154,7 @@ class App extends Component {
                 },
             ],
         })
+        this.props.removeGraph(graphId)
     }
 
     onAddCategory = (graphId, catCfg) => {
@@ -181,13 +178,12 @@ class App extends Component {
     }
 
     onRemoveCategory = (graphId, data) => {
-        this.props.removeCategory(graphId, data.category)
-
         this._send({
             remove_categories: [
                 { unique_id: graphId, categories: [data.category] },
             ],
         })
+        this.props.removeCategory(graphId, data.category)
     }
 
     onModifyGraphRange = (graphId, rangeData) => {

@@ -3,9 +3,7 @@ import { connect } from "react-redux"
 import { Line, Bar, Radar, Polar, Chart } from "react-chartjs-2"
 import DownsamplePlugin from "chartjs-plugin-downsample"
 import GraphConfigPanel from "./GraphConfigPanel"
-import insertPoints from "./insertPoints"
-import removeKeys from "./removeKeys"
-import DataSetContainer from "./DataSetContainer"
+import DataSetContainer from "../classes/DataSetContainer"
 import moment from "moment"
 
 class GraphTile extends Component {

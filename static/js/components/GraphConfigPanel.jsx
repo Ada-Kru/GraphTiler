@@ -3,7 +3,7 @@ import { connect } from "react-redux"
 import { updateGraphCfg } from "../redux"
 import DateTimePicker from "react-datetime-picker"
 import CategoryTile from "./CategoryTile"
-import removeKeys from "./removeKeys"
+import removeKeys from "../functions/removeKeys"
 
 const DATETIME_FORMAT = "MM-dd-y hh:mm a"
 const NEW_CAT_DATA = {

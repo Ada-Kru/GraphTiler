@@ -9,7 +9,7 @@ import {
     REMOVE_DATA_POINTS,
     UPDATE_GRAPH_CFG,
 } from "./appTypes"
-import removeKeys from "../../components/removeKeys"
+import removeKeys from "../../functions/removeKeys"
 
 const INITIAL_STATE = {
         graphs: {},

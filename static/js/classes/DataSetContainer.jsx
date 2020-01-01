@@ -3,7 +3,7 @@ import {
     getRange,
     getCatData,
     getGraphData,
-} from "./reduxStateHelpers"
+} from "../functions/reduxStateHelpers"
 import moment from "moment"
 
 const UNIT_MAP = { sec: "seconds", min: "minutes", hr: "hours" }
