@@ -9,27 +9,41 @@ TIME_FORMAT = TIME_FORMAT_NO_TZ + " %z"
 CAT_NAME = sys.argv[1] if len(sys.argv) == 2 else "PCBandwidth"
 
 
-def random_date(start, end):
-    delta = end - start
-    int_delta = (delta.days * 24 * 60 * 60) + delta.seconds
-    random_second = randrange(int_delta)
-    return start + timedelta(seconds=random_second)
+# def random_date(start, end):
+#     delta = end - start
+#     int_delta = (delta.days * 24 * 60 * 60) + delta.seconds
+#     random_second = randrange(int_delta)
+#     return start + timedelta(seconds=random_second)
+#
+#
+# resp = post(url=f"http://192.168.2.111:7123/remove-category/{CAT_NAME}")
+# print(resp, resp.json())
+#
+# data = {
+#     "displayName": "Bandwidth",
+#     "units": "Bytes",
+#     "abrvUnit": "b",
+#     "decimalPlaces": 0,
+#     "min": 0,
+#     "max": 1000000,
+# }
+#
+#
+# resp = post(url=f"http://192.168.2.111:7123/category/{CAT_NAME}", json=data)
+# print(resp, resp.json())
 
-
-resp = post(url=f"http://192.168.2.111:7123/remove-category/{CAT_NAME}")
+data = {"name": "test_layout", "data": {}}
+resp = post(url="http://192.168.2.111:7123/layout/add", json=data)
 print(resp, resp.json())
 
-data = {
-    "displayName": "Bandwidth",
-    "units": "Bytes",
-    "abrvUnit": "b",
-    "decimalPlaces": 0,
-    "min": 0,
-    "max": 1000000,
-}
+resp = get(url="http://192.168.2.111:7123/layout/get", json=data)
+print(resp, resp.json())
 
-#
-resp = post(url=f"http://192.168.2.111:7123/category/{CAT_NAME}", json=data)
+# data = {"name": "test_layout"}
+# resp = post(url="http://192.168.2.111:7123/layout/delete", json=data)
+# print(resp, resp.json())
+
+resp = get(url="http://192.168.2.111:7123/layouts/")
 print(resp, resp.json())
 
 # data["min"] = 10
@@ -70,12 +84,12 @@ print(resp, resp.json())
 # )
 # print(resp, resp.json())
 
-while True:
-    data = {"reading": randrange(100)}
-    resp = post(
-        url=f"http://192.168.2.111:7123/category/{CAT_NAME}/now", json=data
-    )
-    sleep(1)
+# while True:
+#     data = {"reading": randrange(100)}
+#     resp = post(
+#         url=f"http://192.168.2.111:7123/category/{CAT_NAME}/now", json=data
+#     )
+#     sleep(1)
 
 # data = {"reading": 80}
 #

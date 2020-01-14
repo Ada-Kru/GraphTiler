@@ -82,11 +82,11 @@ class DBInterface:
 
     def get_all_categories(self):
         """Get information on all current categories."""
-        return self._db.categories.find()
+        return self._db.categories.find({}, {"_id": 0})
 
     def get_category(self, catname):
         """Get information on a specific category."""
-        return self._db.categories.find_one({"name": catname})
+        return self._db.categories.find_one({"name": catname}, {"_id": 0})
 
     def add_category(self, catname, data):
         """Add categories to the database."""
@@ -126,6 +126,31 @@ class DBInterface:
             return {"errors": f'Category "{catname}" does not exist.'}
         self._db.categories.delete_one({"name": catname})
         self._db[f"catdata_default_{catname}"].drop()
+        return no_errors()
+
+    def get_layout(self, name):
+        """Get a saved layout."""
+        return self._db.layouts.find_one({"name": name}, {"_id": 0})
+
+    def get_all_layouts(self):
+        """Get a list of all saved layouts."""
+        filter = {"name": 1, "_id": 0}
+        output = [layout for layout in self._db.layouts.find({}, filter)]
+        return {"layouts": output}
+
+    def add_layout(self, layout):
+        """Add a layout to the database."""
+        if self.get_layout(layout["name"]):
+            err = f'Layout "{layout["name"]}" already exists.'
+            return {"errors": {"name": err}}
+
+        data = {"name": layout["name"], "data": layout["data"]}
+        self._db.layouts.insert_one(data)
+        return no_errors()
+
+    def delete_layout(self, layout):
+        """Remove a layout from the database."""
+        self._db.layouts.delete_one({"name": layout})
         return no_errors()
 
     def _get_and_format_points(self, points, collection, filter):

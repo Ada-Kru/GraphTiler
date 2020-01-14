@@ -85,6 +85,13 @@ WS_MSG_SCHEMA = {
     },
 }
 
+LAYOUT_SCHEMA = {"name": STRING_MAX_100}
+
+LAYOUT_WITH_DATA_SCHEMA = {
+    **LAYOUT_SCHEMA,
+    "data": {"required": True, "type": "dict"},
+}
+
 
 def make_min_max_vali(cat_info):
     min_max = {}

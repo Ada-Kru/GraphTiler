@@ -2,6 +2,8 @@ from .db_interface import DBInterface
 from lib.validation import (
     CAT_NAME_SCHEMA,
     NEW_CAT_SCHEMA,
+    LAYOUT_SCHEMA,
+    LAYOUT_WITH_DATA_SCHEMA,
     POINT_DATA_SCHEMA,
     GET_REMOVE_POINTS_SCHEMA,
 )
@@ -20,6 +22,8 @@ class GraphTilerController:
         self._db = DBInterface()
         self._cat_vali = Validator(NEW_CAT_SCHEMA, require_all=True)
         self._cat_name_vali = Validator(CAT_NAME_SCHEMA, require_all=True)
+        self._layout_vali = Validator(LAYOUT_SCHEMA, allow_unknown=True)
+        self._layout_data_vali = Validator(LAYOUT_WITH_DATA_SCHEMA)
         self._points_vali = Validator(POINT_DATA_SCHEMA, require_all=True)
         self._get_rem_vali = Validator(GET_REMOVE_POINTS_SCHEMA)
 
@@ -54,21 +58,40 @@ class GraphTilerController:
 
     def get_all_categories(self):
         """Get information about a category."""
-        categories = self._db.get_all_categories()
-        for category in categories.values():
-            category.pop("_id", None)
-        return categories
+        return self._db.get_all_categories()
 
     def get_category(self, catname):
         """Get information about a category."""
-        category = self._db.get_category(catname)
-        if category is not None:
-            category.pop("_id", None)
-        return category
+        return self._db.get_category(catname)
 
     def remove_category(self, catname):
         """Remove a category."""
         return self._db.remove_category(catname)
+
+    def get_layout(self, layout):
+        """Get a saved layout."""
+        if not self._layout_vali.validate(layout):
+            return {"errors": self._layout_vali.errors}
+
+        return self._db.get_layout(layout["name"])
+
+    def get_all_layouts(self):
+        """Get a list of all the saved layouts."""
+        return self._db.get_all_layouts()
+
+    def add_layout(self, layout):
+        """Add a new layout to the database."""
+        if not self._layout_data_vali.validate(layout):
+            return {"errors": self._layout_data_vali.errors}
+
+        return self._db.add_layout(layout)
+
+    def delete_layout(self, layout):
+        """Remove a saved layout."""
+        if not self._layout_vali.validate(layout):
+            return {"errors": self._layout_modify_vali.errors}
+
+        return self._db.delete_layout(layout["name"])
 
     def _validate_get_remove_points(self, data):
         if not self._get_rem_vali.validate(data):

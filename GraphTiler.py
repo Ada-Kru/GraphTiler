@@ -65,8 +65,7 @@ async def category(name):
 
 @app.route("/category/<name>/<action>", methods=["POST"])
 async def timepoints(name, action):
-    result = {}
-    data = None
+    result, data = {}, None
     if action == "get-points":
         result = ctrl.get_points(name, await request.get_json())
     elif action == "now":
@@ -99,6 +98,24 @@ async def remove_category(name):
 @app.route("/modify-category/<name>", methods=["POST"])
 async def modify_category(name):
     return jsonify(ctrl.modify_category(name, await request.get_json()))
+
+
+@app.route("/layout/<action>", methods=["GET", "POST"])
+async def layout_req(action):
+    layout = await request.get_json()
+    if request.method == "GET":
+        if action == "get":
+            return jsonify(ctrl.get_layout(layout))
+    else:
+        if action == "add":
+            return jsonify(ctrl.add_layout(layout))
+        elif action == "delete":
+            return jsonify(ctrl.delete_layout(layout))
+
+
+@app.route("/layouts/", methods=["GET"])
+async def get_all_layouts():
+    return jsonify(ctrl.get_all_layouts())
 
 
 async def add_cat_ranges(ws, data):
