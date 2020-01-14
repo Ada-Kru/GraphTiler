@@ -61,6 +61,12 @@ html {
     padding-left: 2px;
 }
 
+.save-icon {
+    color: #008389;
+    font-size: 18px;
+    font-weight: normal;
+}
+
 .ctrl-button:hover {
     color: #20d994;
 }
@@ -139,6 +145,10 @@ html {
     padding-top: 3%;
 }
 
+.ReactModal__Overlay {
+    z-index: 1000;
+}
+
 label {
     font-size: small;
 }
@@ -179,7 +189,7 @@ fieldset {
 .fieldset-legend {
     position: absolute;
     background-color: #333;
-    z-index: 1000;
+    z-index: 1;
     font-size: initial;
 }
 

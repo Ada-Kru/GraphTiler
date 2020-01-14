@@ -287,6 +287,10 @@ class App extends Component {
         )
     }
 
+    showLayouts = () => {
+        console.log("show layouts");
+    }
+
     onAction = action => {
         if (action.type === "FlexLayout_AddNode") {
             this.props.addGraph(action.data.json.config.graphId)
@@ -339,6 +343,7 @@ class App extends Component {
                 </datalist>
                 <SideControls
                     addGraphTile={this.addGraphTile}
+                    showLayouts={this.showLayouts}
                     wsState={this.state.wsState}
                 />
                 <div className="graphGrid">
