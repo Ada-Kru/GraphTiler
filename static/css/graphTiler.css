@@ -149,6 +149,74 @@ html {
     z-index: 1000;
 }
 
+.modal-close-x {
+    position: absolute;
+    top: 0%;
+    right: 1%;
+    cursor: pointer;
+    color: #FF5555;
+    font-size: 30px;
+}
+
+.gt-button {
+    color: white;
+    cursor: pointer;
+    background-color: #555;
+    border-top: 2px solid #aaa;
+    border-left: 2px solid #aaa;
+    border-bottom: 2px solid #555;
+    border-right: 2px solid #555;
+}
+
+.modal-content {
+    display: flex;
+    justify-content: center;
+}
+
+.modalCentered {
+    text-align: center;
+    overflow-y: auto;
+    height: 90%;
+    display: flex;
+    justify-content: center;
+}
+
+.layout-list {
+    list-style-type: none;
+    justify-content: center;
+}
+
+.layout-list-item {
+    display: flex;
+    justify-content: space-between;
+    color: #CCC;
+    background-color: #282828;
+    padding: 5px 5px;
+    margin: 5px;
+    border: 2px solid #222;
+    border-radius: 10px;
+}
+
+.layout-list-name {
+    cursor: pointer;
+}
+
+.layout-list-name:hover {
+    text-decoration: underline;
+    color: #FFFFFF;
+}
+
+.list-item-delete-x {
+    padding-left: 30px;
+    cursor: pointer;
+    color: #FF5555;
+    font-size: 15px;
+}
+
+.list-item-delete-x:hover {
+    color: #FF0000;
+}
+
 label {
     font-size: small;
 }

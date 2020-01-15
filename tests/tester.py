@@ -32,12 +32,17 @@ CAT_NAME = sys.argv[1] if len(sys.argv) == 2 else "PCBandwidth"
 # resp = post(url=f"http://192.168.2.111:7123/category/{CAT_NAME}", json=data)
 # print(resp, resp.json())
 
-data = {"name": "test_layout", "data": {}}
-resp = post(url="http://192.168.2.111:7123/layout/add", json=data)
-print(resp, resp.json())
+# data = {"name": "test_layout", "data": {}}
+# resp = post(url="http://192.168.2.111:7123/layout/add", json=data)
+# print(resp, resp.json())
 
-resp = get(url="http://192.168.2.111:7123/layout/get", json=data)
-print(resp, resp.json())
+for i in range(50):
+    data = {"name": f"test_layout{i}", "data": {}}
+    resp = post(url="http://192.168.2.111:7123/layout/add", json=data)
+    print(resp, resp.json())
+
+# resp = get(url="http://192.168.2.111:7123/layout/get", json=data)
+# print(resp, resp.json())
 
 # data = {"name": "test_layout"}
 # resp = post(url="http://192.168.2.111:7123/layout/delete", json=data)
