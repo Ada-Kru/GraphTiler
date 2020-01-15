@@ -103,14 +103,12 @@ async def modify_category(name):
 @app.route("/layout/<action>", methods=["GET", "POST"])
 async def layout_req(action):
     layout = await request.get_json()
-    if request.method == "GET":
-        if action == "get":
-            return jsonify(ctrl.get_layout(layout))
-    else:
-        if action == "add":
-            return jsonify(ctrl.add_layout(layout))
-        elif action == "delete":
-            return jsonify(ctrl.delete_layout(layout))
+    if action == "get":
+        return jsonify(ctrl.get_layout(layout))
+    elif action == "add":
+        return jsonify(ctrl.add_layout(layout))
+    elif action == "delete":
+        return jsonify(ctrl.delete_layout(layout))
 
 
 @app.route("/layouts/", methods=["GET"])
