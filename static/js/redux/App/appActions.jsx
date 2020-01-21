@@ -8,6 +8,7 @@ import {
     NEW_DATA_POINTS,
     UPDATE_GRAPH_CFG,
     REMOVE_DATA_POINTS,
+    LOAD_GRAPH_STATE,
 } from "./appTypes"
 
 export const addGraph = graphId => {
@@ -56,4 +57,8 @@ export const removeDataPoints = ranges => {
 
 export const updateGraphCfg = (graphId, cfg) => {
     return { type: UPDATE_GRAPH_CFG, payload: { graphId: graphId, cfg: cfg } }
+}
+
+export const loadGraphState = (newState) => {
+    return { type: LOAD_GRAPH_STATE, payload: newState }
 }

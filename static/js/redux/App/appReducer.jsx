@@ -8,6 +8,7 @@ import {
     NEW_DATA_POINTS,
     REMOVE_DATA_POINTS,
     UPDATE_GRAPH_CFG,
+    LOAD_GRAPH_STATE,
 } from "./appTypes"
 import removeKeys from "../../functions/removeKeys"
 
@@ -98,6 +99,9 @@ const appReducer = (state = INITIAL_STATE, action) => {
             }
         }
         case ADD_GRAPH: {
+            if (state.graphs.hasOwnProperty(graphId)) {
+                return state
+            }
             let rangeId = (nextRangeId++).toString(),
                 graphData = makeGraphData(rangeId)
             return {
@@ -138,13 +142,13 @@ const appReducer = (state = INITIAL_STATE, action) => {
         }
         case MODIFY_CATEGORY: {
             let category = action.payload.catData.category,
-                catId = ''
-                for (let id of graph.categories) {
-                    if (state.categories[id].category === category) {
-                        catId = id
-                        break
-                    }
+                catId = ""
+            for (let id of graph.categories) {
+                if (state.categories[id].category === category) {
+                    catId = id
+                    break
                 }
+            }
 
             return {
                 ...state,
@@ -192,6 +196,9 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 graphsUpdated: [graphId],
                 ...EMPTY_DATA_POINTS,
             }
+        }
+        case LOAD_GRAPH_STATE: {
+            return {...state, ...action.payload}
         }
         default: {
             return state

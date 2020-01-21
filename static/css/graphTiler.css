@@ -149,12 +149,21 @@ html {
     z-index: 1000;
 }
 
-.modal-close-x {
+.modal-close-icon {
     position: absolute;
     top: 0%;
     right: 1%;
     cursor: pointer;
     color: #FF5555;
+    font-size: 30px;
+}
+
+.modal-reload-icon {
+    position: absolute;
+    top: 0%;
+    left: 1%;
+    cursor: pointer;
+    color: #5555FF;
     font-size: 30px;
 }
 
@@ -171,12 +180,13 @@ html {
 .modal-content {
     display: flex;
     justify-content: center;
+    margin-bottom: 1%;
 }
 
 .modalCentered {
     text-align: center;
     overflow-y: auto;
-    height: 90%;
+    height: 95%;
     display: flex;
     justify-content: center;
 }

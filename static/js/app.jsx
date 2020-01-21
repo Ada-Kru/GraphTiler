@@ -12,6 +12,7 @@ import {
     modifyRange,
     newDataPoints,
     removeDataPoints,
+    loadGraphState,
 } from "./redux"
 import uuid from "uuid/v4"
 import moment from "moment"
@@ -19,7 +20,7 @@ import moment from "moment"
 const RECV_DATE_FORMAT = "YYYY-MM-DD HH:mm:ss"
 const SEND_DATE_FORMAT = RECV_DATE_FORMAT + " ZZ"
 
-let layout = {
+const DEFAULT_LAYOUT = {
     global: { splitterSize: 5, tabDragSpeed: 0.15 },
     layout: {
         type: "row",
@@ -56,7 +57,7 @@ class App extends Component {
         super(props)
 
         this.state = {
-            model: FlexLayout.Model.fromJson(layout),
+            model: FlexLayout.Model.fromJson(DEFAULT_LAYOUT),
             wsState: "disconnected",
             availableCats: {},
         }
@@ -86,16 +87,7 @@ class App extends Component {
 
         this.ws.onopen = evt => {
             this.setState({ wsState: "connected" })
-            let catData = []
-            for (let graphId of Object.keys(this.props.graphs)) {
-                catData.push({
-                    unique_id: graphId,
-                    range: formatWsRangeData(this._getGraphRange(graphId)),
-                    categories: this._getGraphCatNames(graphId),
-                })
-            }
-
-            this._send({ add_categories: catData })
+            this._send({ add_categories: this._makeWSCategoryData() })
         }
 
         this.ws.onmessage = evt => {
@@ -139,6 +131,18 @@ class App extends Component {
 
     _getGraphRange = graphId => {
         return this.props.ranges[this.props.graphs[graphId].range]
+    }
+
+    _makeWSCategoryData = () => {
+        let catData = []
+        for (let graphId of Object.keys(this.props.graphs)) {
+            catData.push({
+                unique_id: graphId,
+                range: formatWsRangeData(this._getGraphRange(graphId)),
+                categories: this._getGraphCatNames(graphId),
+            })
+        }
+        return catData
     }
 
     onRegisterGraph = (graphId, data) => {
@@ -287,8 +291,38 @@ class App extends Component {
         )
     }
 
-    showLayouts = () => {
-        console.log("show layouts");
+    loadLayout = newLayout => {
+        let newModel = FlexLayout.Model.fromJson(DEFAULT_LAYOUT)
+        this.setState({ model: newModel }, () => {
+            let remGraphs = []
+            for (let graphId of Object.keys(this.props.graphs)) {
+                remGraphs.push({
+                    unique_id: graphId,
+                    categories: this._getGraphCatNames(graphId),
+                })
+                this.props.removeGraph(graphId)
+            }
+            this._send({ remove_categories: remGraphs })
+
+            this.props.loadGraphState(newLayout.state)
+            this.setState(
+                { model: FlexLayout.Model.fromJson(newLayout.model) },
+                () => {
+                    this._send({ add_categories: this._makeWSCategoryData() })
+                }
+            )
+        })
+    }
+
+    getLayout = () => {
+        return {
+            model: this.state.model.toJson(),
+            state: {
+                graphs: this.props.graphs,
+                ranges: this.props.ranges,
+                categories: this.props.categories,
+            },
+        }
     }
 
     onAction = action => {
@@ -343,7 +377,8 @@ class App extends Component {
                 </datalist>
                 <SideControls
                     addGraphTile={this.addGraphTile}
-                    showLayouts={this.showLayouts}
+                    getLayout={this.getLayout}
+                    loadLayout={this.loadLayout}
                     wsState={this.state.wsState}
                 />
                 <div className="graphGrid">
@@ -382,6 +417,7 @@ const mapDispatchToProps = dispatch => {
             dispatch(modifyRange(graphId, rangeData)),
         newDataPoints: data => dispatch(newDataPoints(data)),
         removeDataPoints: ranges => dispatch(removeDataPoints(ranges)),
+        loadGraphState: newState => dispatch(loadGraphState(newState)),
     }
 }
 

@@ -8,4 +8,5 @@ export {
     newDataPoints,
     updateGraphCfg,
     removeDataPoints,
+    loadGraphState
 } from "./App/appActions"

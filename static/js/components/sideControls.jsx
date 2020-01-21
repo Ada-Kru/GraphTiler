@@ -9,19 +9,19 @@ const POST_OPTIONS = {
     },
 }
 
+const INITIAL_STATE = {showModal: false,
+loading: true,
+error: false,
+saveModalName: "",
+layouts: [],}
+
 ReactModal.defaultStyles.overlay.backgroundColor = "#222"
 ReactModal.defaultStyles.content.backgroundColor = "#333"
 
 class SideControls extends Component {
     constructor(props) {
         super(props)
-        this.state = {
-            showModal: false,
-            loading: true,
-            error: false,
-            saveModalName: "",
-            layouts: [],
-        }
+        this.state = { ...INITIAL_STATE }
     }
 
     fetchLayouts = () => {
@@ -63,17 +63,17 @@ class SideControls extends Component {
             this.setState({ showModal: true })
             this.fetchLayouts()
         } else {
-            this.setState({
-                showModal: false,
-                loading: true,
-                error: false,
-                layouts: [],
-            })
+            this.setState({ ...INITIAL_STATE })
         }
     }
 
     onModalFormChange = evt => {
         this.setState({ [evt.target.name]: evt.target.value })
+    }
+
+    onRefresh = () => {
+        this.setState({ loading: true, error: false, layouts: [] })
+        this.fetchLayouts()
     }
 
     onSaveLayout = () => {
@@ -82,7 +82,7 @@ class SideControls extends Component {
         }
         let layout = JSON.stringify({
             name: this.state.saveModalName,
-            data: {},
+            data: this.props.getLayout(),
         })
         fetch("/layout/add", { ...POST_OPTIONS, body: layout })
             .then(response => {
@@ -102,10 +102,13 @@ class SideControls extends Component {
     onLoadLayout = name => {
         let layout = JSON.stringify({ name: name })
         fetch("/layout/get", { ...POST_OPTIONS, body: layout })
-            .then(response => { return response.json() })
+            .then(response => {
+                return response.json()
+            })
             .then(json => {
                 if (!json.errors) {
-                    // -----------------------------------json == LOADED DATA
+                    this.setState({ ...INITIAL_STATE })
+                    this.props.loadLayout(json.data)
                 }
             })
             .catch(e => {
@@ -116,7 +119,9 @@ class SideControls extends Component {
     onDeleteLayout = name => {
         let layout = JSON.stringify({ name: name })
         fetch("/layout/delete", { ...POST_OPTIONS, body: layout })
-            .then(response => { return response.json() })
+            .then(response => {
+                return response.json()
+            })
             .then(json => {
                 if (!json.errors) {
                     this.fetchLayouts()
@@ -154,7 +159,14 @@ class SideControls extends Component {
                     contentLabel="Save\Load Modal"
                 >
                     <span
-                        className="modal-close-x"
+                        className="modal-reload-icon"
+                        title="Refresh layouts list"
+                        onClick={this.onRefresh}
+                    >
+                        ⟳
+                    </span>
+                    <span
+                        className="modal-close-icon"
                         title="Close"
                         onClick={this.onShowHideModal}
                     >
