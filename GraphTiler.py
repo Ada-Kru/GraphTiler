@@ -19,6 +19,12 @@ import cfg
 
 # from lib.validation_funcs import str_to_datetime
 
+RESOURCE_PATHS = [
+    "images/graphTiler.ico",
+    "graphTiler.css",
+    "flexLayout-dark.css",
+    "main.js",
+]
 
 app = Quart(__name__)
 # app.json_encoder = GTJSONEncoder
@@ -26,12 +32,6 @@ app.ws_handler = WsConnectionHandler()
 app.data_updates = None
 loop = get_event_loop()
 ctrl = GraphTilerController(app=app, loop=loop)
-RESOURCE_PATHS = [
-    "images/graphTiler.ico",
-    "graphTiler.css",
-    "flexLayout-dark.css",
-    "main.js",
-]
 
 
 @app.route("/<filename>")
@@ -59,7 +59,6 @@ async def category(name):
         data = await request.get_json()
         result = ctrl.add_category(name, data)
         if result["errors"] is None:
-            data.pop("_id", None)
             await app.ws_handler.send_category_added([data])
         return jsonify(result)
 

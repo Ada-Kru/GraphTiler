@@ -23,6 +23,7 @@ class GraphTile extends Component {
             this._makeReduxState()
         )
         this.timerId = null
+        this.firstLoad = true
 
         props.node.setEventListener("configPanelOpen", () => {
             this.setState(prevState => {
@@ -44,8 +45,9 @@ class GraphTile extends Component {
                 this.props.graphsUpdated.includes(this.graphId)
         this.datasets.updateReduxState(this._makeReduxState())
 
-        if (graphUpdated) {
+        if (graphUpdated || this.firstLoad) {
             shouldRedraw = true
+            this.firstLoad = false
             this.datasets.updateCats(this._getGraphCatNames())
             this.datasets.updateGraphOptions()
             this._setRangeTimer()

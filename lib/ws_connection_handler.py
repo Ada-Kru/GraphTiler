@@ -3,7 +3,6 @@ from cfg import TIME_FORMAT_NO_TZ, TIME_MULTS
 from datetime import timezone, timedelta, datetime
 from collections import defaultdict
 from json import dumps
-
 # from pprint import pprint
 
 
@@ -11,7 +10,7 @@ class WsConnectionHandler:
     """Helper for websocket connections."""
 
     def __init__(self):
-        self._categories = defaultdict(lambda: defaultdict(dict))
+        self._categories = {}
         self._connections = set()
 
     def add_connection(self, websocket):
@@ -20,7 +19,7 @@ class WsConnectionHandler:
 
     def remove_connection(self, websocket):
         """Add a new websocket connection."""
-        print("before: ", self._connections)
+        # print("before: ", self._connections)
         self._connections.discard(websocket)
         empty_cats = []
         for category in self._categories.keys():
@@ -31,7 +30,7 @@ class WsConnectionHandler:
         for category in empty_cats:
             self._categories.pop(category, None)
 
-        print("after: ", self._connections)
+        # print("after: ", self._connections)
 
     # def remove_entire_category(self, category):
     #     """Remove an entire category for all connections."""
@@ -52,23 +51,32 @@ class WsConnectionHandler:
         else:
             return a["start"] == b["start"] and a["end"] == b["end"]
 
+    def _add_category_dict(self, category, websocket, cat_data):
+        unique_id, range_data = cat_data["unique_id"], cat_data["range"]
+        if category not in self._categories:
+            self._categories[category] = {websocket: {unique_id: range_data}}
+        else:
+            self._categories[category][websocket][unique_id] = range_data
+
     def add_cat_ranges(self, websocket, data):
         """Add categories to a websocket connection."""
         for cat_data in data:
             if "range" not in cat_data:
                 continue
-            unique_id, range_data = cat_data["unique_id"], cat_data["range"]
+            range_data = cat_data["range"]
             for key in ("start", "end", "since"):
                 if key in range_data:
                     range_data[key] = str_to_datetime(range_data[key])
             for category in cat_data["categories"]:
-                self._categories[category][websocket][unique_id] = range_data
+                self._add_category_dict(category, websocket, cat_data)
 
-        different_ranges = self.remove_cat_ranges(websocket, data)
-        return different_ranges
+        # print("before remove cat ranges: ", self._categories)
+        # different_ranges = self.remove_cat_ranges(websocket, data)
+        # print("after remove cat ranges: ", self._categories)
+        # return different_ranges
 
     def remove_cat_ranges(self, websocket, data):
-        """Add categories to a websocket connection."""
+        """Remove categories from a websocket connection."""
         different = []
         for cat_data in data:
             for category in cat_data["categories"]:
@@ -96,9 +104,11 @@ class WsConnectionHandler:
     async def send_updates(self, category, updates, skip_vali=False):
         """Send updates for the category that are within the time range."""
         if category not in self._categories:
+            print("not in _categories: ", category, self._categories)
             return
 
         for ws, ranges in self._categories[category].items():
+            print(ws, ranges)
             in_range, now = {}, datetime.now(timezone.utc)
             for update in updates:
                 tm = update["time"]
@@ -132,7 +142,6 @@ class WsConnectionHandler:
 
     async def send_category_added(self, cat_data):
         """Notify all connections that a category was added."""
-        print(self._connections)
         for ws in self._connections:
             await ws.send(dumps({"category_added": cat_data}))
 

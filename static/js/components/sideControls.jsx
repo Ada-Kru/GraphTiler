@@ -9,11 +9,13 @@ const POST_OPTIONS = {
     },
 }
 
-const INITIAL_STATE = {showModal: false,
-loading: true,
-error: false,
-saveModalName: "",
-layouts: [],}
+const INITIAL_STATE = {
+    showModal: false,
+    loading: true,
+    error: false,
+    saveModalName: "",
+    layouts: [],
+}
 
 ReactModal.defaultStyles.overlay.backgroundColor = "#222"
 ReactModal.defaultStyles.content.backgroundColor = "#333"
@@ -178,7 +180,7 @@ class SideControls extends Component {
                             type="text"
                             placeholder="Save current layout"
                             name="saveModalName"
-                            value={this.state.saveName}
+                            value={this.state.saveModalName}
                             onChange={this.onModalFormChange}
                         />
                         <button

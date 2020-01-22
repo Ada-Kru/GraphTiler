@@ -201,8 +201,9 @@ const appReducer = (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 ...action.payload,
-                graphUpdateId: ++graphUpdateId,
-                graphsUpdated: [...Object.keys(action.payload.graphs)],
+                // graphUpdateId: ++graphUpdateId,
+                // graphsUpdated: [...Object.keys(action.payload.graphs)],
+                graphsUpdated: [],
             }
         }
         default: {

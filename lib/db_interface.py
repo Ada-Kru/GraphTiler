@@ -103,6 +103,7 @@ class DBInterface:
         data["name"] = catname
         self._db.categories.insert_one(data)
         self._db[colname].create_index([("time", DESCENDING)], unique=True)
+        data.pop("_id", None)
         return no_errors()
 
     def modify_category(self, catname, data):
@@ -239,6 +240,7 @@ class DBInterface:
             range = range_data["range"]
             for catname in range_data["categories"]:
                 if self.get_category(catname) is None:
+                    print("cat name not found: ", catname)
                     continue
 
                 collection = self._db[f"catdata_default_{catname}"]
@@ -256,5 +258,5 @@ class DBInterface:
                 self._get_and_format_points(points, collection, filter)
                 cat_points[catname].update(points)
 
-        print("get points called")
+        print("get points called", len(cat_points))
         return cat_points
