@@ -20,6 +20,7 @@ class WsConnectionHandler:
 
     def remove_connection(self, websocket):
         """Add a new websocket connection."""
+        print("before: ", self._connections)
         self._connections.discard(websocket)
         empty_cats = []
         for category in self._categories.keys():
@@ -29,6 +30,8 @@ class WsConnectionHandler:
 
         for category in empty_cats:
             self._categories.pop(category, None)
+
+        print("after: ", self._connections)
 
     # def remove_entire_category(self, category):
     #     """Remove an entire category for all connections."""
@@ -58,11 +61,10 @@ class WsConnectionHandler:
             for key in ("start", "end", "since"):
                 if key in range_data:
                     range_data[key] = str_to_datetime(range_data[key])
-
-        different_ranges = self.remove_cat_ranges(websocket, data)
-        for cat_data in data:
             for category in cat_data["categories"]:
                 self._categories[category][websocket][unique_id] = range_data
+
+        different_ranges = self.remove_cat_ranges(websocket, data)
         return different_ranges
 
     def remove_cat_ranges(self, websocket, data):
@@ -130,6 +132,7 @@ class WsConnectionHandler:
 
     async def send_category_added(self, cat_data):
         """Notify all connections that a category was added."""
+        print(self._connections)
         for ws in self._connections:
             await ws.send(dumps({"category_added": cat_data}))
 

@@ -100,7 +100,7 @@ class App extends Component {
             }
         }
 
-        this.ws.onclose = () => {
+        this.ws.onclose = (evt) => {
             this.setState({ wsState: "disconnected" })
             setTimeout(() => this.setupWebsocket(), 1000)
         }
@@ -354,12 +354,12 @@ class App extends Component {
     }
 
     componentDidMount() {
-        this.props.addGraph("test")
-        this.layout.current.addTabToTabSet("#2", {
-            component: "graphTile",
-            name: "TEST",
-            config: { graphId: "test", configPanelOpen: true },
-        })
+        // this.props.addGraph("test")
+        // this.layout.current.addTabToTabSet("#2", {
+        //     component: "graphTile",
+        //     name: "TEST",
+        //     config: { graphId: "test", configPanelOpen: true },
+        // })
         this.setupWebsocket()
     }
 

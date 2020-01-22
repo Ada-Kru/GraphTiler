@@ -256,4 +256,5 @@ class DBInterface:
                 self._get_and_format_points(points, collection, filter)
                 cat_points[catname].update(points)
 
+        print("get points called")
         return cat_points

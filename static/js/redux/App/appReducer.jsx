@@ -198,7 +198,12 @@ const appReducer = (state = INITIAL_STATE, action) => {
             }
         }
         case LOAD_GRAPH_STATE: {
-            return {...state, ...action.payload}
+            return {
+                ...state,
+                ...action.payload,
+                graphUpdateId: ++graphUpdateId,
+                graphsUpdated: [...Object.keys(action.payload.graphs)],
+            }
         }
         default: {
             return state

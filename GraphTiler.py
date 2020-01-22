@@ -7,6 +7,7 @@ from quart import (
     url_for,
     abort,
     websocket,
+    make_push_promise,
 )
 from asyncio import get_event_loop, create_task, gather, Queue, CancelledError
 from json import loads, dumps, JSONDecodeError
@@ -25,6 +26,12 @@ app.ws_handler = WsConnectionHandler()
 app.data_updates = None
 loop = get_event_loop()
 ctrl = GraphTilerController(app=app, loop=loop)
+RESOURCE_PATHS = [
+    "images/graphTiler.ico",
+    "graphTiler.css",
+    "flexLayout-dark.css",
+    "main.js",
+]
 
 
 @app.route("/<filename>")
@@ -33,16 +40,10 @@ async def index(filename):
         abort(404)
         return
     file = "index.html" if filename is None else filename
-    response = await make_response(await render_template(file))
-    response.push_promises.add(
-        url_for("static", filename="images/graphTiler.ico")
-    )
-    response.push_promises.add(url_for("static", filename="graphTiler.css"))
-    response.push_promises.add(
-        url_for("static", filename="flexLayout-dark.css")
-    )
-    response.push_promises.add(url_for("static", filename="main.js"))
-    return response
+    for path in RESOURCE_PATHS:
+        await make_push_promise(url_for("static", filename=path))
+
+    return await make_response(await render_template(file))
 
 
 @app.route("/category/", methods=["GET"])
