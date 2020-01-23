@@ -24,6 +24,7 @@ class GraphTile extends Component {
         )
         this.timerId = null
         this.firstLoad = true
+        this.pointsUpdated = true
 
         props.node.setEventListener("configPanelOpen", () => {
             this.setState(prevState => {
@@ -47,7 +48,6 @@ class GraphTile extends Component {
 
         if (graphUpdated || this.firstLoad) {
             shouldRedraw = true
-            this.firstLoad = false
             this.datasets.updateCats(this._getGraphCatNames())
             this.datasets.updateGraphOptions()
             this._setRangeTimer()
@@ -66,12 +66,12 @@ class GraphTile extends Component {
             pointsUpdated = this._onUpdatePoints() || pointsUpdated
             pointsUpdated = this._onRemovePoints() || pointsUpdated
         }
-        if (
-            shouldRedraw ||
-            (pointsUpdated && this._getRange().rangeType !== "past")
-        ) {
+        let updatePts = pointsUpdated && this._getRange().rangeType !== "past"
+        if (shouldRedraw || updatePts) {
             this._updateGraph()
         }
+        this.firstLoad = false
+        this.pointsUpdated = pointsUpdated || this.pointsUpdated
     }
 
     UNSAFE_componentWillMount = () => {
@@ -141,7 +141,9 @@ class GraphTile extends Component {
                 pastSeconds *= 3600
             }
             this.timerId = setInterval(() => {
-                if (this.datasets.removePointsBeforeTime(pastSeconds)) {
+                let updated = this.datasets.removePointsBeforeTime(pastSeconds)
+                if (updated || this.pointsUpdated) {
+                    this.pointsUpdated = false
                     this._updateGraph()
                 }
             }, 1000)

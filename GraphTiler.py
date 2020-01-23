@@ -118,8 +118,6 @@ async def get_all_layouts():
 
 async def add_cat_ranges(ws, data):
     app.ws_handler.add_cat_ranges(ws, data)
-    # changed_ranges = app.ws_handler.add_cat_ranges(ws, data)
-    # print(changed_ranges)
     cat_points_in_range = ctrl.get_points_range_cats(data)
     await ws.send(dumps({"point_update": cat_points_in_range}))
 

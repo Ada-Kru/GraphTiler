@@ -19,7 +19,6 @@ class WsConnectionHandler:
 
     def remove_connection(self, websocket):
         """Add a new websocket connection."""
-        # print("before: ", self._connections)
         self._connections.discard(websocket)
         empty_cats = []
         for category in self._categories.keys():
@@ -29,12 +28,6 @@ class WsConnectionHandler:
 
         for category in empty_cats:
             self._categories.pop(category, None)
-
-        # print("after: ", self._connections)
-
-    # def remove_entire_category(self, category):
-    #     """Remove an entire category for all connections."""
-    #     self._categories.pop(category, None)
 
     def _is_equal_range(self, a, b):
         """Check if ranges are equal."""
@@ -70,11 +63,6 @@ class WsConnectionHandler:
             for category in cat_data["categories"]:
                 self._add_category_dict(category, websocket, cat_data)
 
-        # print("before remove cat ranges: ", self._categories)
-        # different_ranges = self.remove_cat_ranges(websocket, data)
-        # print("after remove cat ranges: ", self._categories)
-        # return different_ranges
-
     def remove_cat_ranges(self, websocket, data):
         """Remove categories from a websocket connection."""
         different = []
@@ -104,11 +92,9 @@ class WsConnectionHandler:
     async def send_updates(self, category, updates, skip_vali=False):
         """Send updates for the category that are within the time range."""
         if category not in self._categories:
-            print("not in _categories: ", category, self._categories)
             return
 
         for ws, ranges in self._categories[category].items():
-            print(ws, ranges)
             in_range, now = {}, datetime.now(timezone.utc)
             for update in updates:
                 tm = update["time"]

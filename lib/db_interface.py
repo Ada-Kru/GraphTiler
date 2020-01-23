@@ -240,7 +240,6 @@ class DBInterface:
             range = range_data["range"]
             for catname in range_data["categories"]:
                 if self.get_category(catname) is None:
-                    print("cat name not found: ", catname)
                     continue
 
                 collection = self._db[f"catdata_default_{catname}"]
@@ -258,5 +257,4 @@ class DBInterface:
                 self._get_and_format_points(points, collection, filter)
                 cat_points[catname].update(points)
 
-        print("get points called", len(cat_points))
         return cat_points

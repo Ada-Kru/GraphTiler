@@ -65,14 +65,14 @@ print(resp, resp.json())
 # print(resp, resp.json())
 
 
-start = datetime.strptime("2020-01-01 01:00:00 -0600", TIME_FORMAT)
-end = datetime.strptime("2020-01-20 01:00:00 -0600", TIME_FORMAT)
-
-readings = []
-for _ in range(10):
-    dt = random_date(start, end).strftime(TIME_FORMAT)
-    readings.append({"time": dt, "reading": randrange(60000)})
-data = {"readings": readings}
+# start = datetime.strptime("2020-01-01 01:00:00 -0600", TIME_FORMAT)
+# end = datetime.strptime("2020-01-20 01:00:00 -0600", TIME_FORMAT)
+#
+# readings = []
+# for _ in range(10):
+#     dt = random_date(start, end).strftime(TIME_FORMAT)
+#     readings.append({"time": dt, "reading": randrange(60000)})
+# data = {"readings": readings}
 
 # data = {
 #     "readings": [
@@ -84,17 +84,17 @@ data = {"readings": readings}
 #         {"time": "2019-10-22 09:19:50 -0600", "reading": 20000},
 #     ]
 # }
-resp = post(
-    url=f"http://192.168.2.111:7123/category/{CAT_NAME}/add", json=data
-)
+# resp = post(
+#     url=f"http://192.168.2.111:7123/category/{CAT_NAME}/add", json=data
+# )
 # print(resp, resp.json())
 
-# while True:
-#     data = {"reading": randrange(100)}
-#     resp = post(
-#         url=f"http://192.168.2.111:7123/category/{CAT_NAME}/now", json=data
-#     )
-#     sleep(1)
+while True:
+    data = {"reading": randrange(100)}
+    resp = post(
+        url=f"http://192.168.2.111:7123/category/{CAT_NAME}/now", json=data
+    )
+    sleep(1)
 
 # data = {"reading": 80}
 #
