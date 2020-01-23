@@ -47,6 +47,7 @@ const makeGraphData = rangeId => {
         since: new Date(),
         start: new Date(),
         end: new Date(),
+        ...DEFAULT_RANGE,
         legendDisplay: true,
         legendPosition: "top",
         showXAxis: true,

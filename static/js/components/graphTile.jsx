@@ -10,11 +10,12 @@ class GraphTile extends Component {
     constructor(props) {
         super(props)
         let cfg = props.node.getConfig()
-
         this.graphId = cfg.graphId
+        let catIds = this._getCatIds()
+
         this.state = {
-            configPanelOpen: cfg.configPanelOpen,
-            catIds: this._getCatIds(),
+            configPanelOpen: catIds.length == 0,
+            catIds: catIds,
             gradient: null,
             key: 0,
         }
@@ -76,6 +77,10 @@ class GraphTile extends Component {
 
     UNSAFE_componentWillMount = () => {
         Chart.plugins.register(DownsamplePlugin)
+    }
+
+    componentWillUnmount = () => {
+        clearInterval(this.timerId)
     }
 
     _updateGraph = () => {

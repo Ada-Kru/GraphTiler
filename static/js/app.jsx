@@ -282,10 +282,7 @@ class App extends Component {
             {
                 component: "graphTile",
                 name: `Graph ${this.numGraphs}`,
-                config: {
-                    graphId: uuid(),
-                    configPanelOpen: true,
-                },
+                config: { graphId: uuid() },
             },
             null
         )
@@ -358,7 +355,7 @@ class App extends Component {
         // this.layout.current.addTabToTabSet("#2", {
         //     component: "graphTile",
         //     name: "TEST",
-        //     config: { graphId: "test", configPanelOpen: true },
+        //     config: { graphId: "test" },
         // })
         this.setupWebsocket()
     }
