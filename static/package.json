@@ -7,7 +7,9 @@
     "build": "webpack -p --progress --config webpack.config.js",
     "dev-build": "webpack --progress -d --config webpack.config.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "webpack --progress -d --config webpack.config.js --watch"
+    "watch": "webpack --progress -d --config webpack.config.js --watch",
+    "scss": "node-sass --watch scss -o css",
+    "watch:sass": "node-sass -w scss --output-style compressed"
   },
   "keywords": [
     "Graph",
@@ -34,7 +36,7 @@
     "css-loader": "^3.4.0",
     "flexlayout-react": "^0.3.4",
     "moment": "^2.24.0",
-    "node-sass": "^4.13.0",
+    "node-sass": "^4.13.1",
     "rc-dock": "^2.4.8",
     "react": "^16.12.0",
     "react-chartjs-2": "^2.8.0",

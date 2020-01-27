@@ -1,0 +1,371 @@
+body {
+  background-color: #111; }
+
+body,
+html {
+  scrollbar-color: #444 #222; }
+
+.y-scroll {
+  overflow-y: auto;
+  overflow-x: hidden; }
+
+.panel-ctrl {
+  cursor: pointer;
+  color: #aaa;
+  display: inline-block;
+  width: 18px;
+  height: 24px;
+  text-align: center;
+  opacity: 0.3;
+  transition: all 0.15s ease-in-out;
+  line-height: 30px; }
+
+.panel-ctrl:hover {
+  opacity: 1; }
+
+#root {
+  background: #222; }
+
+.graphGrid {
+  left: 21px;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  position: absolute;
+  overflow: hidden;
+  background-color: black; }
+
+.side-controls {
+  height: 100%;
+  width: 20px;
+  position: absolute;
+  margin-left: -8px;
+  margin-top: -8px;
+  background: #181818;
+  user-select: none; }
+
+.ctrl-button {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 28px;
+  color: #00b974;
+  text-align: center;
+  padding-left: 2px; }
+
+.save-icon {
+  color: #008389;
+  font-size: 18px;
+  font-weight: normal; }
+
+.ctrl-button:hover {
+  color: #20d994; }
+
+.connection-indicator {
+  font-weight: bold;
+  font-size: 20px; }
+
+.disconnected {
+  color: #aa0000; }
+
+.connecting {
+  color: #aaaa00; }
+
+.connected {
+  color: #0f04; }
+
+.graphConfigButton {
+  color: #888;
+  cursor: pointer;
+  padding-left: 8px;
+  padding-right: 2px;
+  line-height: 14px; }
+
+.graphConfigButton:hover {
+  color: #fff; }
+
+.graphTile {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  min-width: 50; }
+
+.graphHolder {
+  position: relative;
+  height: 100%;
+  width: 100%; }
+
+.graphHolder.configOpen {
+  width: 50%;
+  float: left; }
+
+.configPanel {
+  display: flex;
+  flex-direction: column;
+  color: white;
+  background-color: #333;
+  width: 50%;
+  height: 100%;
+  float: right;
+  /* transition: width 0.2s; */ }
+
+.graphSettings {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  width: 90%;
+  height: 100%;
+  padding-left: 3%; }
+
+.config-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding-top: 3%; }
+
+.ReactModal__Overlay {
+  z-index: 1000; }
+
+.modal-close-icon {
+  position: absolute;
+  top: 0%;
+  right: 1%;
+  cursor: pointer;
+  color: #FF5555;
+  font-size: 30px; }
+
+.modal-reload-icon {
+  position: absolute;
+  top: 0%;
+  left: 1%;
+  cursor: pointer;
+  color: #5555FF;
+  font-size: 30px; }
+
+.gt-button {
+  color: white;
+  cursor: pointer;
+  background-color: #555;
+  border-top: 2px solid #aaa;
+  border-left: 2px solid #aaa;
+  border-bottom: 2px solid #555;
+  border-right: 2px solid #555; }
+
+.modal-content {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1%; }
+
+.modalCentered {
+  text-align: center;
+  overflow-y: auto;
+  height: 95%;
+  display: flex;
+  justify-content: center; }
+
+.layout-list {
+  list-style-type: none;
+  justify-content: center; }
+
+.layout-list-item {
+  display: flex;
+  justify-content: space-between;
+  color: #CCC;
+  background-color: #282828;
+  padding: 5px 5px;
+  margin: 5px;
+  border: 2px solid #222;
+  border-radius: 10px; }
+
+.layout-list-name {
+  cursor: pointer; }
+
+.layout-list-name:hover {
+  text-decoration: underline;
+  color: #FFFFFF; }
+
+.list-item-delete-x {
+  padding-left: 30px;
+  cursor: pointer;
+  color: #FF5555;
+  font-size: 15px; }
+
+.list-item-delete-x:hover {
+  color: #FF0000; }
+
+label {
+  font-size: small; }
+
+fieldset {
+  position: relative;
+  border: 2px solid #222; }
+
+.fieldset-wrapper {
+  display: flex;
+  flex-flow: row wrap; }
+
+.cat-tile-options fieldset {
+  width: 100%; }
+
+.range-cfg-fieldset {
+  margin-top: 15px;
+  flex-flow: column; }
+
+.range-cfg-fieldset label {
+  order: unset;
+  flex: none; }
+
+.flex-div {
+  display: flex;
+  flex-flow: row wrap; }
+
+.cat-color-svg {
+  margin-left: 25px; }
+
+.fieldset-legend {
+  position: absolute;
+  background-color: #333;
+  z-index: 1;
+  font-size: initial; }
+
+/* legend {
+    color: #BBBBBB;
+    font-size: smaller;
+} */
+select {
+  width: max-content;
+  height: 20px; }
+
+.gt-input {
+  vertical-align: middle;
+  margin: 2px 10px;
+  background-color: #444;
+  color: #fff;
+  border-top: 1px solid #555;
+  border-left: 1px solid #555;
+  border-bottom: 1px solid #888;
+  border-right: 1px solid #888; }
+
+.legend-input {
+  margin-left: 5px;
+  vertical-align: middle;
+  background-color: #444;
+  color: #fff;
+  border-top: 1px solid #555;
+  border-left: 1px solid #555;
+  border-bottom: 1px solid #888;
+  border-right: 1px solid #888; }
+
+input[type="number"] {
+  max-width: 60px; }
+
+input:disabled,
+select:disabled {
+  background-color: #222;
+  color: #aaa;
+  border: none; }
+
+input[type="color"] {
+  width: 40px;
+  background-color: inherit;
+  border: none;
+  min-width: 20px;
+  cursor: pointer; }
+
+label .react-datetime-picker,
+label .react-datetimerange-picker {
+  max-height: 24px;
+  margin: 5px 20px; }
+
+.react-datetime-picker__wrapper {
+  font-size: small; }
+
+.react-datetime-picker--enabled {
+  background-color: #444 !important;
+  border-top: 1px solid #555 !important;
+  border-left: 1px solid #555 !important;
+  border-bottom: 1px solid #888 !important;
+  border-right: 1px solid #888 !important; }
+
+.react-datetime-picker--disabled {
+  background-color: #222 !important;
+  border: none; }
+
+.react-datetime-picker__inputGroup__input {
+  color: #FFF; }
+
+.react-calendar {
+  background-color: #333 !important;
+  border-top: 1px solid #555;
+  border-left: 1px solid #555;
+  border-bottom: 1px solid #aaa;
+  border-right: 1px solid #aaa; }
+
+.react-calendar__navigation__label,
+.react-calendar__navigation__arrow,
+.react-calendar__tile {
+  color: white; }
+
+.react-calendar__month-view__days__day {
+  color: white; }
+
+.react-calendar__navigation button:hover,
+.react-calendar__month-view__days button:hover,
+.react-calendar__year-view__months button:hover {
+  background-color: #555 !important; }
+
+.cat-tile-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap; }
+
+.cat-tile-header {
+  display: flex;
+  justify-content: space-between;
+  padding-left: 1%;
+  padding-right: 1%; }
+
+.cat-tile-button {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  color: #aaa; }
+
+.cat-tile-button:hover {
+  color: #fff; }
+
+.cat-tile-button.red:hover {
+  color: #f55; }
+
+.cat-tile-button.right {
+  position: absolute;
+  /* left: 98.5%; */
+  /* top: 0%; */
+  right: -1% !important; }
+
+.cat-tile-options {
+  display: flex;
+  /* flex-direction: column; */
+  justify-content: start;
+  width: 100%;
+  padding-left: 1%;
+  flex-flow: row wrap;
+  align-items: center; }
+
+.cat-tile-footer {
+  display: flex;
+  justify-content: space-around;
+  padding-top: 1%;
+  width: 100%; }
+
+.cat-tile-footer button {
+  width: 50%;
+  color: white;
+  cursor: pointer;
+  background-color: #555;
+  border-top: 2px solid #aaa;
+  border-left: 2px solid #aaa;
+  border-bottom: 2px solid #555;
+  border-right: 2px solid #555; }
+
+.cat-tile-footer button:hover {
+  color: #afa; }
