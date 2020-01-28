@@ -362,18 +362,18 @@ class CategoryTile extends Component {
             )
         } else {
             return (
-                <fieldset className="cat-tile">
-                    <legend>
+                <div className="cat-tile">
+                    <span className="cat-tile-label">
                         {this.state.category + " "}
                         {this.makeCfgBtn()} {this.makeCloseBtn(true)}
-                    </legend>
+                    </span>
                     <div className="cat-tile-options">
                         <label>
                             Colors
                             {this.makeCatColorDisplay()}
                         </label>
                     </div>
-                </fieldset>
+                </div>
             )
         }
     }

@@ -48,6 +48,8 @@ class WsConnectionHandler:
         unique_id, range_data = cat_data["unique_id"], cat_data["range"]
         if category not in self._categories:
             self._categories[category] = {websocket: {unique_id: range_data}}
+        elif websocket not in self._categories[category]:
+            self._categories[category][websocket] = {unique_id: range_data}
         else:
             self._categories[category][websocket][unique_id] = range_data
 

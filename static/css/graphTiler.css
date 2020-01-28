@@ -196,6 +196,17 @@ html {
   .list-item-delete-x:hover {
     color: #ff0000; }
 
+.cat-tile {
+  border: 2px solid #222;
+  border-radius: 3px;
+  padding: 4px;
+  margin: 5px; }
+
+.cat-tile-label {
+  display: inline-block;
+  position: relative;
+  width: 100%; }
+
 .cat-tile-container {
   display: flex;
   justify-content: center;
@@ -218,7 +229,8 @@ html {
     color: #f55; }
   .cat-tile-button.right {
     position: absolute;
-    right: -1% !important; }
+    right: -10%;
+    top: -70%; }
 
 .cat-tile-options {
   display: flex;
