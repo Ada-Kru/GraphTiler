@@ -2,13 +2,8 @@ const webpack = require("webpack")
 
 const config = {
     entry: __dirname + "\\js\\index.jsx",
-    output: {
-        path: __dirname + "\\dist",
-        filename: "bundle.js",
-    },
-    resolve: {
-        extensions: [".js", ".jsx", ".css"],
-    },
+    output: { path: __dirname + "\\dist", filename: "bundle.js" },
+    resolve: { extensions: [".js", ".jsx", ".css"] },
     module: {
         rules: [
             {
@@ -31,10 +26,7 @@ const config = {
                     },
                 ],
             },
-            {
-                test: /\.css$/i,
-                use: ["style-loader", "css-loader"],
-            },
+            { test: /\.css$/i, use: ["style-loader", "css-loader"] },
         ],
     },
 }

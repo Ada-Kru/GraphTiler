@@ -194,7 +194,7 @@ class SideControls extends Component {
                     {this.makeLayoutList()}
                 </ReactModal>
                 <span
-                    className="ctrl-button"
+                    className="ctrl-icon add-icon"
                     title="Add new graph tile"
                     onClick={this.props.addGraphTile}
                 >
@@ -202,7 +202,7 @@ class SideControls extends Component {
                 </span>
                 <br />
                 <span
-                    className="ctrl-button save-icon"
+                    className="ctrl-icon save-icon"
                     title="Save\Load Layout"
                     onClick={this.onShowHideModal}
                 >

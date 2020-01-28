@@ -9,6 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "webpack --progress -d --config webpack.config.js --watch",
     "scss": "node-sass --watch scss -o css",
+    "sass": "node-sass --watch scss/graphTiler.sass -o css",
     "watch:sass": "node-sass -w scss --output-style compressed"
   },
   "keywords": [

@@ -1,0 +1,443 @@
+$background-highest: #444;
+$background-high: #333;
+$background-mid: #222;
+$background-low: #111;
+$button-bright: #AAA;
+$button-mid: #888;
+$button-dark: #555;
+$control-background: #181818;
+$add-tile-icon-color: #00b974;
+$save-icon-color: #008389;
+$ctrl-icon-hover-color: #20d994;
+$modal-close-icon-color: #ff5555;
+$modal-close-icon-color-hover: #ffaaaa;
+$modal-reload-icon-color: #5555ff;
+$modal-reload-icon-color-hover: #aaaaff;
+
+%dark-button {
+    background-color: $button-dark;
+    border-top: 2px solid $button-bright;
+    border-left: 2px solid $button-bright;
+    border-bottom: 2px solid $button-dark;
+    border-right: 2px solid $button-dark;
+}
+
+%gt-input-shared {
+    vertical-align: middle;
+    color: #fff;
+    background-color: $background-highest;
+    border-top: 1px solid $button-dark;
+    border-left: 1px solid $button-dark;
+    border-bottom: 1px solid $button-mid;
+    border-right: 1px solid $button-mid;
+}
+
+%disabled-input-shared {
+    background-color: $background-mid;
+    color: $button-bright;
+    border: none;
+}
+
+%modal-icon {
+    position: absolute;
+    top: 0%;
+    cursor: pointer;
+    font-size: 30px;
+}
+
+body,
+html {
+    scrollbar-color: $background-highest $background-mid;
+    background-color: $background-low;
+}
+
+#root {
+    background: $background-mid;
+}
+
+.y-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.panel-ctrl {
+    cursor: pointer;
+    color: $button-bright;
+    display: inline-block;
+    width: 18px;
+    height: 24px;
+    text-align: center;
+    opacity: 0.3;
+    transition: all 0.15s ease-in-out;
+    line-height: 30px;
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.graphGrid {
+    left: 21px;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    position: absolute;
+    overflow: hidden;
+    background-color: black;
+}
+
+.side-controls {
+    height: 100%;
+    width: 20px;
+    position: absolute;
+    margin-left: -8px;
+    margin-top: -8px;
+    background: $control-background;
+    user-select: none;
+}
+
+.ctrl-icon {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 28px;
+    text-align: center;
+    padding-left: 2px;
+    &.add-icon {
+        color: $add-tile-icon-color;
+        &:hover {
+            color: $ctrl-icon-hover-color;
+        }
+    }
+    &.save-icon {
+        color: $save-icon-color;
+        font-size: 18px;
+        font-weight: normal;
+        &:hover {
+            color: $ctrl-icon-hover-color;
+        }
+    }
+}
+
+.connection-indicator {
+    font-weight: bold;
+    font-size: 20px;
+    &.disconnected {
+        color: #aa0000;
+    }
+    &.connecting {
+        color: #aaaa00;
+    }
+    &.connected {
+        color: #0f04;
+    }
+}
+
+.graphConfigButton {
+    color: $button-mid;
+    cursor: pointer;
+    padding-left: 8px;
+    padding-right: 2px;
+    line-height: 14px;
+    &:hover {
+        color: #fff;
+    }
+}
+
+.graphTile {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    min-width: 50;
+}
+
+.graphHolder {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    &.configOpen {
+        width: 50%;
+        float: left;
+    }
+}
+
+.configPanel {
+    display: flex;
+    flex-direction: column;
+    color: white;
+    background-color: $background-high;
+    width: 50%;
+    height: 100%;
+    float: right;
+}
+
+.graphSettings {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    width: 90%;
+    height: 100%;
+    padding-left: 3%;
+}
+
+.config-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-top: 3%;
+}
+
+.ReactModal__Overlay {
+    z-index: 1000;
+}
+
+.modal-close-icon {
+    @extend %modal-icon;
+    right: 1%;
+    color: $modal-close-icon-color;
+    &:hover {
+        color: $modal-close-icon-color-hover
+    }
+}
+
+.modal-reload-icon {
+    @extend %modal-icon;
+    left: 1%;
+    color: $modal-reload-icon-color;
+    &:hover {
+        color: $modal-reload-icon-color-hover
+    }
+}
+
+.modal-content {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1%;
+}
+
+.modalCentered {
+    text-align: center;
+    overflow-y: auto;
+    height: 95%;
+    display: flex;
+    justify-content: center;
+}
+
+.layout-list {
+    list-style-type: none;
+    justify-content: center;
+}
+
+.layout-list-item {
+    display: flex;
+    justify-content: space-between;
+    color: #ccc;
+    background-color: #282828;
+    padding: 5px 5px;
+    margin: 5px;
+    border: 2px solid $background-mid;
+    border-radius: 10px;
+}
+
+.layout-list-name {
+    cursor: pointer;
+    &:hover {
+        text-decoration: underline;
+        color: #ffffff;
+    }
+}
+
+.list-item-delete-x {
+    padding-left: 30px;
+    cursor: pointer;
+    color: #ff5555;
+    font-size: 15px;
+    &:hover {
+        color: #ff0000;
+    }
+}
+
+.cat-tile-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.cat-tile-header {
+    display: flex;
+    justify-content: space-between;
+    padding-left: 1%;
+    padding-right: 1%;
+}
+
+.cat-tile-button {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    color: $button-bright;
+    &:hover {
+        color: #fff;
+    }
+    &.red:hover {
+        color: #f55;
+    }
+    &.right {
+        position: absolute;
+        right: -1% !important;
+    }
+}
+
+.cat-tile-options {
+    display: flex;
+    justify-content: start;
+    width: 100%;
+    padding-left: 1%;
+    flex-flow: row wrap;
+    align-items: center;
+    fieldset {
+        width: 100%;
+    }
+}
+
+.cat-tile-footer {
+    display: flex;
+    justify-content: space-around;
+    padding-top: 1%;
+    width: 100%;
+    button {
+        @extend %dark-button;
+        width: 50%;
+        color: white;
+        cursor: pointer;
+        &:hover {
+            color: #afa;
+        }
+    }
+}
+
+fieldset {
+    position: relative;
+    border: 2px solid $background-mid;
+}
+
+.fieldset-wrapper {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.range-cfg-fieldset {
+    margin-top: 15px;
+    flex-flow: column;
+    label {
+        order: unset;
+        flex: none;
+    }
+}
+
+.flex-div {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.cat-color-svg {
+    margin-left: 25px;
+}
+
+.fieldset-legend {
+    position: absolute;
+    background-color: $background-high;
+    z-index: 1;
+    font-size: initial;
+}
+
+.gt-button {
+    @extend %dark-button;
+    color: white;
+    cursor: pointer;
+}
+
+.gt-input {
+    @extend %gt-input-shared;
+    margin: 2px 10px;
+}
+
+.legend-input {
+    margin-left: 5px;
+    @extend %gt-input-shared;
+}
+
+input {
+    &[type="number"] {
+        max-width: 60px;
+    }
+    &[type="color"] {
+        width: 40px;
+        background-color: inherit;
+        border: none;
+        min-width: 20px;
+        cursor: pointer;
+    }
+    &:disabled {
+        @extend %disabled-input-shared
+    }
+}
+
+select {
+    width: max-content;
+    height: 20px;
+    &:disabled {
+        @extend %disabled-input-shared
+    }
+}
+
+label {
+    font-size: small;
+    &.react-datetime-picker,
+    &.react-datetimerange-picker {
+        max-height: 24px;
+        margin: 5px 20px;
+    }
+}
+
+.react-datetime-picker__wrapper {
+    font-size: small;
+}
+
+.react-datetime-picker--enabled {
+    background-color: $background-highest !important;
+    border-top: 1px solid $button-dark !important;
+    border-left: 1px solid $button-dark !important;
+    border-bottom: 1px solid $button-mid !important;
+    border-right: 1px solid $button-mid !important;
+}
+
+.react-datetime-picker--disabled {
+    background-color: $background-mid !important;
+    border: none;
+}
+
+.react-datetime-picker__inputGroup__input {
+    color: #fff;
+}
+
+.react-calendar {
+    background-color: $background-high !important;
+    border-top: 1px solid $button-dark;
+    border-left: 1px solid $button-dark;
+    border-bottom: 1px solid $button-bright;
+    border-right: 1px solid $button-bright;
+}
+
+.react-calendar__navigation__label,
+.react-calendar__navigation__arrow,
+.react-calendar__tile {
+    color: white;
+}
+
+.react-calendar__month-view__days__day {
+    color: white;
+}
+
+.react-calendar__navigation button:hover,
+.react-calendar__month-view__days button:hover,
+.react-calendar__year-view__months button:hover {
+    background-color: $button-dark !important;
+}

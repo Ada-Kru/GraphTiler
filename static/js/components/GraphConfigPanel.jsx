@@ -528,7 +528,7 @@ class GraphConfigPanel extends Component {
                     <span className="config-row">
                         Categories
                         <span
-                            className="ctrl-button"
+                            className="ctrl-icon add-icon"
                             title="Add new category"
                             onClick={this.addCategory}
                         >
