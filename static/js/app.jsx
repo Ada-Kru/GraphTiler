@@ -37,6 +37,7 @@ const DEFAULT_LAYOUT = {
     },
 }
 
+// Formats range data before sending across websocket.
 function formatWsRangeData(rangeData) {
     let output = { range_type: rangeData.rangeType }
     if (rangeData.hasOwnProperty("pastUnit")) {
@@ -64,6 +65,8 @@ class App extends Component {
 
         this.ws = null
         this.numGraphs = 0
+
+        // Function maps for websocket events and internal events.
         this._wsMsgMap = {
             point_update: this.onMsgPointUpdate,
             category_added: this.onAddedBackendCat,
@@ -92,7 +95,6 @@ class App extends Component {
 
         this.ws.onmessage = evt => {
             let msg = JSON.parse(evt.data)
-            console.log("websocket data:", msg)
             for (let [type, data] of Object.entries(msg)) {
                 if (this._wsMsgMap.hasOwnProperty(type)) {
                     this._wsMsgMap[type](data)
@@ -106,7 +108,6 @@ class App extends Component {
         }
 
         this.ws.error = evt => {
-            console.log("Websocket error: ", evt)
             this.ws.close()
         }
     }
@@ -115,6 +116,7 @@ class App extends Component {
         this.ws.send(JSON.stringify(data))
     }
 
+    // Listener for internal events from other tiles.
     listener = (graphId, msg) => {
         for (let [key, data] of Object.entries(msg)) {
             this._listenerMap[key](graphId, data)
@@ -206,6 +208,7 @@ class App extends Component {
 
     onMsgPointUpdate = categories => {
         let newCatPoints = {}
+        // Convert string datetimes from point data into UTC moments
         for (let [category, readings] of Object.entries(categories)) {
             let points = []
             for (let [timeStr, reading] of Object.entries(readings)) {
@@ -238,6 +241,7 @@ class App extends Component {
         this.props.removeDataPoints(rem)
     }
 
+    // Update graphs when points are removed in the backend.
     onBackendRemovedPoints = remData => {
         for (let range of Object.values(remData)) {
             if (range.hasOwnProperty("times")) {
@@ -322,6 +326,8 @@ class App extends Component {
         }
     }
 
+    // Detect when a new graph is added.  Will not trigger when the user backs
+    // out of adding a new graph by pressing ESC.
     onAction = action => {
         if (action.type === "FlexLayout_AddNode") {
             this.props.addGraph(action.data.json.config.graphId)
@@ -329,6 +335,7 @@ class App extends Component {
         return action
     }
 
+    // Add a custom configuration button to each tab.
     customizeTab = (node, data) => {
         data.content = (
             <span
@@ -351,12 +358,6 @@ class App extends Component {
     }
 
     componentDidMount() {
-        // this.props.addGraph("test")
-        // this.layout.current.addTabToTabSet("#2", {
-        //     component: "graphTile",
-        //     name: "TEST",
-        //     config: { graphId: "test" },
-        // })
         this.setupWebsocket()
     }
 

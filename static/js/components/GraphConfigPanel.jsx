@@ -1,3 +1,5 @@
+// Configuration panel for graph tiles.
+
 import React, { Component } from "react"
 import { connect } from "react-redux"
 import { updateGraphCfg } from "../redux"
@@ -83,6 +85,8 @@ class GraphConfigPanel extends Component {
     }
 
     componentDidMount = () => {
+        // Add custom event listeners to prevent the graph from updating colors
+        // until after the user has closed the color picker.  Prevents slowdown.
         this.xAxisColorInput.current.addEventListener(
             "change",
             this.onGraphOptionsChange
@@ -186,10 +190,11 @@ class GraphConfigPanel extends Component {
     }
 
     onGraphOptionsChange = evt => {
-        if (!evt.target.checkValidity()) return
-        this.setState({ [evt.target.name]: evt.target.value }, () =>
-            this.onGraphConfigChange()
-        )
+        if (evt.target.checkValidity()) {
+            this.setState({ [evt.target.name]: evt.target.value }, () =>
+                this.onGraphConfigChange()
+            )
+        }
     }
 
     onGraphDisplayChange = evt => {

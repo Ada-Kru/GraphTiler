@@ -1,5 +1,5 @@
 from pymongo import MongoClient, UpdateOne, DESCENDING
-from pymongo.errors import CollectionInvalid
+from pymongo.errors import CollectionInvalid, ServerSelectionTimeoutError
 from lib.funcs import no_errors
 from lib.validation import ADD_SCHEMA
 from lib.validation_funcs import str_to_datetime
@@ -75,18 +75,27 @@ class DBInterface:
             added_points.append(point)
 
         if db_updates:
-            self._db[f"catdata_default_{catname}"].bulk_write(db_updates)
+            try:
+                self._db[f"catdata_default_{catname}"].bulk_write(db_updates)
+            except ServerSelectionTimeoutError:
+                return {"errors": {"server": "Could not connect to database"}}
 
         errors = None if not errors else errors
         return {"errors": errors, "added_points": added_points}
 
     def get_all_categories(self):
         """Get information on all current categories."""
-        return self._db.categories.find({}, {"_id": 0})
+        try:
+            return self._db.categories.find({}, {"_id": 0})
+        except ServerSelectionTimeoutError:
+            return {"errors": {"server": "Could not connect to database"}}
 
     def get_category(self, catname):
         """Get information on a specific category."""
-        return self._db.categories.find_one({"name": catname}, {"_id": 0})
+        try:
+            return self._db.categories.find_one({"name": catname}, {"_id": 0})
+        except ServerSelectionTimeoutError:
+            return {"errors": {"server": "Could not connect to database"}}
 
     def add_category(self, catname, data):
         """Add categories to the database."""
@@ -99,12 +108,17 @@ class DBInterface:
                     "name": f'A category named "{catname}" already exists.'
                 }
             }
+        except ServerSelectionTimeoutError:
+            return {"errors": {"server": "Could not connect to database"}}
 
         data["name"] = catname
-        self._db.categories.insert_one(data)
-        self._db[colname].create_index([("time", DESCENDING)], unique=True)
-        data.pop("_id", None)
-        return no_errors()
+        try:
+            self._db.categories.insert_one(data)
+            self._db[colname].create_index([("time", DESCENDING)], unique=True)
+            data.pop("_id", None)
+            return no_errors()
+        except ServerSelectionTimeoutError:
+            return {"errors": {"server": "Could not connect to database"}}
 
     def modify_category(self, catname, data):
         """
@@ -116,17 +130,23 @@ class DBInterface:
             return {
                 "errors": {"name": f'Category "{catname}" does not exist.'}
             }
-        self._db.categories.delete_one({"name": catname})
-        data["name"] = catname
-        self._db.categories.insert_one(data)
+        try:
+            self._db.categories.delete_one({"name": catname})
+            data["name"] = catname
+            self._db.categories.insert_one(data)
+        except ServerSelectionTimeoutError:
+            return {"errors": {"server": "Could not connect to database"}}
         return no_errors()
 
     def remove_category(self, catname):
         """Remove a category."""
         if self.get_category(catname) is None:
             return {"errors": f'Category "{catname}" does not exist.'}
-        self._db.categories.delete_one({"name": catname})
-        self._db[f"catdata_default_{catname}"].drop()
+        try:
+            self._db.categories.delete_one({"name": catname})
+            self._db[f"catdata_default_{catname}"].drop()
+        except ServerSelectionTimeoutError:
+            return {"errors": {"server": "Could not connect to database"}}
         return no_errors()
 
     def get_layout(self, name):
@@ -136,8 +156,11 @@ class DBInterface:
     def get_all_layouts(self):
         """Get a list of all saved layouts."""
         filter = {"name": 1, "_id": 0}
-        output = [layout for layout in self._db.layouts.find({}, filter)]
-        return {"layouts": output}
+        try:
+            output = [layout for layout in self._db.layouts.find({}, filter)]
+            return {"layouts": output}
+        except ServerSelectionTimeoutError:
+            return {"errors": {"server": "Could not connect to database"}}
 
     def add_layout(self, layout):
         """Add a layout to the database."""
@@ -146,13 +169,19 @@ class DBInterface:
             return {"errors": {"name": err}}
 
         data = {"name": layout["name"], "data": layout["data"]}
-        self._db.layouts.insert_one(data)
-        return no_errors()
+        try:
+            self._db.layouts.insert_one(data)
+            return no_errors()
+        except ServerSelectionTimeoutError:
+            return {"errors": {"server": "Could not connect to database"}}
 
     def delete_layout(self, layout):
         """Remove a layout from the database."""
-        self._db.layouts.delete_one({"name": layout})
-        return no_errors()
+        try:
+            self._db.layouts.delete_one({"name": layout})
+            return no_errors()
+        except ServerSelectionTimeoutError:
+            return {"errors": {"server": "Could not connect to database"}}
 
     def _get_and_format_points(self, points, collection, filter):
         """Get data points for a specified filter and add to dict in place."""
@@ -162,99 +191,112 @@ class DBInterface:
 
     def get_points(self, catname, data):
         """Get data points for a specific time or time range."""
-        if self.get_category(catname) is None:
-            return {"errors": f'Category "{catname}" does not exist.'}
+        try:
+            if self.get_category(catname) is None:
+                return {"errors": f'Category "{catname}" does not exist.'}
 
-        points = {}
-        collection = self._db[f"catdata_default_{catname}"]
+            points = {}
+            collection = self._db[f"catdata_default_{catname}"]
 
-        if "times" in data:
-            data["times"] = [
-                datetime.strptime(time_str, TIME_FORMAT)
-                for time_str in data["times"]
-            ]
-            times = data["times"]
-            filter = {"time": {"$in": times}}
-            self._get_and_format_points(points, collection, filter)
-        if "range" in data:
-            start = datetime.strptime(data["range"]["start"], TIME_FORMAT)
-            end = datetime.strptime(data["range"]["end"], TIME_FORMAT)
-            filter = {"time": {"$gte": start, "$lte": end}}
-            self._get_and_format_points(points, collection, filter)
-        if "since" in data:
-            start = datetime.strptime(data["since"], TIME_FORMAT)
-            filter = {"time": {"$gte": start}}
-            self._get_and_format_points(points, collection, filter)
+            if "times" in data:
+                data["times"] = [
+                    datetime.strptime(time_str, TIME_FORMAT)
+                    for time_str in data["times"]
+                ]
+                times = data["times"]
+                filter = {"time": {"$in": times}}
+                self._get_and_format_points(points, collection, filter)
+            if "range" in data:
+                start = datetime.strptime(data["range"]["start"], TIME_FORMAT)
+                end = datetime.strptime(data["range"]["end"], TIME_FORMAT)
+                filter = {"time": {"$gte": start, "$lte": end}}
+                self._get_and_format_points(points, collection, filter)
+            if "since" in data:
+                start = datetime.strptime(data["since"], TIME_FORMAT)
+                filter = {"time": {"$gte": start}}
+                self._get_and_format_points(points, collection, filter)
 
-        return {"errors": None, "points": points}
+            return {"errors": None, "points": points}
+        except ServerSelectionTimeoutError:
+            return {"errors": {"server": "Could not connect to database"}}
 
     def remove_points(self, catname, data):
         """Remove datapoints from the database."""
-        if self.get_category(catname) is None:
-            return {"errors": f'Category "{catname}" does not exist.'}
+        try:
+            if self.get_category(catname) is None:
+                return {"errors": f'Category "{catname}" does not exist.'}
 
-        output = {"removed_count": 0}
-        cat_data = self._db[f"catdata_default_{catname}"]
+            output = {"removed_count": 0}
+            cat_data = self._db[f"catdata_default_{catname}"]
 
-        if "times" in data:
-            times = [
-                datetime.strptime(time_str, TIME_FORMAT)
-                for time_str in data["times"]
-            ]
-            res = cat_data.delete_many({"time": {"$in": times}})
-            output["removed_count"] += res.deleted_count
-            data["times"] = [
-                (dt - dt.utcoffset()).strftime(TIME_FORMAT_NO_TZ)
-                for dt in times
-            ]
-        if "range" in data:
-            start = datetime.strptime(data["range"]["start"], TIME_FORMAT)
-            end = datetime.strptime(data["range"]["end"], TIME_FORMAT)
-            res = cat_data.delete_many({"time": {"$gte": start, "$lte": end}})
-            output["removed_count"] += res.deleted_count
-            start = (start - start.utcoffset()).strftime(TIME_FORMAT_NO_TZ)
-            end = (end - end.utcoffset()).strftime(TIME_FORMAT_NO_TZ)
-            data["range"]["start"] = start
-            data["range"]["end"] = end
-        if "since" in data:
-            since = datetime.strptime(data["since"], TIME_FORMAT)
-            res = cat_data.delete_many({"time": {"$gte": since}})
-            output["removed_count"] += res.deleted_count
-            since = (since - since.utcoffset()).strftime(TIME_FORMAT_NO_TZ)
-            data["since"] = since
+            if "times" in data:
+                times = [
+                    datetime.strptime(time_str, TIME_FORMAT)
+                    for time_str in data["times"]
+                ]
+                res = cat_data.delete_many({"time": {"$in": times}})
+                output["removed_count"] += res.deleted_count
+                data["times"] = [
+                    (dt - dt.utcoffset()).strftime(TIME_FORMAT_NO_TZ)
+                    for dt in times
+                ]
+            if "range" in data:
+                start = datetime.strptime(data["range"]["start"], TIME_FORMAT)
+                end = datetime.strptime(data["range"]["end"], TIME_FORMAT)
+                res = cat_data.delete_many(
+                    {"time": {"$gte": start, "$lte": end}}
+                )
+                output["removed_count"] += res.deleted_count
+                start = (start - start.utcoffset()).strftime(TIME_FORMAT_NO_TZ)
+                end = (end - end.utcoffset()).strftime(TIME_FORMAT_NO_TZ)
+                data["range"]["start"] = start
+                data["range"]["end"] = end
+            if "since" in data:
+                since = datetime.strptime(data["since"], TIME_FORMAT)
+                res = cat_data.delete_many({"time": {"$gte": since}})
+                output["removed_count"] += res.deleted_count
+                since = (since - since.utcoffset()).strftime(TIME_FORMAT_NO_TZ)
+                data["since"] = since
 
-        output["errors"] = None
-        return output
+            output["errors"] = None
+            return output
+        except ServerSelectionTimeoutError:
+            return {"errors": {"server": "Could not connect to database"}}
 
     def remove_all_points(self, catname):
         """Remove datapoints from the database."""
         cat_data = f"catdata_default_{catname}"
-        res = self._db[cat_data].delete_many({})
-
-        return {"errors": None, "removed_count": res.deleted_count}
+        try:
+            res = self._db[cat_data].delete_many({})
+            return {"errors": None, "removed_count": res.deleted_count}
+        except ServerSelectionTimeoutError:
+            return {"errors": {"server": "Could not connect to database"}}
 
     def get_points_range_cats(self, data):
         """Get all valid points for when a frontend category is added."""
-        cat_points, now = defaultdict(dict), datetime.now(timezone.utc)
-        for range_data in data:
-            range = range_data["range"]
-            for catname in range_data["categories"]:
-                if self.get_category(catname) is None:
-                    continue
+        try:
+            cat_points, now = defaultdict(dict), datetime.now(timezone.utc)
+            for range_data in data:
+                range = range_data["range"]
+                for catname in range_data["categories"]:
+                    if self.get_category(catname) is None:
+                        continue
 
-                collection = self._db[f"catdata_default_{catname}"]
-                rtype, points = range["range_type"], {}
-                if rtype == "past":
-                    amnt, unit = range["past_amount"], range["past_unit"]
-                    delta = timedelta(seconds=amnt * TIME_MULTS[unit])
-                    filter = {"time": {"$gte": now - delta}}
-                elif rtype == "since":
-                    filter = {"time": {"$gte": range["since"]}}
-                elif rtype == "timerange":
-                    start, end = range["start"], range["end"]
-                    filter = {"time": {"$gte": start, "$lte": end}}
+                    collection = self._db[f"catdata_default_{catname}"]
+                    rtype, points = range["range_type"], {}
+                    if rtype == "past":
+                        amnt, unit = range["past_amount"], range["past_unit"]
+                        delta = timedelta(seconds=amnt * TIME_MULTS[unit])
+                        filter = {"time": {"$gte": now - delta}}
+                    elif rtype == "since":
+                        filter = {"time": {"$gte": range["since"]}}
+                    elif rtype == "timerange":
+                        start, end = range["start"], range["end"]
+                        filter = {"time": {"$gte": start, "$lte": end}}
 
-                self._get_and_format_points(points, collection, filter)
-                cat_points[catname].update(points)
+                    self._get_and_format_points(points, collection, filter)
+                    cat_points[catname].update(points)
 
-        return cat_points
+            return cat_points
+        except ServerSelectionTimeoutError:
+            return {"errors": {"server": "Could not connect to database"}}

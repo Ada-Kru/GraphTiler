@@ -94,6 +94,7 @@ LAYOUT_WITH_DATA_SCHEMA = {
 
 
 def make_min_max_vali(cat_info):
+    """Create a validator for a specific category."""
     min_max = {}
     if "min" in cat_info:
         min_max["min"] = cat_info["min"]

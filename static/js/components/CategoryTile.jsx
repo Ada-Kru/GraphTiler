@@ -1,3 +1,5 @@
+// Category configuration tiles that appear in the graph config panel.
+
 import React, { Component } from "react"
 import { connect } from "react-redux"
 import removeKeys from "../functions/removeKeys"

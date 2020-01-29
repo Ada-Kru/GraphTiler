@@ -1,3 +1,5 @@
+// Side control buttons and save\load layout modal.
+
 import React, { Component } from "react"
 import ReactModal from "react-modal"
 

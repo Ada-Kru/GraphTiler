@@ -17,8 +17,6 @@ from lib.ws_connection_handler import WsConnectionHandler
 from lib.validation import WS_MSG_SCHEMA
 import cfg
 
-# from lib.validation_funcs import str_to_datetime
-
 RESOURCE_PATHS = [
     "images/graphTiler.ico",
     "graphTiler.css",
@@ -27,7 +25,6 @@ RESOURCE_PATHS = [
 ]
 
 app = Quart(__name__)
-# app.json_encoder = GTJSONEncoder
 app.ws_handler = WsConnectionHandler()
 app.data_updates = None
 loop = get_event_loop()

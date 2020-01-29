@@ -1,15 +1,24 @@
 from lib.validation_funcs import str_to_datetime
 from cfg import TIME_FORMAT_NO_TZ, TIME_MULTS
 from datetime import timezone, timedelta, datetime
-from collections import defaultdict
 from json import dumps
-# from pprint import pprint
 
 
 class WsConnectionHandler:
-    """Helper for websocket connections."""
+    """
+    Holds information about monitored categories and time ranges.
+
+    Holds information about monitored categories and time ranges for connected
+    websocket instances for the duration of their connection.
+    """
 
     def __init__(self):
+        # The websocket instances themselves are used as keys for each
+        # currently monitored category.
+        #
+        # Format: self._categories[category][websocket_obj][unique_id]
+        # where the value pointed to by unique_id is range data for the current
+        # connection and category.
         self._categories = {}
         self._connections = set()
 

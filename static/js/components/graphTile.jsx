@@ -60,13 +60,14 @@ class GraphTile extends Component {
                     gradient2: gd.gradient2,
                 },
             })
-            // console.log("datasets: ", this.datasets)
             this.setState({ catIds: this._getCatIds() })
         }
         if (prevProps.pointUpdateId !== this.props.pointUpdateId) {
             pointsUpdated = this._onUpdatePoints() || pointsUpdated
             pointsUpdated = this._onRemovePoints() || pointsUpdated
         }
+        // Range type "past" only updates on a timer to avoid jittering when new
+        // data points are added to graph.
         let updatePts = pointsUpdated && this._getRange().rangeType !== "past"
         if (shouldRedraw || updatePts) {
             this._updateGraph()
@@ -88,6 +89,8 @@ class GraphTile extends Component {
         this.setState({ key: Math.random() })
     }
 
+    // Make a copy of the relevant parts of the redux state to pass to the data
+    // container.
     _makeReduxState = () => {
         return {
             graphs: this.props.graphs,
@@ -133,6 +136,8 @@ class GraphTile extends Component {
         return this.datasets.removedPoints()
     }
 
+    // Set a timer to update the graph if needed every second for the "past"
+    // range type.
     _setRangeTimer = () => {
         let range = this._getRange()
         clearInterval(this.timerId)

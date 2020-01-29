@@ -61,6 +61,7 @@ const makeGraphData = rangeId => {
     }
 }
 
+// ID generators to create unique numerical indexes for the redux store.
 let nextRangeId = 0,
     nextCatId = 0,
     pointUpdateId = 0,
@@ -199,6 +200,13 @@ const appReducer = (state = INITIAL_STATE, action) => {
             }
         }
         case LOAD_GRAPH_STATE: {
+            // Set ID generators higher than the highest IDs from the new layout
+            // to avoid them being overwritten when new categories and ranges
+            // added.
+            let rangeIds = Object.keys(action.payload.ranges),
+                catIds = Object.keys(action.payload.categories)
+            nextRangeId = rangeIds.length ? Math.max(rangeIds) + 1 : nextRangeId
+            nextCatId = catIds.length ? Math.max(catIds) + 1 : nextCatId
             return {
                 ...state,
                 ...action.payload,

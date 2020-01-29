@@ -1,3 +1,5 @@
+// Data container to handle data points and chart config for each graph tile.
+
 import {
     getGraphCatNames,
     getRange,

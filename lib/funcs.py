@@ -1,3 +1,4 @@
+# Misc helper functions.
 
 
 def no_errors():
