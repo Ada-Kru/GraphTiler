@@ -1,6 +1,6 @@
 MONGO_PORT = 7000
 MONGO_ADDRESS = "localhost"
-SERVER_IP = "192.168.2.111"
+SERVER_IP = "192.168.2.105"
 SERVER_PORT = 7123
 TIME_MULTS = {"sec": 1, "min": 60, "hr": 3600}
 TIME_FORMAT_NO_TZ = "%Y-%m-%d %H:%M:%S"
