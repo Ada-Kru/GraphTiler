@@ -18,10 +18,6 @@ Demo
 ----
 
 `Demonstration Video <https://youtu.be/7F43OCp4Ffk>`_
-.. image:: https://i.ytimg.com/vi/7F43OCp4Ffk/maxresdefault.jpg
-  :width: 500
-  :alt: Demonstration Video
-  :target: https://youtu.be/7F43OCp4Ffk
 
 
 Installation
