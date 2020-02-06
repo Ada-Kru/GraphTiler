@@ -44,6 +44,7 @@ API Reference
 Returns a list of all categories.
 
 .. code-block:: python
+
     from requests import get, post
 
     resp = get(url="http://localhost:7123/category/")
@@ -53,6 +54,7 @@ Returns a list of all categories.
 
 GET to get data for a specific category or POST to create a new category.
 .. code-block:: python
+
     from requests import get, post
 
     cat_name = "fanSpeed"
@@ -79,6 +81,7 @@ GET to get data for a specific category or POST to create a new category.
 Modify category information.
 
 .. code-block:: python
+
     from requests import get, post
 
     cat_name = "fanSpeed"
@@ -101,6 +104,7 @@ Modify category information.
 Remove a category and all associated data points.
 
 .. code-block:: python
+
     from requests import get, post
 
     cat_name = "fanSpeed"
@@ -113,6 +117,7 @@ Remove a category and all associated data points.
 Add a single data point for the current time.
 
 .. code-block:: python
+
     from requests import get, post
 
     cat_name = "fanSpeed"
@@ -131,6 +136,7 @@ Add a single data point for the current time.
 Add data points for the specified times.
 
 .. code-block:: python
+
     from requests import get, post
 
     cat_name = "fanSpeed"
@@ -153,6 +159,7 @@ Add data points for the specified times.
 Get data points for a category for a time range or specific times.
 
 .. code-block:: python
+
     from requests import get, post
 
     cat_name = "fanSpeed"
@@ -177,6 +184,7 @@ Get data points for a category for a time range or specific times.
 Remove data points for a category for a time range or specific times.
 
 .. code-block:: python
+
     from requests import get, post
 
     cat_name = "fanSpeed"
@@ -201,6 +209,7 @@ Remove data points for a category for a time range or specific times.
 Remove all data points for a category.
 
 .. code-block:: python
+
     from requests import get, post
 
     cat_name = "fanSpeed"
