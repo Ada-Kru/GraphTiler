@@ -39,23 +39,20 @@ Installation
 
 API Reference
 -------------
-[GET]  /category/ :
+[GET]  /category/
+
+Returns a list of all categories.
 
 .. code-block:: python
-    # Returns a list of all categories
-
-    # Example:
     from requests import get, post
 
     resp = get(url="http://localhost:7123/category/")
     print(resp.json())
 
-[GET, POST]  /category/<name> :
+[GET, POST]  /category/<name>
 
+GET to get data for a specific category or POST to create a new category.
 .. code-block:: python
-    # GET to get data for a specific category or POST to create a new category.
-
-    # Example:
     from requests import get, post
 
     cat_name = "fanSpeed"
@@ -79,10 +76,9 @@ API Reference
 
 [POST]  /modify-category/<name> :
 
-.. code-block:: python
-    # Modify category information
+Modify category information.
 
-    # Example:
+.. code-block:: python
     from requests import get, post
 
     cat_name = "fanSpeed"
@@ -100,12 +96,11 @@ API Reference
     print(resp.json())
 
 
-[POST]  /remove-category/<name> :
+[POST]  /remove-category/<name>
+
+Remove a category and all associated data points.
 
 .. code-block:: python
-    # Remove a category and all associated data points.
-
-    # Example:
     from requests import get, post
 
     cat_name = "fanSpeed"
@@ -115,10 +110,9 @@ API Reference
 
 [POST]  /category/<name>/now :
 
-.. code-block:: python
-    # Add a single data point for the current time.
+Add a single data point for the current time.
 
-    # Example:
+.. code-block:: python
     from requests import get, post
 
     cat_name = "fanSpeed"
@@ -134,10 +128,9 @@ API Reference
 
 [POST]  /category/<name>/add :
 
-.. code-block:: python
-    # Add data points for the specified times.
+Add data points for the specified times.
 
-    # Example:
+.. code-block:: python
     from requests import get, post
 
     cat_name = "fanSpeed"
@@ -157,10 +150,9 @@ API Reference
 
 [POST]  /category/<name>/get-points :
 
-.. code-block:: python
-    # Get data points for a category for a time range or specific times.
+Get data points for a category for a time range or specific times.
 
-    # Example:
+.. code-block:: python
     from requests import get, post
 
     cat_name = "fanSpeed"
@@ -182,10 +174,9 @@ API Reference
 
 [POST]  /category/<name>/remove :
 
-.. code-block:: python
-    # Remove data points for a category for a time range or specific times.
+Remove data points for a category for a time range or specific times.
 
-    # Example:
+.. code-block:: python
     from requests import get, post
 
     cat_name = "fanSpeed"
@@ -207,10 +198,9 @@ API Reference
 
 [POST]  /category/<name>/remove-all :
 
-.. code-block:: python
-    # Remove all data points for a category.
+Remove all data points for a category.
 
-    # Example:
+.. code-block:: python
     from requests import get, post
 
     cat_name = "fanSpeed"
