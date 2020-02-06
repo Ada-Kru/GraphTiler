@@ -53,6 +53,7 @@ Returns a list of all categories.
 [GET, POST]  /category/<name>
 
 GET to get data for a specific category or POST to create a new category.
+
 .. code-block:: python
 
     from requests import get, post
