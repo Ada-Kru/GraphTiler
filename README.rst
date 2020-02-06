@@ -1,13 +1,14 @@
 ===========
-Graph Tiler
+GraphTiler
 ===========
 
 Display multiple configurable graphs at once with real-time data updates from a database.
 
 * Graphs can be rearranged and resized.
+* Multiple datasets can be displayed on the same graph with live updates.
 * Layouts can be saved and restored.
 * React & Redux frontend, SASS, Chart.js graphs.
-* Quart ( Flask ) backend with RESTful API and Cerberus for data validation.
+* Quart (Flask compatible) backend with RESTful API and Cerberus for data validation.
 * MongoDB database.
 * For Python 3.7 and up
 * MIT License
@@ -16,6 +17,11 @@ Display multiple configurable graphs at once with real-time data updates from a 
 Demo
 ----
 
+`Demonstration Video <https://youtu.be/7F43OCp4Ffk>`_
+.. image:: https://i.ytimg.com/vi/7F43OCp4Ffk/maxresdefault.jpg
+  :width: 500
+  :alt: Demonstration Video
+  :target: https://youtu.be/7F43OCp4Ffk
 
 
 Installation

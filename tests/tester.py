@@ -65,13 +65,13 @@ print(resp, resp.json())
 # print(resp, resp.json())
 
 
-# start = datetime.strptime("2020-01-01 01:00:00 -0600", TIME_FORMAT)
-# end = datetime.strptime("2020-01-20 01:00:00 -0600", TIME_FORMAT)
+# start = datetime.strptime("2020-01-01 13:00:00 -0600", TIME_FORMAT)
+# end = datetime.strptime("2020-01-01 13:01:00 -0600", TIME_FORMAT)
 #
 # readings = []
 # for _ in range(10):
 #     dt = random_date(start, end).strftime(TIME_FORMAT)
-#     readings.append({"time": dt, "reading": randrange(60000)})
+#     readings.append({"time": dt, "reading": randrange(200, 700)})
 # data = {"readings": readings}
 
 # data = {
